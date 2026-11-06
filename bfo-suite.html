@@ -1,0 +1,3025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BFO Synthesis & Deposition Suite • Lab Workbench</title>
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM TOKENS (DARK & LIGHT THEMES)
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-lab: #0b0f19;
+      --bg-grid-line: rgba(255, 255, 255, 0.02);
+      --bg-radial-glow: rgba(30, 58, 138, 0.22);
+      --glass-base: rgba(18, 28, 48, 0.6);
+      --glass-border: rgba(148, 163, 184, 0.28);
+      --bfo-film-tint: radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.12) 0%, rgba(217, 70, 239, 0.08) 45%, rgba(6, 182, 212, 0.04) 80%, transparent 100%);
+      --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.2), inset 0 0 12px rgba(255, 255, 255, 0.03);
+      --header-bg: rgba(17, 24, 39, 0.9);
+      --header-border: rgba(255, 255, 255, 0.1);
+      --box-inner-bg: rgba(10, 15, 28, 0.78);
+      --input-bg: rgba(15, 23, 42, 0.85);
+      --stopwatch-bg: rgba(5, 8, 16, 0.85);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-digits: #ffffff;
+      --corner-bevel: rgba(255, 255, 255, 0.45);
+      --accent-cyan: #06b6d4;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-emerald: #10b981;
+      --modal-bg: #0f172a;
+      --table-border: rgba(255, 255, 255, 0.08);
+      --clock-pill-bg: #050811;
+      --card-bg: rgba(15, 23, 42, 0.7);
+    }
+
+    body.theme-light {
+      --bg-lab: #f0f4f9;
+      --bg-grid-line: rgba(0, 0, 0, 0.04);
+      --bg-radial-glow: rgba(59, 130, 246, 0.12);
+      --glass-base: rgba(255, 255, 255, 0.78);
+      --glass-border: rgba(148, 163, 184, 0.55);
+      --bfo-film-tint: radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.16) 0%, rgba(192, 38, 211, 0.08) 45%, rgba(14, 165, 233, 0.06) 80%, transparent 100%);
+      --glass-shadow: 0 10px 25px rgba(100, 116, 139, 0.22), inset 0 1px 2px rgba(255, 255, 255, 0.9), inset 0 0 14px rgba(255, 255, 255, 0.6);
+      --header-bg: rgba(255, 255, 255, 0.9);
+      --header-border: rgba(203, 213, 225, 0.8);
+      --box-inner-bg: rgba(241, 245, 249, 0.85);
+      --input-bg: rgba(255, 255, 255, 0.95);
+      --stopwatch-bg: rgba(248, 250, 252, 0.95);
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-digits: #0f172a;
+      --corner-bevel: rgba(100, 116, 139, 0.5);
+      --accent-cyan: #0284c7;
+      --accent-amber: #d97706;
+      --accent-rose: #e11d48;
+      --accent-emerald: #059669;
+      --modal-bg: #ffffff;
+      --table-border: rgba(203, 213, 225, 0.7);
+      --clock-pill-bg: #e2e8f0;
+      --card-bg: rgba(255, 255, 255, 0.85);
+    }
+
+    body {
+      background-color: var(--bg-lab);
+      background-image: 
+        radial-gradient(circle at 50% 0%, var(--bg-radial-glow) 0%, transparent 60%),
+        linear-gradient(var(--bg-grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid-line) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0.55rem 0.75rem;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* ==========================================================================
+       MAIN NAVIGATION & HEADER
+       ========================================================================== */
+    header {
+      background: var(--header-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--header-border);
+      border-radius: 12px;
+      padding: 0.5rem 0.85rem;
+      margin-bottom: 0.65rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #06b6d4, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.75rem;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(6, 182, 212, 0.4);
+    }
+
+    .brand-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .brand-tag {
+      font-size: 0.62rem;
+      font-family: ui-monospace, monospace;
+      padding: 2px 6px;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      color: var(--accent-cyan);
+      border-radius: 999px;
+    }
+
+    /* 3 TOP MODULE TABS */
+    .module-nav {
+      display: flex;
+      align-items: center;
+      background: var(--box-inner-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .nav-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-tab-btn.active {
+      background: linear-gradient(135deg, var(--accent-cyan), #0284c7);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(6, 182, 212, 0.4);
+    }
+
+    .global-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .clock-pill {
+      font-family: ui-monospace, monospace;
+      font-size: 0.72rem;
+      color: var(--accent-cyan);
+      background: var(--clock-pill-bg);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 0.28rem 0.55rem;
+      border-radius: 8px;
+    }
+
+    .btn-tool {
+      background: var(--card-bg);
+      border: 1px solid var(--table-border);
+      color: var(--text-main);
+      padding: 0.35rem 0.65rem;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-tool:hover {
+      background: rgba(148, 163, 184, 0.25);
+    }
+
+    .btn-audio-on {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: var(--accent-emerald);
+    }
+
+    .btn-excel {
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      color: var(--accent-emerald);
+      font-weight: 700;
+    }
+
+    .btn-reset {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.35);
+      color: var(--accent-rose);
+    }
+
+    .btn-info-round {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--box-inner-bg);
+      border: 1px solid rgba(6, 182, 212, 0.5);
+      color: var(--accent-cyan);
+      font-family: "Georgia", serif;
+      font-style: italic;
+      font-size: 0.88rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(6, 182, 212, 0.2);
+      transition: all 0.2s ease;
+      padding: 0;
+    }
+
+    .btn-info-round:hover {
+      background: rgba(6, 182, 212, 0.22);
+      transform: scale(1.08);
+    }
+
+    /* MODULE CONTAINERS */
+    .module-view {
+      display: none;
+      flex-direction: column;
+      flex-grow: 1;
+      width: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .module-view.active-module {
+      display: flex;
+    }
+
+    /* ==========================================================================
+       MODULE 1: STOICHIOMETRIC CALCULATOR VIEW
+       ========================================================================== */
+    .calc-card-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 860px) {
+      .calc-card-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-panel {
+      background: var(--glass-base);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      box-shadow: var(--glass-shadow);
+    }
+
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      border-bottom: 1px solid var(--table-border);
+      padding-bottom: 0.5rem;
+    }
+
+    .input-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .input-field-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .calc-text-input {
+      background: var(--input-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 8px;
+      padding: 0.45rem 0.65rem;
+      color: var(--text-main);
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .calc-text-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.25);
+    }
+
+    .btn-calc-action {
+      background: linear-gradient(135deg, #0891b2, #0284c7);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: ui-monospace, monospace;
+      font-weight: 800;
+      font-size: 0.88rem;
+      padding: 0.65rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+      margin-top: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-calc-action:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+
+    .result-display-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem;
+    }
+
+    .result-metric-card {
+      background: var(--box-inner-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 10px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      transition: all 0.2s ease;
+    }
+
+    .result-metric-card:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .metric-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .metric-val {
+      font-family: ui-monospace, monospace;
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: var(--accent-amber);
+    }
+
+    .metric-formula {
+      font-size: 0.62rem;
+      font-family: ui-monospace, monospace;
+      color: var(--text-muted);
+    }
+
+    .btn-push-synthesis {
+      background: linear-gradient(135deg, #059669, #10b981);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.8rem;
+      padding: 0.6rem 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .btn-push-synthesis:hover {
+      filter: brightness(1.15);
+    }
+
+    /* ==========================================================================
+       MODULE 2: PRECURSOR SYNTHESIS GUIDED WORKFLOW
+       ========================================================================== */
+    .synth-stage-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--box-inner-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 10px;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .step-pill-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.28rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid var(--table-border);
+    }
+
+    .step-pill-indicator.active-step {
+      background: rgba(6, 182, 212, 0.2);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      font-weight: 800;
+    }
+
+    .step-pill-indicator.complete-step {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: var(--accent-emerald);
+      color: var(--accent-emerald);
+    }
+
+    .synth-guide-container {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .synth-guide-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .instruction-card {
+      background: var(--glass-base);
+      backdrop-filter: blur(14px);
+      border: 2px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--glass-shadow);
+      min-height: 380px;
+    }
+
+    .instruction-stage-tag {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      font-family: ui-monospace, monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .instruction-main-text {
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.4;
+      color: var(--text-main);
+      margin: 0.6rem 0;
+    }
+
+    .prep-prompt-banner {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: 8px;
+      padding: 0.75rem 0.95rem;
+      color: #fcd34d;
+      font-size: 0.84rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+    }
+
+    body.theme-light .prep-prompt-banner {
+      background: rgba(245, 158, 11, 0.12);
+      color: #b45309;
+    }
+
+    .synth-timer-display {
+      background: var(--stopwatch-bg);
+      border: 2px solid var(--table-border);
+      border-radius: 12px;
+      padding: 1.2rem 0.5rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .synth-timer-display.timer-pulsing-alarm {
+      border-color: #ef4444 !important;
+      background: rgba(239, 68, 68, 0.18) !important;
+      animation: pulse-alarm-strobe 1s infinite alternate;
+    }
+
+    .synth-timer-digits {
+      font-family: ui-monospace, "SF Mono", monospace;
+      font-size: 3.2rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--text-digits);
+      text-shadow: 0 0 16px rgba(6, 182, 212, 0.25);
+    }
+
+    .synth-timer-digits.digits-alert {
+      color: #f87171 !important;
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.8) !important;
+    }
+
+    .synth-timer-subtext {
+      font-family: ui-monospace, monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      font-weight: 700;
+    }
+
+    .btn-confirm-stage {
+      background: linear-gradient(135deg, #059669, #047857);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      border-radius: 10px;
+      color: #fff;
+      font-family: ui-monospace, monospace;
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 0.75rem 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+      margin-top: 0.8rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-confirm-stage:hover {
+      filter: brightness(1.15);
+      transform: scale(1.02);
+    }
+
+    /* PRESETS DRAWER FOR SYNTHESIS */
+    .presets-config-panel {
+      background: var(--glass-base);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      box-shadow: var(--glass-shadow);
+    }
+
+    /* ==========================================================================
+       MODULE 3: 6-SPECIMEN SPINNING GRID & GLASS SUBSTRATE TILES
+       ========================================================================== */
+    .grid-container {
+      display: grid;
+      gap: 0.75rem;
+      width: 100%;
+      flex-grow: 1;
+      margin: 0 auto;
+    }
+
+    /* Mobile Portrait View: 2 columns x 3 rows */
+    @media (orientation: portrait), (max-width: 767px) {
+      .grid-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    /* Tablet & Desktop Landscape: 3 columns x 2 rows */
+    @media (orientation: landscape) and (min-width: 768px) {
+      .grid-container {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .glass-substrate {
+      position: relative;
+      background: var(--glass-base);
+      background-image: var(--bfo-film-tint);
+      backdrop-filter: blur(14px);
+      border: 2px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 0.65rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      box-shadow: var(--glass-shadow);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+      min-height: 295px;
+    }
+
+    .glass-substrate::before {
+      content: "";
+      position: absolute;
+      top: -30%;
+      left: -40%;
+      width: 120%;
+      height: 90%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.04) 40%, transparent 70%);
+      transform: rotate(-15deg);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .glass-substrate::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 16px;
+      height: 16px;
+      border-top: 2px solid var(--corner-bevel);
+      border-right: 2px solid var(--corner-bevel);
+      border-top-right-radius: 10px;
+      pointer-events: none;
+    }
+
+    .substrate-idle { border-color: rgba(148, 163, 184, 0.3); }
+    .substrate-active {
+      border-color: rgba(6, 182, 212, 0.85);
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.35), inset 0 0 14px rgba(6, 182, 212, 0.15);
+    }
+    .substrate-alarm {
+      border-color: #ef4444 !important;
+      background-color: rgba(239, 68, 68, 0.14) !important;
+      animation: pulse-alarm-strobe 1s infinite alternate ease-in-out !important;
+    }
+    .substrate-cooling {
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 26px rgba(239, 68, 68, 0.65), inset 0 0 16px rgba(239, 68, 68, 0.22) !important;
+      animation: pulse-red-cooling 1.8s infinite ease-in-out;
+    }
+    .substrate-cooled {
+      border-color: #10b981 !important;
+      box-shadow: 0 0 32px rgba(16, 185, 129, 0.8), inset 0 0 20px rgba(16, 185, 129, 0.3) !important;
+      animation: pulse-green-cooled 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-alarm-strobe {
+      0% { border-color: #ef4444; box-shadow: 0 0 32px rgba(239, 68, 68, 0.9), inset 0 0 20px rgba(239, 68, 68, 0.45); }
+      100% { border-color: #7f1d1d; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3), inset 0 0 6px rgba(239, 68, 68, 0.15); }
+    }
+    @keyframes pulse-red-cooling {
+      0%, 100% { border-color: #ef4444; box-shadow: 0 0 24px rgba(239, 68, 68, 0.6), inset 0 0 14px rgba(239, 68, 68, 0.2); }
+      50% { border-color: #991b1b; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3), inset 0 0 8px rgba(239, 68, 68, 0.1); }
+    }
+    @keyframes pulse-green-cooled {
+      0%, 100% { border-color: #10b981; box-shadow: 0 0 30px rgba(16, 185, 129, 0.85), inset 0 0 18px rgba(16, 185, 129, 0.3); }
+      50% { border-color: #059669; box-shadow: 0 0 12px rgba(16, 185, 129, 0.35), inset 0 0 8px rgba(16, 185, 129, 0.12); }
+    }
+
+    .tile-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      gap: 0.3rem;
+    }
+
+    .tile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.25rem;
+    }
+
+    .specimen-name-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed var(--glass-border);
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 0.85rem;
+      font-family: ui-monospace, monospace;
+      width: 48%;
+      outline: none;
+      padding: 1px 2px;
+    }
+
+    .specimen-name-input:focus {
+      border-bottom-color: var(--accent-cyan);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .btn-log-icon {
+      background: var(--box-inner-bg);
+      border: 1px solid var(--table-border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .btn-log-icon:hover {
+      color: var(--text-main);
+      border-color: var(--accent-cyan);
+    }
+
+    .layer-badge {
+      font-size: 0.65rem;
+      font-family: ui-monospace, monospace;
+      font-weight: 800;
+      padding: 2px 6px;
+      background: rgba(6, 182, 212, 0.2);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: var(--accent-cyan);
+      border-radius: 999px;
+    }
+
+    /* SIDE BY SIDE S1 & S2 */
+    .spin-profile-box {
+      background: var(--box-inner-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 8px;
+      padding: 0.25rem 0.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .stages-side-by-side {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem;
+    }
+
+    .stage-card-sm {
+      background: var(--input-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 6px;
+      padding: 0.2rem 0.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .stage-card-header {
+      font-size: 0.58rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .spin-input-sm {
+      background: var(--input-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 4px;
+      color: var(--text-main);
+      font-family: ui-monospace, monospace;
+      font-size: 0.64rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 1px 2px;
+      outline: none;
+      width: 100%;
+    }
+
+    .spin-select-sm {
+      background: var(--box-inner-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 4px;
+      color: var(--text-main);
+      font-family: ui-monospace, monospace;
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 1px 2px;
+      outline: none;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* SINGLE ROW FOR PRECURSOR VOL, GEL PRESET, DRY PRESET */
+    .row-tri-params {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.25rem;
+      background: var(--box-inner-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 6px;
+      padding: 0.22rem 0.3rem;
+      align-items: center;
+    }
+
+    .param-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .param-cell-label {
+      font-size: 0.54rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .param-cell-input, .param-cell-select {
+      background: var(--input-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 4px;
+      color: var(--text-main);
+      font-family: ui-monospace, monospace;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 1px 2px;
+      outline: none;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* DUAL TIME DISPLAY STRIP */
+    .timing-dual-strip {
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+      background: var(--box-inner-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 6px;
+      padding: 0.25rem 0.45rem;
+      font-size: 0.68rem;
+      font-family: ui-monospace, monospace;
+    }
+
+    .timing-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .timing-label {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.65rem;
+    }
+
+    .timing-val-gel {
+      font-weight: 800;
+      color: var(--accent-amber);
+    }
+
+    .timing-val-dry {
+      font-weight: 800;
+      color: var(--accent-rose);
+    }
+
+    .stopwatch-center {
+      text-align: center;
+      background: var(--stopwatch-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 9px;
+      padding: 0.3rem 0.4rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .stopwatch-phase-badge {
+      font-size: 0.58rem;
+      font-family: ui-monospace, monospace;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .phase-idle { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; }
+    .phase-gelation { background: rgba(6, 182, 212, 0.2); color: #67e8f9; }
+    .phase-drying { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+    .phase-alarm { background: #ef4444 !important; color: #ffffff !important; animation: pulse-badge 0.8s infinite alternate; }
+    .phase-cooling { background: rgba(239, 68, 68, 0.25); color: #fca5a5; }
+    .phase-cooled { background: rgba(16, 185, 129, 0.25); color: #6ee7b7; }
+
+    @keyframes pulse-badge {
+      0% { opacity: 0.75; transform: scale(0.97); }
+      100% { opacity: 1; transform: scale(1.02); }
+    }
+
+    .stopwatch-digits {
+      font-family: ui-monospace, monospace;
+      font-size: 1.75rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--text-digits);
+      text-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+    }
+
+    .digits-alarm {
+      color: #f87171 !important;
+      text-shadow: 0 0 16px rgba(239, 68, 68, 0.8) !important;
+    }
+
+    .target-countdown-text {
+      font-family: ui-monospace, monospace;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .target-overdue-text {
+      font-family: ui-monospace, monospace;
+      font-size: 0.64rem;
+      font-weight: 800;
+      color: #ef4444;
+      margin-top: 2px;
+    }
+
+    .cooling-countdown-text {
+      font-family: ui-monospace, monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #fca5a5;
+      margin-top: 3px;
+    }
+
+    /* ACTION BUTTONS */
+    .actions-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.3rem;
+      margin-top: 0.1rem;
+    }
+
+    .btn-act {
+      border: none;
+      border-radius: 8px;
+      font-family: ui-monospace, monospace;
+      font-weight: 800;
+      font-size: 0.72rem;
+      padding: 0.48rem 0.2rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.1;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+    }
+
+    .btn-act:not(:disabled):active { transform: scale(0.95); }
+    .btn-act:disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+      filter: grayscale(60%);
+      box-shadow: none !important;
+    }
+
+    .btn-subtext {
+      font-size: 0.54rem;
+      font-weight: 500;
+      opacity: 0.85;
+      margin-top: 1px;
+    }
+
+    .btn-gelation {
+      background: linear-gradient(180deg, #0891b2 0%, #0e7490 100%);
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(8, 145, 178, 0.4);
+    }
+
+    .btn-gelation-ready {
+      animation: pulse-gelation-ready 1.2s infinite alternate !important;
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.8) !important;
+    }
+
+    @keyframes pulse-gelation-ready {
+      0% { transform: scale(1); filter: brightness(1); }
+      100% { transform: scale(1.03); filter: brightness(1.25); }
+    }
+
+    .btn-drying {
+      background: linear-gradient(180deg, #d97706 0%, #b45309 100%);
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(217, 119, 6, 0.4);
+    }
+
+    .btn-drying-alarm {
+      animation: pulse-drying-cta 1s infinite alternate !important;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.8) !important;
+    }
+
+    @keyframes pulse-drying-cta {
+      0% { transform: scale(1); filter: brightness(1); }
+      100% { transform: scale(1.04); filter: brightness(1.25); }
+    }
+
+    .btn-stop {
+      background: linear-gradient(180deg, #e11d48 0%, #be123c 100%);
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(225, 29, 72, 0.45);
+    }
+
+    .btn-stop-alarm {
+      animation: pulse-stop-cta 1s infinite alternate !important;
+      box-shadow: 0 0 16px rgba(225, 29, 72, 0.9) !important;
+    }
+
+    @keyframes pulse-stop-cta {
+      0% { transform: scale(1); filter: brightness(1); }
+      100% { transform: scale(1.04); filter: brightness(1.3); }
+    }
+
+    /* ==========================================================================
+       MODALS & DIALOGS
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-backdrop.hidden { display: none; }
+
+    .modal-card {
+      background: var(--modal-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 660px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      color: var(--text-main);
+    }
+
+    .modal-card-info { max-width: 480px; }
+
+    .modal-header {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--table-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      padding: 0.85rem 1rem;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .modal-footer {
+      padding: 0.7rem 1rem;
+      border-top: 1px solid var(--table-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.72rem;
+      font-family: ui-monospace, monospace;
+      text-align: left;
+    }
+
+    .history-table th {
+      padding: 6px 8px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--table-border);
+    }
+
+    .history-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--table-border);
+      color: var(--text-main);
+    }
+
+    .attribution-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0.75rem 0.5rem;
+      gap: 0.65rem;
+    }
+
+    .attribution-avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #38bdf8, #0369a1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+    }
+
+    .attribution-author {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .attribution-role {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .attribution-copyright {
+      font-family: ui-monospace, monospace;
+      font-size: 0.75rem;
+      color: var(--text-main);
+      background: var(--box-inner-bg);
+      border: 1px solid var(--table-border);
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+    }
+
+    /* THEME SWITCHER */
+    .theme-switch-container {
+      width: 100%;
+      background: var(--box-inner-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 10px;
+      padding: 0.55rem 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.3rem;
+    }
+
+    .theme-toggle-group {
+      display: inline-flex;
+      background: var(--input-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .theme-btn-opt {
+      background: transparent;
+      border: none;
+      padding: 0.25rem 0.65rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .theme-btn-opt.active {
+      background: var(--accent-cyan);
+      color: #ffffff;
+    }
+
+    .toast-msg {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+      z-index: 150;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+    }
+
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- GLOBAL WORKBENCH HEADER & TOP NAV -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">BFO</div>
+      <div>
+        <div class="brand-title">
+          <span>Synthesis</span>
+          <span class="brand-tag">Spin Coat</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 MAIN MODULE TABS -->
+    <nav class="module-nav">
+      <button id="tabBtnCalc" class="nav-tab-btn active" onclick="switchModule('calc')">
+        <span>🧮 1. Calculation</span>
+      </button>
+      <button id="tabBtnSynth" class="nav-tab-btn" onclick="switchModule('synth')">
+        <span>🧪 2. Precursor Synthesis</span>
+      </button>
+      <button id="tabBtnSpin" class="nav-tab-btn" onclick="switchModule('spin')">
+        <span>🔄 3. Spinning Process</span>
+      </button>
+    </nav>
+
+    <div class="global-controls">
+      <div class="clock-pill" id="globalClockDisplay">SYNC --:--:--</div>
+
+      <!-- Creator Attribution Info Button 'i' -->
+      <button id="infoModalBtn" class="btn-info-round" onclick="openInfoModal()" title="Creator Attribution, Theme & App Info">
+        i
+      </button>
+
+      <!-- Master Audio Toggle -->
+      <button id="audioToggleBtn" class="btn-tool btn-audio-on" onclick="toggleAudio()">
+        <span id="audioIcon">🔊</span>
+        <span id="audioText">Audio ON</span>
+      </button>
+
+      <!-- Excel Export Button -->
+      <button class="btn-tool btn-excel" onclick="exportBatchExcel()" title="Export individual formatted tables for all 6 specimens">
+        <span>Excel</span>
+      </button>
+
+      <!-- CSV Export -->
+      <button class="btn-tool" onclick="exportBatchCSV()" title="Export CSV log">
+        <span>CSV</span>
+      </button>
+
+      <!-- Reset All -->
+      <button class="btn-tool btn-reset" onclick="confirmResetAll()">
+        <span>Reset All</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       MODULE 1: STOICHIOMETRIC CALCULATOR VIEW
+       ========================================================================== -->
+  <main id="moduleViewCalc" class="module-view active-module">
+    <div class="calc-card-container">
+      
+      <!-- Input Parameters Form -->
+      <div class="form-panel">
+        <h3 class="panel-title"><span>📐 Stoichiometric & Solvent Formulation</span></h3>
+        
+        <div class="input-field-group">
+          <label class="input-field-label">1. Target Amount of BFO (g)</label>
+          <input type="number" id="calcTargetBFO" class="calc-text-input" value="1.0" step="0.05" min="0.01">
+        </div>
+
+        <div class="input-field-group">
+          <label class="input-field-label">2. Excess Bismuth (%)</label>
+          <input type="number" id="calcExcessBi" class="calc-text-input" value="10" step="0.5" min="0">
+        </div>
+
+        <div class="input-field-group">
+          <label class="input-field-label">3. Purity of Bi(NO₃)₃·5H₂O (%)</label>
+          <input type="number" id="calcPurityBi" class="calc-text-input" value="98.0" step="0.1" min="1" max="100">
+        </div>
+
+        <div class="input-field-group">
+          <label class="input-field-label">4. Purity of Fe(NO₃)₃·9H₂O (%)</label>
+          <input type="number" id="calcPurityFe" class="calc-text-input" value="98.0" step="0.1" min="1" max="100">
+        </div>
+
+        <div class="input-field-group">
+          <label class="input-field-label">5. Ratio of 2-MOE to Acetic Acid (Volumetric)</label>
+          <select id="calcSolventRatio" class="calc-text-input">
+            <option value="4:1" selected>4 : 1 (Standard Sol-Gel)</option>
+            <option value="3:1">3 : 1</option>
+            <option value="5:1">5 : 1</option>
+            <option value="1:1">1 : 1</option>
+          </select>
+        </div>
+
+        <div class="input-field-group">
+          <label class="input-field-label">6. Solution Concentration (M or mol/L)</label>
+          <input type="number" id="calcConcentration" class="calc-text-input" value="0.2" step="0.01" min="0.01">
+        </div>
+
+        <button class="btn-calc-action" onclick="performFormulationCalculation()">
+          <span>⚡ Calculate Reagents & Solvents</span>
+        </button>
+      </div>
+
+      <!-- Calculated Output Cards -->
+      <div class="form-panel">
+        <h3 class="panel-title"><span>📋 Reagent Measurements & Solvent Quantities</span></h3>
+        
+        <div class="result-display-grid">
+          <!-- 2-MOE Volume -->
+          <div class="result-metric-card">
+            <span class="metric-title">2-Methoxyethanol (2-MOE)</span>
+            <span class="metric-val" id="res2MOE">12.79 mL</span>
+            <span class="metric-formula">Primary Solvating Medium</span>
+          </div>
+
+          <!-- Acetic Acid Volume -->
+          <div class="result-metric-card">
+            <span class="metric-title">Glacial Acetic Acid (HAc)</span>
+            <span class="metric-val" id="resAceticAcid">3.20 mL</span>
+            <span class="metric-formula">Hydrolysis & Chelating Agent</span>
+          </div>
+
+          <!-- Bismuth Nitrate Mass -->
+          <div class="result-metric-card">
+            <span class="metric-title">Bi(NO₃)₃·5H₂O Mass</span>
+            <span class="metric-val" id="resBiMass">1.740 g</span>
+            <span class="metric-formula">MW: 485.07 g/mol (incl. excess & purity)</span>
+          </div>
+
+          <!-- Iron Nitrate Mass -->
+          <div class="result-metric-card">
+            <span class="metric-title">Fe(NO₃)₃·9H₂O Mass</span>
+            <span class="metric-val" id="resFeMass">1.318 g</span>
+            <span class="metric-formula">MW: 404.00 g/mol (purity corrected)</span>
+          </div>
+        </div>
+
+        <div style="background: var(--box-inner-bg); border: 1px solid var(--table-border); border-radius: 8px; padding: 0.65rem; font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; margin-top: 0.5rem;">
+          <strong style="color: var(--accent-cyan);">Formulation Summary:</strong>
+          Total solution volume: <span id="resTotalVol" style="color:var(--text-main); font-weight:700;">15.98 mL</span> @ 
+          <span id="resSummaryMolarity" style="color:var(--text-main); font-weight:700;">0.20 M</span>. 
+          Target BFO Yield: <span id="resSummaryBFO" style="color:var(--text-main); font-weight:700;">1.00 g</span> (MW: 312.82 g/mol).
+        </div>
+
+        <button class="btn-push-synthesis" onclick="promptPushPasscode()">
+          <span>🔒 Push Quantities Directly to Precursor Synthesis &rarr;</span>
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       MODULE 2: PRECURSOR SYNTHESIS GUIDED WORKFLOW
+       ========================================================================== */
+  -->
+  <main id="moduleViewSynth" class="module-view">
+    <!-- Pipeline Stage Stepper Bar -->
+    <div class="synth-stage-bar">
+      <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+        <span class="step-pill-indicator active-step" id="stepPill1">1. Solvent Prep</span>
+        <span class="step-pill-indicator" id="stepPill2">2. Bi Dissolution</span>
+        <span class="step-pill-indicator" id="stepPill3">3. Fe Dissolution</span>
+        <span class="step-pill-indicator" id="stepPill4">4. Dropwise HAc</span>
+        <span class="step-pill-indicator" id="stepPill5">5. Homogenization</span>
+      </div>
+
+      <div style="display:flex; gap:0.35rem;">
+        <button class="btn-tool" onclick="togglePresetEditor()">
+          <span>⚙️ Presets</span>
+        </button>
+        <button class="btn-tool btn-reset" onclick="resetSynthesisToDefaults()">
+          <span>Default Presets</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Active Instruction & Timer Panel -->
+    <div class="synth-guide-container">
+      
+      <!-- Stage Instructions & Dynamic Lab Prompts -->
+      <div class="instruction-card">
+        <div>
+          <span class="instruction-stage-tag" id="synthStageBadge">STEP 1 OF 5 • SOLVENT STABILIZATION</span>
+          <h2 class="instruction-main-text" id="synthMainInstruction">
+            Take <span id="dyn2MOEAmount" style="color:var(--accent-cyan);">12.79 mL</span> 2-MOE. Set temperature to 25°C and stirring to 300 RPM.
+          </h2>
+
+          <!-- Alert Prompt for What to Measure Next -->
+          <div class="prep-prompt-banner" id="synthPrepPrompt">
+            <span>⚖️ <strong>Bench Prompt:</strong> Measure <span id="dynBiAmount">1.740 g</span> of Bi(NO₃)₃·5H₂O while solvent stirs.</span>
+          </div>
+
+          <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.5; margin-top:0.4rem;">
+            Acoustic Alarms: Periodic reminders every 10s during cooldown, 1 beep every 5s when ≤ 20s remain, and continuous 1 beep/second in the final 5s.
+          </div>
+        </div>
+
+        <button class="btn-confirm-stage" id="btnConfirmStage" onclick="onConfirmSynthesisStage()">
+          <span id="confirmBtnIcon">▶</span>
+          <span id="confirmBtnText">Confirm Reagent Added & Start 5m Timer</span>
+        </button>
+      </div>
+
+      <!-- Active Timer & Status Readout -->
+      <div class="instruction-card" style="justify-content: flex-start; gap: 0.8rem;">
+        <div class="synth-timer-display" id="synthTimerDisplay">
+          <span class="instruction-stage-tag" id="synthTimerPhase">COUNTDOWN REMAINING</span>
+          <div class="synth-timer-digits" id="synthTimerDigits">05:00</div>
+          <span class="synth-timer-subtext" id="synthTimerSubtext">Stirring: 300 RPM @ 25°C</span>
+        </div>
+
+        <!-- Presets Configuration Drawer (Collapsible) -->
+        <div class="presets-config-panel" id="synthPresetsPanel" style="display:none;">
+          <div style="font-size:0.75rem; font-weight:800; color:var(--accent-cyan); display:flex; justify-content:space-between;">
+            <span>EDIT STAGE PRESETS</span>
+            <button class="btn-tool" style="padding:1px 5px;" onclick="togglePresetEditor()">&times;</button>
+          </div>
+
+          <div class="row-tri-params" style="grid-template-columns: 1fr 1fr;">
+            <div class="param-cell">
+              <span class="param-cell-label">Step 1 Time (sec)</span>
+              <input type="number" id="psetTime1" class="param-cell-input" value="300">
+            </div>
+            <div class="param-cell">
+              <span class="param-cell-label">Step 2 Time (sec)</span>
+              <input type="number" id="psetTime2" class="param-cell-input" value="300">
+            </div>
+          </div>
+
+          <div class="row-tri-params" style="grid-template-columns: 1fr 1fr;">
+            <div class="param-cell">
+              <span class="param-cell-label">Step 3 Time (sec)</span>
+              <input type="number" id="psetTime3" class="param-cell-input" value="1800">
+            </div>
+            <div class="param-cell">
+              <span class="param-cell-label">Step 4 Drop (sec)</span>
+              <input type="number" id="psetTime4" class="param-cell-input" value="120">
+            </div>
+          </div>
+
+          <div class="row-tri-params" style="grid-template-columns: 1fr 1fr;">
+            <div class="param-cell">
+              <span class="param-cell-label">Step 5 Homog (sec)</span>
+              <input type="number" id="psetTime5" class="param-cell-input" value="5400">
+            </div>
+            <div class="param-cell">
+              <span class="param-cell-label">Stir Speed (RPM)</span>
+              <input type="number" id="psetRPM" class="param-cell-input" value="300">
+            </div>
+          </div>
+
+          <button class="btn-tool" style="justify-content:center; background:var(--accent-cyan); color:#fff; font-weight:700;" onclick="saveCustomSynthesisPresets()">
+            Save Custom Presets
+          </button>
+        </div>
+
+        <button class="btn-tool" style="justify-content:center; margin-top:auto;" onclick="switchModule('spin')">
+          <span>Go to 3. Spinning Process Workbench &rarr;</span>
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       MODULE 3: 6-SPECIMEN SPINNING GRID & GLASS SUBSTRATE TILES
+       ========================================================================== -->
+  <main id="moduleViewSpin" class="module-view">
+    <div class="grid-container" id="gridContainer"></div>
+  </main>
+
+  <!-- CREATOR ATTRIBUTION & THEME MODAL ('i' Button) -->
+  <div class="modal-backdrop hidden" id="infoModal">
+    <div class="modal-card modal-card-info">
+      <div class="modal-header">
+        <h3 class="modal-title">System Settings & Attribution</h3>
+        <button class="btn-tool" onclick="closeInfoModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="attribution-box">
+          <div class="attribution-avatar">⚙️</div>
+          <div>
+            <div class="attribution-author">Sukanto Biswas</div>
+            <div class="attribution-role">Mechanical Engineer</div>
+          </div>
+          <div class="attribution-copyright">
+            Copyright
+          </div>
+
+          <!-- THEME SWITCHER -->
+          <div class="theme-switch-container">
+            <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.4rem;">
+              <span id="themeCurrentIcon">🌙</span>
+              <span>Theme Mode</span>
+            </div>
+            <div class="theme-toggle-group">
+              <button id="btnThemeDark" class="theme-btn-opt active" onclick="setAppTheme('dark')">
+                <span>🌙 Dark</span>
+              </button>
+              <button id="btnThemeLight" class="theme-btn-opt" onclick="setAppTheme('light')">
+                <span>☀️ Light</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="font-size:0.74rem; line-height:1.5; color:var(--text-muted); max-width:380px; border-top:1px solid var(--table-border); padding-top:0.65rem;">
+            End-to-end BFO (<span style="color:var(--accent-cyan);">BiFeO₃</span>) multiferroic thin film synthesis suite: Stoichiometric calculation, stage-gated precursor synthesis with tiered acoustic timing, and 6-substrate spin coating pipeline monitor.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="btn-tool" onclick="closeInfoModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAYER HISTORY MODAL -->
+  <div class="modal-backdrop hidden" id="historyModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="historyModalTitle">Specimen Layer Log</h3>
+        <button class="btn-tool" onclick="closeHistoryModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>2-Stage Spin Profile</th>
+              <th>Gelation</th>
+              <th>Drying</th>
+              <th>Cooling Status</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-tool btn-reset" onclick="clearCurrentSpecimenHistory()">Clear History</button>
+        <button class="btn-tool" onclick="closeHistoryModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSCODE PIN MODAL FOR PUSHING CALCULATION -->
+  <div class="modal-backdrop hidden" id="pinModal">
+    <div class="modal-card modal-card-info" style="max-width: 360px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Authentication Required</h3>
+        <button class="btn-tool" onclick="closePinModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align: center; display: flex; flex-direction: column; gap: 0.8rem; padding: 1.2rem;">
+        <span style="font-size: 0.8rem; color: var(--text-muted);">
+          Enter 0000 to transfer formulation & restart Precursor Synthesis:
+        </span>
+        <input 
+          type="password" 
+          id="pinInput" 
+          maxlength="6" 
+          placeholder="••••" 
+          style="background: var(--input-bg); border: 1px solid var(--table-border); border-radius: 8px; padding: 0.6rem; color: var(--accent-cyan); font-family: ui-monospace, monospace; font-size: 1.5rem; letter-spacing: 0.3em; text-align: center; outline: none;"
+          onkeydown="if(event.key === 'Enter') submitPushPasscode();"
+        />
+        <div id="pinErrorMsg" style="color: var(--accent-rose); font-size: 0.72rem; min-height: 1rem; font-weight: 700;"></div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end; gap: 0.5rem;">
+        <button class="btn-tool" onclick="closePinModal()">Cancel</button>
+        <button class="btn-tool" style="background: var(--accent-cyan); color: #fff; font-weight: 700;" onclick="submitPushPasscode()">Verify & Push</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastBox" class="toast-msg"></div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT APPLICATION LOGIC
+       ========================================================================== -->
+  <script>
+    /* ==========================================================================
+       GLOBAL STATE & AUDIO SUBSYSTEM
+       ========================================================================== */
+    const COOLING_SECONDS = 180;          // 3 minutes cooling
+    const MIN_COOLING_FOR_GELATION = 30;  // 30 seconds mandatory cooldown before gelation
+    const MIN_GELATION_FOR_DRYING = 30;   // 30 seconds minimum gelation before drying
+    const MIN_GELATION_FOR_STOP = 10;     // 10 seconds minimum gelation before stop
+
+    let currentModule = 'calc';           // 'calc', 'synth', 'spin'
+    let audioEnabled = true;
+    let audioCtx = null;
+    let lastAlarmBeepSec = 0;
+    let lastSynthBeepSec = 0;
+    let activeModalId = null;
+    let currentTheme = 'dark';
+
+    // CALCULATED CHEMICAL QUANTITIES CACHE (Calculator View)
+    let calculatedValues = {
+      bfoMass: 1.0,
+      biMass: 1.740,
+      feMass: 1.318,
+      twoMoeVol: 12.79,
+      aceticVol: 3.20,
+      totalVol: 15.98,
+      molarity: 0.20
+    };
+
+    // ACTIVE PRECURSOR SYNTHESIS VALUES (Decoupled from live calculator until authenticated push)
+    let activeSynthValues = {
+      bfoMass: 1.0,
+      biMass: 1.740,
+      feMass: 1.318,
+      twoMoeVol: 12.79,
+      aceticVol: 3.20,
+      totalVol: 15.98,
+      molarity: 0.20
+    };
+
+    // SYNTHESIS STAGE TIMERS & DEFAULT PRESETS
+    let synthPresets = {
+      step1: 300,   // 5 min
+      step2: 300,   // 5 min
+      step3: 1800,  // 30 min
+      step4: 120,   // 2 min
+      step5: 5400,  // 1.5 hr (90 min)
+      rpm: 300
+    };
+
+    let synthState = {
+      currentStage: 1,      // 1 to 5
+      timerRunning: false,
+      startSysSec: null,
+      durationSec: 300,
+      elapsedSec: 0,
+      isFinished: false
+    };
+
+    // 6 SPECIMENS WORKBENCH
+    let specimens = [
+      { id: 1, name: "Specimen 1", layer: 0, s1_rpm: "1000 RPM", s1_time: "10s", s2_rpm: "3500 RPM", s2_time: "30s", vol: "50 µL", gelPreset: 60, dryPreset: 180, stage: "idle", timerRunning: false, startSysSec: null, elapsedSec: 0, isOverdue: false, gelationSecLogged: null, gelationLogged: null, dryingLogged: null, coolingRemaining: 0, coolingStartSysSec: null, coolingActive: false, isCooled: false, history: [] },
+      { id: 2, name: "Specimen 2", layer: 0, s1_rpm: "1000 RPM", s1_time: "10s", s2_rpm: "3500 RPM", s2_time: "30s", vol: "50 µL", gelPreset: 60, dryPreset: 180, stage: "idle", timerRunning: false, startSysSec: null, elapsedSec: 0, isOverdue: false, gelationSecLogged: null, gelationLogged: null, dryingLogged: null, coolingRemaining: 0, coolingStartSysSec: null, coolingActive: false, isCooled: false, history: [] },
+      { id: 3, name: "Specimen 3", layer: 0, s1_rpm: "1000 RPM", s1_time: "10s", s2_rpm: "3500 RPM", s2_time: "30s", vol: "50 µL", gelPreset: 60, dryPreset: 180, stage: "idle", timerRunning: false, startSysSec: null, elapsedSec: 0, isOverdue: false, gelationSecLogged: null, gelationLogged: null, dryingLogged: null, coolingRemaining: 0, coolingStartSysSec: null, coolingActive: false, isCooled: false, history: [] },
+      { id: 4, name: "Specimen 4", layer: 0, s1_rpm: "1000 RPM", s1_time: "10s", s2_rpm: "3500 RPM", s2_time: "30s", vol: "50 µL", gelPreset: 60, dryPreset: 180, stage: "idle", timerRunning: false, startSysSec: null, elapsedSec: 0, isOverdue: false, gelationSecLogged: null, gelationLogged: null, dryingLogged: null, coolingRemaining: 0, coolingStartSysSec: null, coolingActive: false, isCooled: false, history: [] },
+      { id: 5, name: "Specimen 5", layer: 0, s1_rpm: "1000 RPM", s1_time: "10s", s2_rpm: "3500 RPM", s2_time: "30s", vol: "50 µL", gelPreset: 60, dryPreset: 180, stage: "idle", timerRunning: false, startSysSec: null, elapsedSec: 0, isOverdue: false, gelationSecLogged: null, gelationLogged: null, dryingLogged: null, coolingRemaining: 0, coolingStartSysSec: null, coolingActive: false, isCooled: false, history: [] },
+      { id: 6, name: "Specimen 6", layer: 0, s1_rpm: "1000 RPM", s1_time: "10s", s2_rpm: "3500 RPM", s2_time: "30s", vol: "50 µL", gelPreset: 60, dryPreset: 180, stage: "idle", timerRunning: false, startSysSec: null, elapsedSec: 0, isOverdue: false, gelationSecLogged: null, gelationLogged: null, dryingLogged: null, coolingRemaining: 0, coolingStartSysSec: null, coolingActive: false, isCooled: false, history: [] }
+    ];
+
+    function getDeviceSecs() {
+      return Math.floor(Date.now() / 1000);
+    }
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, type, duration, delay = 0, gainVal = 0.25) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime + delay;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(gainVal, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.start(now);
+        osc.stop(now + duration);
+      } catch (e) {
+        console.warn("Audio play error:", e);
+      }
+    }
+
+    function playChime(kind) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        if (kind === 'cooledReady') {
+          playTone(523.25, 'sine', 0.2, 0, 0.3);
+          playTone(783.99, 'sine', 0.2, 0.12, 0.3);
+          playTone(1046.50, 'sine', 0.4, 0.25, 0.3);
+        } else if (kind === 'tap') {
+          playTone(500, 'triangle', 0.05, 0, 0.12);
+        } else if (kind === 'stopCooling') {
+          playTone(349.23, 'sine', 0.15, 0, 0.25);
+          playTone(261.63, 'sine', 0.25, 0.12, 0.25);
+        } else if (kind === 'unlocked') {
+          playTone(659.25, 'sine', 0.15, 0, 0.2);
+        } else if (kind === 'stageFinish') {
+          playTone(587.33, 'triangle', 0.2, 0, 0.3);
+          playTone(880.00, 'triangle', 0.35, 0.18, 0.35);
+        }
+      } catch (err) {
+        console.warn("Audio error:", err);
+      }
+    }
+
+    /* ==========================================================================
+       MODULE SWITCHING
+       ========================================================================== */
+    function switchModule(moduleName) {
+      currentModule = moduleName;
+      document.getElementById('moduleViewCalc').classList.remove('active-module');
+      document.getElementById('moduleViewSynth').classList.remove('active-module');
+      document.getElementById('moduleViewSpin').classList.remove('active-module');
+
+      document.getElementById('tabBtnCalc').classList.remove('active');
+      document.getElementById('tabBtnSynth').classList.remove('active');
+      document.getElementById('tabBtnSpin').classList.remove('active');
+
+      if (moduleName === 'calc') {
+        document.getElementById('moduleViewCalc').classList.add('active-module');
+        document.getElementById('tabBtnCalc').classList.add('active');
+      } else if (moduleName === 'synth') {
+        document.getElementById('moduleViewSynth').classList.add('active-module');
+        document.getElementById('tabBtnSynth').classList.add('active');
+        renderSynthesisView();
+      } else if (moduleName === 'spin') {
+        document.getElementById('moduleViewSpin').classList.add('active-module');
+        document.getElementById('tabBtnSpin').classList.add('active');
+        renderAllSubstrates();
+      }
+      playChime('tap');
+    }
+
+    /* ==========================================================================
+       MODULE 1: STOICHIOMETRIC CALCULATIONS
+       ========================================================================== */
+    function performFormulationCalculation() {
+      const targetBFO = parseFloat(document.getElementById('calcTargetBFO').value) || 1.0;
+      const excessBiPct = parseFloat(document.getElementById('calcExcessBi').value) || 0;
+      const purityBiPct = parseFloat(document.getElementById('calcPurityBi').value) || 100;
+      const purityFePct = parseFloat(document.getElementById('calcPurityFe').value) || 100;
+      const ratioStr = document.getElementById('calcSolventRatio').value;
+      const concM = parseFloat(document.getElementById('calcConcentration').value) || 0.2;
+
+      // Molecular weights (g/mol)
+      const MW_BFO = 312.82;
+      const MW_BI_PRECURSOR = 485.07; // Bi(NO3)3.5H2O
+      const MW_FE_PRECURSOR = 404.00; // Fe(NO3)3.9H2O
+
+      const molesBFO = targetBFO / MW_BFO;
+
+      // Pure stoichiometric masses
+      const pureBiMass = molesBFO * MW_BI_PRECURSOR;
+      const pureFeMass = molesBFO * MW_FE_PRECURSOR;
+
+      // Adjusted for excess Bismuth and purity
+      const actualBiMass = (pureBiMass * (1 + excessBiPct / 100)) / (purityBiPct / 100);
+      const actualFeMass = pureFeMass / (purityFePct / 100);
+
+      // Total solution volume (L -> mL)
+      const totalVolL = molesBFO / concM;
+      const totalVolML = totalVolL * 1000;
+
+      // Solvent volumetric split
+      let parts = ratioStr.split(':').map(Number);
+      let r2Moe = parts[0] || 4;
+      let rHAc = parts[1] || 1;
+      let totalParts = r2Moe + rHAc;
+
+      const vol2MOE = (totalVolML * (r2Moe / totalParts));
+      const volHAc = (totalVolML * (rHAc / totalParts));
+
+      // Cache
+      calculatedValues = {
+        bfoMass: targetBFO,
+        biMass: actualBiMass,
+        feMass: actualFeMass,
+        twoMoeVol: vol2MOE,
+        aceticVol: volHAc,
+        totalVol: totalVolML,
+        molarity: concM
+      };
+
+      // Display results
+      document.getElementById('res2MOE').textContent = `${vol2MOE.toFixed(2)} mL`;
+      document.getElementById('resAceticAcid').textContent = `${volHAc.toFixed(2)} mL`;
+      document.getElementById('resBiMass').textContent = `${actualBiMass.toFixed(3)} g`;
+      document.getElementById('resFeMass').textContent = `${actualFeMass.toFixed(3)} g`;
+
+      document.getElementById('resTotalVol').textContent = `${totalVolML.toFixed(2)} mL`;
+      document.getElementById('resSummaryMolarity').textContent = `${concM.toFixed(2)} M`;
+      document.getElementById('resSummaryBFO').textContent = `${targetBFO.toFixed(2)} g`;
+
+      playChime('tap');
+      triggerToast("Stoichiometric formulation computed (not yet pushed to synthesis)");
+      persistState();
+    }
+
+    /* PASSCODE PROTECTED DATA PUSH & SYNTHESIS REINITIALIZATION */
+    function promptPushPasscode() {
+      const pinModal = document.getElementById('pinModal');
+      const pinInput = document.getElementById('pinInput');
+      const pinError = document.getElementById('pinErrorMsg');
+      pinError.textContent = '';
+      pinInput.value = '';
+      pinModal.classList.remove('hidden');
+      setTimeout(() => pinInput.focus(), 100);
+    }
+
+    function closePinModal() {
+      document.getElementById('pinModal').classList.add('hidden');
+    }
+
+    function submitPushPasscode() {
+      const pin = document.getElementById('pinInput').value.trim();
+      const pinError = document.getElementById('pinErrorMsg');
+
+      if (pin !== '0000') {
+        pinError.textContent = 'Invalid Passcode. Enter 0000.';
+        playTone(260, 'sawtooth', 0.15, 0, 0.3);
+        return;
+      }
+
+      closePinModal();
+
+      // Ensure fresh calculation values are used
+      performFormulationCalculation();
+
+      // Commit calculation to active synthesis pipeline
+      activeSynthValues = JSON.parse(JSON.stringify(calculatedValues));
+
+      // Re-initialize Precursor Synthesis to Step 1 fresh start
+      synthState.currentStage = 1;
+      synthState.timerRunning = false;
+      synthState.startSysSec = null;
+      synthState.elapsedSec = 0;
+      synthState.durationSec = synthPresets.step1;
+      synthState.isFinished = false;
+
+      const btn = document.getElementById('btnConfirmStage');
+      if (btn) {
+        btn.onclick = onConfirmSynthesisStage;
+        btn.disabled = false;
+      }
+
+      const digitsEl = document.getElementById('synthTimerDigits');
+      const timerDisplay = document.getElementById('synthTimerDisplay');
+      if (digitsEl) {
+        digitsEl.textContent = formatMinSec(synthPresets.step1);
+        digitsEl.classList.remove('digits-alert');
+      }
+      if (timerDisplay) timerDisplay.classList.remove('timer-pulsing-alarm');
+
+      persistState();
+      switchModule('synth');
+      playChime('unlocked');
+      triggerToast("Passcode accepted: New synthesis initialized with updated quantities");
+    }
+
+    /* ==========================================================================
+       MODULE 2: PRECURSOR SYNTHESIS PROTOCOL & TIERED ALARMS
+       ========================================================================== */
+    function renderSynthesisView() {
+      const stage = synthState.currentStage;
+      const badge = document.getElementById('synthStageBadge');
+      const text = document.getElementById('synthMainInstruction');
+      const prompt = document.getElementById('synthPrepPrompt');
+      const btn = document.getElementById('btnConfirmStage');
+      const btnText = document.getElementById('confirmBtnText');
+      const sub = document.getElementById('synthTimerSubtext');
+
+      // Update pills
+      for (let i = 1; i <= 5; i++) {
+        const pill = document.getElementById(`stepPill${i}`);
+        if (!pill) continue;
+        pill.className = 'step-pill-indicator';
+        if (i < stage) pill.classList.add('complete-step');
+        else if (i === stage) pill.classList.add('active-step');
+      }
+
+      // Read exclusively from authenticated activeSynthValues
+      const moeStr = `${activeSynthValues.twoMoeVol.toFixed(2)} mL`;
+      const biStr = `${activeSynthValues.biMass.toFixed(3)} g`;
+      const feStr = `${activeSynthValues.feMass.toFixed(3)} g`;
+      const hacStr = `${activeSynthValues.aceticVol.toFixed(2)} mL`;
+
+      if (stage === 1) {
+        badge.textContent = "STEP 1 OF 5 • SOLVENT STABILIZATION";
+        text.innerHTML = `Take <span style="color:var(--accent-cyan);">${moeStr}</span> 2-MOE. Set temperature to 25°C and stirring to ${synthPresets.rpm} RPM.`;
+        prompt.innerHTML = `<span>⚖️ <strong>Bench Prompt:</strong> Measure <strong style="color:#fff;">${biStr}</strong> of Bi(NO₃)₃·5H₂O while solvent stabilizes.</span>`;
+        btnText.textContent = synthState.timerRunning ? "Step 1 Timer Running..." : `Confirm 2-MOE & Start ${formatMinSec(synthPresets.step1)} Timer`;
+        sub.textContent = `Target: ${formatMinSec(synthPresets.step1)} • Stirring @ 25°C`;
+      } else if (stage === 2) {
+        badge.textContent = "STEP 2 OF 5 • BISMUTH DISSOLUTION";
+        text.innerHTML = `Add measured <span style="color:var(--accent-amber);">${biStr}</span> Bismuth Nitrate into the 2-MOE solution.`;
+        prompt.innerHTML = `<span>⚖️ <strong>Bench Prompt:</strong> Measure <strong style="color:#fff;">${feStr}</strong> of Fe(NO₃)₃·9H₂O while dissolving.</span>`;
+        btnText.textContent = synthState.timerRunning ? "Step 2 Timer Running..." : `Confirm Bi Nitrate Added & Start ${formatMinSec(synthPresets.step2)} Timer`;
+        sub.textContent = `Target: ${formatMinSec(synthPresets.step2)} • Clear Solvating`;
+      } else if (stage === 3) {
+        badge.textContent = "STEP 3 OF 5 • IRON NITRATE DISSOLUTION";
+        text.innerHTML = `Add measured <span style="color:var(--accent-rose);">${feStr}</span> Iron Nitrate into the solution.`;
+        prompt.innerHTML = `<span>⚖️ <strong>Bench Prompt:</strong> Measure <strong style="color:#fff;">${hacStr}</strong> Acetic Acid into dispensing syringe/pipette.</span>`;
+        btnText.textContent = synthState.timerRunning ? "Step 3 Timer Running..." : `Confirm Fe Nitrate Added & Start ${formatMinSec(synthPresets.step3)} Timer`;
+        sub.textContent = `Target: ${formatMinSec(synthPresets.step3)} • Darkening Reddish Complex`;
+      } else if (stage === 4) {
+        badge.textContent = "STEP 4 OF 5 • DROP-WISE HYDROLYSIS CONTROL";
+        text.innerHTML = `Add <span style="color:var(--accent-cyan);">${hacStr}</span> Acetic Acid drop-wise continuously over 2 minutes.`;
+        prompt.innerHTML = `<span>💧 <strong>Bench Prompt:</strong> Add drops slowly with continuous stirring to prevent local precipitation.</span>`;
+        btnText.textContent = synthState.timerRunning ? "Dropwise Timer Running..." : `Start 2-Minute Dropwise Addition Timer`;
+        sub.textContent = `Target: ${formatMinSec(synthPresets.step4)} • Dropwise Dispense`;
+      } else if (stage === 5) {
+        badge.textContent = "STEP 5 OF 5 • FINAL HOMOGENIZATION & REFLUX";
+        text.innerHTML = `Continue constant stirring for <span style="color:var(--accent-emerald);">1.5 hours</span> at 25°C for homogeneous BFO sol formation.`;
+        prompt.innerHTML = `<span>🔬 <strong>Ready Status:</strong> Precursor will be ready for spin coating deposition once finished.</span>`;
+        btnText.textContent = synthState.timerRunning ? "Homogenization Running..." : `Start 1.5h Homogenization Timer`;
+        sub.textContent = `Target: ${formatMinSec(synthPresets.step5)} • Polycondensation`;
+      }
+
+      if (synthState.timerRunning) {
+        btn.disabled = true;
+      } else {
+        btn.disabled = false;
+      }
+    }
+
+    function onConfirmSynthesisStage() {
+      initAudio();
+      playChime('tap');
+
+      const stage = synthState.currentStage;
+      let duration = synthPresets.step1;
+      if (stage === 2) duration = synthPresets.step2;
+      else if (stage === 3) duration = synthPresets.step3;
+      else if (stage === 4) duration = synthPresets.step4;
+      else if (stage === 5) duration = synthPresets.step5;
+
+      synthState.durationSec = duration;
+      synthState.startSysSec = getDeviceSecs();
+      synthState.elapsedSec = 0;
+      synthState.timerRunning = true;
+      synthState.isFinished = false;
+
+      renderSynthesisView();
+      triggerToast(`Synthesis Step ${stage} started (${formatMinSec(duration)})`);
+      persistState();
+    }
+
+    function advanceSynthesisStep() {
+      if (synthState.currentStage < 5) {
+        synthState.currentStage += 1;
+        synthState.timerRunning = false;
+        synthState.startSysSec = null;
+        synthState.elapsedSec = 0;
+        synthState.isFinished = false;
+
+        // Restore confirm handler for the newly advanced stage
+        const btn = document.getElementById('btnConfirmStage');
+        if (btn) {
+          btn.onclick = onConfirmSynthesisStage;
+          btn.disabled = false;
+        }
+
+        // Reset timer digits display to the next stage preset duration
+        let nextDuration = synthPresets.step1;
+        if (synthState.currentStage === 2) nextDuration = synthPresets.step2;
+        else if (synthState.currentStage === 3) nextDuration = synthPresets.step3;
+        else if (synthState.currentStage === 4) nextDuration = synthPresets.step4;
+        else if (synthState.currentStage === 5) nextDuration = synthPresets.step5;
+
+        synthState.durationSec = nextDuration;
+        const digitsEl = document.getElementById('synthTimerDigits');
+        const timerDisplay = document.getElementById('synthTimerDisplay');
+        if (digitsEl) {
+          digitsEl.textContent = formatMinSec(nextDuration);
+          digitsEl.classList.remove('digits-alert');
+        }
+        if (timerDisplay) timerDisplay.classList.remove('timer-pulsing-alarm');
+
+        playChime('stageFinish');
+        renderSynthesisView();
+        triggerToast(`Advanced to Step ${synthState.currentStage}`);
+      } else {
+        synthState.timerRunning = false;
+        synthState.startSysSec = null;
+        synthState.isFinished = true;
+        playChime('cooledReady');
+        triggerToast("🎉 Precursor Sol Synthesis Complete! Ready for Spin Coating.");
+      }
+      persistState();
+    }
+
+    function togglePresetEditor() {
+      const panel = document.getElementById('synthPresetsPanel');
+      panel.style.display = (panel.style.display === 'none') ? 'flex' : 'none';
+    }
+
+    function saveCustomSynthesisPresets() {
+      synthPresets.step1 = parseInt(document.getElementById('psetTime1').value, 10) || 300;
+      synthPresets.step2 = parseInt(document.getElementById('psetTime2').value, 10) || 300;
+      synthPresets.step3 = parseInt(document.getElementById('psetTime3').value, 10) || 1800;
+      synthPresets.step4 = parseInt(document.getElementById('psetTime4').value, 10) || 120;
+      synthPresets.step5 = parseInt(document.getElementById('psetTime5').value, 10) || 5400;
+      synthPresets.rpm = parseInt(document.getElementById('psetRPM').value, 10) || 300;
+
+      togglePresetEditor();
+      renderSynthesisView();
+      triggerToast("Custom synthesis presets saved");
+      persistState();
+    }
+
+    function resetSynthesisToDefaults() {
+      synthPresets = {
+        step1: 300,   // 5 min
+        step2: 300,   // 5 min
+        step3: 1800,  // 30 min
+        step4: 120,   // 2 min
+        step5: 5400,  // 1.5 hr
+        rpm: 300
+      };
+      synthState.currentStage = 1;
+      synthState.timerRunning = false;
+      synthState.elapsedSec = 0;
+      synthState.isFinished = false;
+
+      document.getElementById('psetTime1').value = 300;
+      document.getElementById('psetTime2').value = 300;
+      document.getElementById('psetTime3').value = 1800;
+      document.getElementById('psetTime4').value = 120;
+      document.getElementById('psetTime5').value = 5400;
+      document.getElementById('psetRPM').value = 300;
+
+      renderSynthesisView();
+      triggerToast("Synthesis reset to standard default presets");
+      persistState();
+    }
+
+    /* ==========================================================================
+       SYNTHESIS TIERED ACOUSTIC ALARM ENGINE
+       Rule:
+       - Beeps every 10 seconds during countdown reminder phase
+       - When 20 seconds left: beeps every 5 seconds
+       - Last 5 seconds: 1 beep per second
+       - At 0: continuous completion alarm
+       ========================================================================== */
+    function checkSynthesisAcousticAlerts(remainingSec, currentSec) {
+      if (!audioEnabled || !synthState.timerRunning) return;
+
+      if (remainingSec <= 0) {
+        // Continuous alarm when completed
+        if (currentSec - lastSynthBeepSec >= 2) {
+          playTone(880, 'sine', 0.25, 0, 0.4);
+          playTone(1046.5, 'sine', 0.25, 0.25, 0.4);
+          lastSynthBeepSec = currentSec;
+        }
+        return;
+      }
+
+      // Last 5 seconds: exactly 1 beep per second
+      if (remainingSec <= 5) {
+        if (currentSec !== lastSynthBeepSec) {
+          playTone(987.77, 'sine', 0.12, 0, 0.35); // B5 tone
+          lastSynthBeepSec = currentSec;
+        }
+        return;
+      }
+
+      // When 20 seconds or fewer left: beep every 5 seconds (20, 15, 10)
+      if (remainingSec <= 20) {
+        if (remainingSec % 5 === 0 && (currentSec - lastSynthBeepSec >= 4)) {
+          playTone(783.99, 'sine', 0.14, 0, 0.3); // G5 tone
+          lastSynthBeepSec = currentSec;
+        }
+        return;
+      }
+
+      // Reminder phase: beep every 10 seconds
+      if (remainingSec % 10 === 0 && (currentSec - lastSynthBeepSec >= 9)) {
+        playTone(659.25, 'sine', 0.12, 0, 0.25); // E5 tone
+        lastSynthBeepSec = currentSec;
+      }
+    }
+
+    /* ==========================================================================
+       PERIODIC 100ms TICK (STOPWATCHES, SYNTHESIS ALARMS, COOLING)
+       ========================================================================== */
+    setInterval(() => {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      document.getElementById('globalClockDisplay').textContent = `SYNC ${timeString}`;
+
+      const currentSec = Math.floor(now.getTime() / 1000);
+
+      // 1. UPDATE SYNTHESIS MODULE
+      if (synthState.timerRunning && synthState.startSysSec !== null) {
+        const passed = currentSec - synthState.startSysSec;
+        synthState.elapsedSec = passed;
+        const remaining = Math.max(0, synthState.durationSec - passed);
+
+        const timerDisplay = document.getElementById('synthTimerDisplay');
+        const digitsEl = document.getElementById('synthTimerDigits');
+        if (digitsEl) {
+          digitsEl.textContent = formatMinSec(remaining);
+          if (remaining <= 5) {
+            digitsEl.classList.add('digits-alert');
+            timerDisplay.classList.add('timer-pulsing-alarm');
+          } else {
+            digitsEl.classList.remove('digits-alert');
+            timerDisplay.classList.remove('timer-pulsing-alarm');
+          }
+        }
+
+        checkSynthesisAcousticAlerts(remaining, currentSec);
+
+        if (passed >= synthState.durationSec && !synthState.isFinished) {
+          const btn = document.getElementById('btnConfirmStage');
+          if (btn) {
+            btn.disabled = false;
+            document.getElementById('confirmBtnText').textContent = "Step Complete! Advance to Next Step →";
+            btn.onclick = advanceSynthesisStep;
+          }
+        }
+      }
+
+      // 2. UPDATE SPINNING 6 TILES
+      let structureChange = false;
+      let anyTileOverdue = false;
+
+      specimens.forEach(spec => {
+        if (spec.timerRunning && spec.startSysSec !== null) {
+          const delta = currentSec - spec.startSysSec;
+          if (delta !== spec.elapsedSec) {
+            const prevElapsed = spec.elapsedSec;
+            spec.elapsedSec = delta;
+
+            let targetPreset = (spec.stage === 'gelation') ? (spec.gelPreset || 60) : (spec.dryPreset || 180);
+            const wasOverdue = spec.isOverdue;
+            spec.isOverdue = (delta >= targetPreset);
+
+            if (spec.isOverdue !== wasOverdue) structureChange = true;
+            updateTileDisplayOnly(spec.id);
+
+            if (spec.stage === 'gelation' && prevElapsed < MIN_GELATION_FOR_DRYING && delta >= MIN_GELATION_FOR_DRYING) {
+              playChime('unlocked');
+              triggerToast(`${spec.name}: 30s Gelation reached • Drying Unlocked`);
+              structureChange = true;
+            }
+          }
+
+          if (spec.isOverdue) anyTileOverdue = true;
+        }
+
+        if (spec.coolingActive && spec.coolingRemaining > 0 && spec.coolingStartSysSec !== null) {
+          const passed = currentSec - spec.coolingStartSysSec;
+          const left = Math.max(0, COOLING_SECONDS - passed);
+          if (left !== spec.coolingRemaining) {
+            const prevLeft = spec.coolingRemaining;
+            spec.coolingRemaining = left;
+
+            const prevPassed = COOLING_SECONDS - prevLeft;
+            if (prevPassed < MIN_COOLING_FOR_GELATION && passed >= MIN_COOLING_FOR_GELATION) {
+              playChime('unlocked');
+              triggerToast(`${spec.name}: 30s Safe cooling reached • Gelation unlocked`);
+              structureChange = true;
+            }
+
+            if (spec.coolingRemaining === 0) {
+              spec.coolingActive = false;
+              spec.isCooled = true;
+              playChime('cooledReady');
+              triggerToast(`${spec.name} is Cooled & Ready!`);
+              structureChange = true;
+            } else {
+              updateTileCoolingOnly(spec.id);
+            }
+          }
+        }
+      });
+
+      if (anyTileOverdue) {
+        if (currentSec - lastAlarmBeepSec >= 2) {
+          if (audioEnabled) {
+            playTone(880, 'sine', 0.14, 0, 0.35);
+            playTone(880, 'sine', 0.14, 0.18, 0.35);
+          }
+          lastAlarmBeepSec = currentSec;
+        }
+      }
+
+      if (structureChange) {
+        persistState();
+        renderAllSubstrates();
+      }
+    }, 100);
+
+    /* ==========================================================================
+       MODULE 3: SPINNING INTERLOCKS & SUBSTRATE ACTIONS
+       ========================================================================== */
+    function onGelationClick(id) {
+      const spec = specimens.find(s => s.id === id);
+      if (!spec) return;
+
+      if (spec.stage === 'gelation') {
+        triggerToast(`⚠️ Interlock: Gelation running for Layer ${spec.layer}`);
+        return;
+      }
+      if (spec.stage === 'drying') {
+        triggerToast("⚠️ Interlock: Substrate is currently on Drying Hotplate");
+        return;
+      }
+
+      if (spec.coolingActive && spec.coolingStartSysSec !== null) {
+        const coolingElapsed = getDeviceSecs() - spec.coolingStartSysSec;
+        if (coolingElapsed < MIN_COOLING_FOR_GELATION) {
+          const waitLeft = MIN_COOLING_FOR_GELATION - coolingElapsed;
+          triggerToast(`⚠️ Interlock: Cooling requires at least 30s (${waitLeft}s remaining)`);
+          return;
+        }
+      }
+
+      initAudio();
+      playChime('tap');
+
+      if (spec.layer > 0) archiveLayerRecord(spec);
+
+      spec.layer += 1;
+      spec.stage = 'gelation';
+      spec.timerRunning = true;
+      spec.startSysSec = getDeviceSecs();
+      spec.elapsedSec = 0;
+      spec.isOverdue = false;
+      spec.gelationSecLogged = null;
+      spec.gelationLogged = null;
+      spec.dryingLogged = null;
+      spec.coolingActive = false;
+      spec.coolingRemaining = 0;
+      spec.coolingStartSysSec = null;
+      spec.isCooled = false;
+
+      persistState();
+      renderAllSubstrates();
+      triggerToast(`${spec.name}: Layer ${spec.layer} Started (Gelation Target: ${spec.gelPreset}s)`);
+    }
+
+    function onDryingClick(id) {
+      const spec = specimens.find(s => s.id === id);
+      if (!spec) return;
+
+      if (spec.stage === 'gelation' && spec.elapsedSec < MIN_GELATION_FOR_DRYING) {
+        triggerToast(`⚠️ Interlock: Gelation needs at least 30s (${MIN_GELATION_FOR_DRYING - spec.elapsedSec}s left)`);
+        return;
+      }
+
+      initAudio();
+      playChime('tap');
+
+      if (spec.stage === 'gelation') {
+        spec.gelationSecLogged = spec.elapsedSec;
+        spec.gelationLogged = formatMinSec(spec.elapsedSec);
+      }
+
+      spec.stage = 'drying';
+      spec.timerRunning = true;
+      spec.startSysSec = getDeviceSecs();
+      spec.elapsedSec = 0;
+      spec.isOverdue = false;
+      spec.coolingActive = false;
+      spec.coolingRemaining = 0;
+      spec.coolingStartSysSec = null;
+      spec.isCooled = false;
+
+      persistState();
+      renderAllSubstrates();
+      triggerToast(`${spec.name}: Drying Hotplate Started (Target: ${formatMinSec(spec.dryPreset)})`);
+    }
+
+    function onStopClick(id) {
+      const spec = specimens.find(s => s.id === id);
+      if (!spec) return;
+
+      if (spec.stage === 'gelation' && spec.elapsedSec < MIN_GELATION_FOR_STOP) {
+        triggerToast(`⚠️ Interlock: Cannot stop gelation under 10 seconds`);
+        return;
+      }
+
+      initAudio();
+
+      if (spec.stage === 'drying') spec.dryingLogged = formatMinSec(spec.elapsedSec);
+      else if (spec.stage === 'gelation') {
+        spec.gelationSecLogged = spec.elapsedSec;
+        spec.gelationLogged = formatMinSec(spec.elapsedSec);
+        spec.dryingLogged = '00:00';
+      }
+
+      spec.timerRunning = false;
+      spec.stage = 'cooling';
+      spec.isOverdue = false;
+      spec.coolingStartSysSec = getDeviceSecs();
+      spec.coolingRemaining = COOLING_SECONDS;
+      spec.coolingActive = true;
+      spec.isCooled = false;
+
+      playChime('stopCooling');
+      persistState();
+      renderAllSubstrates();
+      triggerToast(`${spec.name}: Drying Stopped. 3m Cooling Started`);
+    }
+
+    function onStopwatchTap(id) {
+      const spec = specimens.find(s => s.id === id);
+      if (!spec || !spec.timerRunning) return;
+      initAudio();
+      playChime('tap');
+      spec.startSysSec = getDeviceSecs();
+      spec.elapsedSec = 0;
+      updateTileDisplayOnly(spec.id);
+      triggerToast(`${spec.name}: Stopwatch snapped to clock second`);
+    }
+
+    function archiveLayerRecord(spec) {
+      const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      spec.history.push({
+        layer: spec.layer,
+        recipe: `S1: ${spec.s1_rpm}/${spec.s1_time} • S2: ${spec.s2_rpm}/${spec.s2_time} • ${spec.vol}`,
+        gelation: spec.gelationLogged || (spec.stage === 'gelation' ? formatMinSec(spec.elapsedSec) : '--:--'),
+        drying: spec.dryingLogged || (spec.stage === 'drying' ? formatMinSec(spec.elapsedSec) : '--:--'),
+        cooling: spec.isCooled ? 'Cooled (3m ok)' : (spec.coolingRemaining > 0 ? `Cooling (${formatMinSec(spec.coolingRemaining)})` : 'Stopped'),
+        timestamp: nowStr
+      });
+    }
+
+    /* ==========================================================================
+       SUBSTRATE TILE RENDERING (SIDE-BY-SIDE S1/S2 & REORGANIZED ROW)
+       ========================================================================== */
+    function renderAllSubstrates() {
+      const container = document.getElementById('gridContainer');
+      if (!container) return;
+
+      const currentSec = getDeviceSecs();
+      const timeSelectOptions = [10, 20, 30, 40, 50, 60];
+
+      container.innerHTML = specimens.map(spec => {
+        let borderClass = 'substrate-idle';
+        let badgeClass = 'phase-idle';
+        let badgeText = 'Idle / Ready';
+
+        if (spec.isCooled) {
+          borderClass = 'substrate-cooled';
+          badgeClass = 'phase-cooled';
+          badgeText = 'Cooled • Ready';
+        } else if (spec.coolingActive) {
+          borderClass = 'substrate-cooling';
+          badgeClass = 'phase-cooling';
+          badgeText = `Cooling: ${formatMinSec(spec.coolingRemaining)}`;
+        } else if (spec.timerRunning) {
+          if (spec.isOverdue) {
+            borderClass = 'substrate-alarm';
+            badgeClass = 'phase-alarm';
+            badgeText = (spec.stage === 'gelation') ? '⚠️ GELATION OVERDUE' : '⚠️ DRYING OVERDUE';
+          } else {
+            borderClass = 'substrate-active';
+            badgeClass = (spec.stage === 'gelation') ? 'phase-gelation' : 'phase-drying';
+            badgeText = (spec.stage === 'gelation') ? 'Gelation Active' : 'Drying Hotplate';
+          }
+        }
+
+        const gelText = spec.gelationLogged 
+          ? spec.gelationLogged 
+          : (spec.stage === 'gelation' ? formatMinSec(spec.elapsedSec) : '--:--');
+
+        const dryText = spec.dryingLogged 
+          ? spec.dryingLogged 
+          : (spec.stage === 'drying' ? formatMinSec(spec.elapsedSec) : (spec.stage === 'cooling' || spec.isCooled ? '00:00' : '--:--'));
+
+        let targetPreset = (spec.stage === 'gelation') ? (spec.gelPreset || 60) : (spec.dryPreset || 180);
+        let targetStatusHtml = '';
+        if (spec.timerRunning) {
+          if (spec.isOverdue) {
+            targetStatusHtml = `<div class="target-overdue-text" id="target-sub-${spec.id}">OVERDUE: +${formatMinSec(spec.elapsedSec - targetPreset)}</div>`;
+          } else {
+            targetStatusHtml = `<div class="target-countdown-text" id="target-sub-${spec.id}">Target: ${formatMinSec(targetPreset)} (-${formatMinSec(targetPreset - spec.elapsedSec)})</div>`;
+          }
+        } else if (spec.stage === 'idle') {
+          targetStatusHtml = `<div class="target-countdown-text" id="target-sub-${spec.id}">Gel: ${spec.gelPreset}s • Dry: ${formatMinSec(spec.dryPreset)}</div>`;
+        }
+
+        let gelationLocked = false;
+        let gelationLockLabel = '+New Layer';
+        if (spec.stage === 'gelation') {
+          gelationLocked = true;
+          gelationLockLabel = 'Running...';
+        } else if (spec.stage === 'drying') {
+          gelationLocked = true;
+          gelationLockLabel = 'Drying...';
+        } else if (spec.coolingActive && spec.coolingStartSysSec !== null) {
+          const coolingElapsed = currentSec - spec.coolingStartSysSec;
+          if (coolingElapsed < MIN_COOLING_FOR_GELATION) {
+            gelationLocked = true;
+            gelationLockLabel = `🔒 Cool ${MIN_COOLING_FOR_GELATION - coolingElapsed}s`;
+          } else {
+            gelationLocked = false;
+            gelationLockLabel = '+Next Layer';
+          }
+        }
+
+        const dryingLocked = (spec.stage !== 'gelation') || (spec.elapsedSec < MIN_GELATION_FOR_DRYING);
+        const dryingLeft = (spec.stage === 'gelation' && spec.elapsedSec < MIN_GELATION_FOR_DRYING) ? (MIN_GELATION_FOR_DRYING - spec.elapsedSec) : 0;
+
+        let stopLocked = false;
+        let stopLeft = 0;
+        if (spec.stage === 'gelation') {
+          if (spec.elapsedSec < MIN_GELATION_FOR_STOP) {
+            stopLocked = true;
+            stopLeft = MIN_GELATION_FOR_STOP - spec.elapsedSec;
+          }
+        } else if (spec.stage !== 'drying') {
+          stopLocked = true;
+        }
+
+        const s1Opts = timeSelectOptions.map(t => `<option value="${t}s" ${spec.s1_time === `${t}s` ? 'selected' : ''}>${t}s</option>`).join('');
+        const s2Opts = timeSelectOptions.map(t => `<option value="${t}s" ${spec.s2_time === `${t}s` ? 'selected' : ''}>${t}s</option>`).join('');
+
+        return `
+          <div class="glass-substrate ${borderClass}" id="substrate-card-${spec.id}">
+            <div class="tile-content">
+              
+              <!-- 1. Header -->
+              <div class="tile-header">
+                <input type="text" class="specimen-name-input" value="${escapeStr(spec.name)}" onchange="updateSpecimenName(${spec.id}, this.value)" />
+                <div class="header-actions">
+                  <button class="btn-log-icon" onclick="openHistoryModal(${spec.id})">
+                    <span>📋</span>
+                    <span>${spec.history.length}</span>
+                  </button>
+                  <span class="layer-badge">${spec.layer === 0 ? 'Layer 0' : `Layer ${spec.layer}`}</span>
+                </div>
+              </div>
+
+              <!-- 2. Side-by-Side S1 & S2 -->
+              <div class="spin-profile-box">
+                <div class="stages-side-by-side">
+                  <div class="stage-card-sm">
+                    <div class="stage-card-header"><span>S1 SPREAD</span></div>
+                    <input type="text" class="spin-input-sm" value="${escapeStr(spec.s1_rpm)}" onchange="updateSpinParam(${spec.id}, 's1_rpm', this.value)" placeholder="1000 RPM" />
+                    <select class="spin-select-sm" onchange="updateSpinParam(${spec.id}, 's1_time', this.value)">
+                      ${s1Opts}
+                    </select>
+                  </div>
+                  <div class="stage-card-sm">
+                    <div class="stage-card-header"><span>S2 THIN</span></div>
+                    <input type="text" class="spin-input-sm" value="${escapeStr(spec.s2_rpm)}" onchange="updateSpinParam(${spec.id}, 's2_rpm', this.value)" placeholder="3500 RPM" />
+                    <select class="spin-select-sm" onchange="updateSpinParam(${spec.id}, 's2_time', this.value)">
+                      ${s2Opts}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Precursor Vol, Gel Preset, Dry Preset -->
+              <div class="row-tri-params">
+                <div class="param-cell">
+                  <span class="param-cell-label">Vol</span>
+                  <input type="text" class="param-cell-input" value="${escapeStr(spec.vol)}" onchange="updateSpinParam(${spec.id}, 'vol', this.value)" placeholder="50 µL" />
+                </div>
+                <div class="param-cell">
+                  <span class="param-cell-label">Gel Target</span>
+                  <select class="param-cell-select" onchange="updatePreset(${spec.id}, 'gelPreset', this.value)">
+                    <option value="45" ${spec.gelPreset === 45 ? 'selected' : ''}>45s</option>
+                    <option value="60" ${spec.gelPreset === 60 ? 'selected' : ''}>60s</option>
+                    <option value="90" ${spec.gelPreset === 90 ? 'selected' : ''}>90s</option>
+                    <option value="120" ${spec.gelPreset === 120 ? 'selected' : ''}>120s</option>
+                  </select>
+                </div>
+                <div class="param-cell">
+                  <span class="param-cell-label">Dry Target</span>
+                  <select class="param-cell-select" onchange="updatePreset(${spec.id}, 'dryPreset', this.value)">
+                    <option value="180" ${spec.dryPreset === 180 ? 'selected' : ''}>3 min</option>
+                    <option value="240" ${spec.dryPreset === 240 ? 'selected' : ''}>4 min</option>
+                    <option value="300" ${spec.dryPreset === 300 ? 'selected' : ''}>5 min</option>
+                    <option value="360" ${spec.dryPreset === 360 ? 'selected' : ''}>6 min</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 4. Timing Strip: Gelation Shifted Up & Drying Below -->
+              <div class="timing-dual-strip">
+                <div class="timing-line">
+                  <span class="timing-label"><span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent-amber);"></span> Gelation:</span>
+                  <span class="timing-val-gel" id="gel-disp-${spec.id}">${gelText}</span>
+                </div>
+                <div class="timing-line">
+                  <span class="timing-label"><span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent-rose);"></span> Drying:</span>
+                  <span class="timing-val-dry" id="dry-disp-${spec.id}">${dryText}</span>
+                </div>
+              </div>
+
+              <!-- 5. Main Stopwatch -->
+              <div class="stopwatch-center" onclick="onStopwatchTap(${spec.id})">
+                <div class="stopwatch-phase-badge ${badgeClass}" id="badge-disp-${spec.id}">${badgeText}</div>
+                <div class="stopwatch-digits ${spec.isOverdue ? 'digits-alarm' : ''}" id="timer-digits-${spec.id}">${formatMinSec(spec.elapsedSec)}</div>
+                ${targetStatusHtml}
+                ${spec.coolingActive ? `<div class="cooling-countdown-text" id="cooling-text-${spec.id}">❄ Cool: ${formatMinSec(spec.coolingRemaining)}</div>` : ''}
+              </div>
+
+              <!-- 6. Actions -->
+              <div class="actions-row">
+                <button class="btn-act btn-gelation" id="btn-gelation-${spec.id}" ${gelationLocked ? 'disabled' : ''} onclick="onGelationClick(${spec.id})">
+                  <span>Gelation</span>
+                  <span class="btn-subtext" id="subtext-gelation-${spec.id}">${gelationLockLabel}</span>
+                </button>
+                <button class="btn-act btn-drying ${spec.stage === 'gelation' && spec.isOverdue ? 'btn-drying-alarm' : ''}" id="btn-drying-${spec.id}" ${dryingLocked ? 'disabled' : ''} onclick="onDryingClick(${spec.id})">
+                  <span>Drying</span>
+                  <span class="btn-subtext" id="subtext-drying-${spec.id}">${dryingLocked && spec.stage === 'gelation' ? `🔒 ${dryingLeft}s` : 'Reset 00:00'}</span>
+                </button>
+                <button class="btn-act btn-stop ${spec.stage === 'drying' && spec.isOverdue ? 'btn-stop-alarm' : ''}" id="btn-stop-${spec.id}" ${stopLocked ? 'disabled' : ''} onclick="onStopClick(${spec.id})">
+                  <span>Stop</span>
+                  <span class="btn-subtext" id="subtext-stop-${spec.id}">${stopLocked && spec.stage === 'gelation' ? `🔒 ${stopLeft}s` : '3m Cool'}</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateTileDisplayOnly(id) {
+      const spec = specimens.find(s => s.id === id);
+      if (!spec) return;
+
+      const timerEl = document.getElementById(`timer-digits-${id}`);
+      if (timerEl) {
+        timerEl.textContent = formatMinSec(spec.elapsedSec);
+        if (spec.isOverdue) timerEl.classList.add('digits-alarm');
+        else timerEl.classList.remove('digits-alarm');
+      }
+
+      const targetSub = document.getElementById(`target-sub-${id}`);
+      if (targetSub && spec.timerRunning) {
+        const targetPreset = (spec.stage === 'gelation') ? (spec.gelPreset || 60) : (spec.dryPreset || 180);
+        if (spec.isOverdue) {
+          targetSub.className = 'target-overdue-text';
+          targetSub.textContent = `OVERDUE: +${formatMinSec(spec.elapsedSec - targetPreset)}`;
+        } else {
+          targetSub.className = 'target-countdown-text';
+          targetSub.textContent = `Target: ${formatMinSec(targetPreset)} (-${formatMinSec(targetPreset - spec.elapsedSec)})`;
+        }
+      }
+
+      if (spec.stage === 'gelation') {
+        const gelEl = document.getElementById(`gel-disp-${id}`);
+        if (gelEl) gelEl.textContent = formatMinSec(spec.elapsedSec);
+
+        const dryingBtn = document.getElementById(`btn-drying-${id}`);
+        const dryingSub = document.getElementById(`subtext-drying-${id}`);
+        if (dryingBtn && dryingSub) {
+          if (spec.elapsedSec < MIN_GELATION_FOR_DRYING) {
+            dryingBtn.disabled = true;
+            dryingSub.textContent = `🔒 ${MIN_GELATION_FOR_DRYING - spec.elapsedSec}s`;
+          } else {
+            dryingBtn.disabled = false;
+            dryingSub.textContent = 'Reset 00:00';
+          }
+        }
+      } else if (spec.stage === 'drying') {
+        const dryEl = document.getElementById(`dry-disp-${id}`);
+        if (dryEl) dryEl.textContent = formatMinSec(spec.elapsedSec);
+      }
+    }
+
+    function updateTileCoolingOnly(id) {
+      const spec = specimens.find(s => s.id === id);
+      if (!spec) return;
+      const coolEl = document.getElementById(`cooling-text-${id}`);
+      if (coolEl) coolEl.textContent = `❄ Cool: ${formatMinSec(spec.coolingRemaining)}`;
+      const badgeEl = document.getElementById(`badge-disp-${id}`);
+      if (badgeEl) badgeEl.textContent = `Cooling: ${formatMinSec(spec.coolingRemaining)}`;
+
+      const gelBtn = document.getElementById(`btn-gelation-${id}`);
+      const gelSub = document.getElementById(`subtext-gelation-${id}`);
+      if (gelBtn && gelSub && spec.coolingStartSysSec !== null) {
+        const passed = getDeviceSecs() - spec.coolingStartSysSec;
+        if (passed < MIN_COOLING_FOR_GELATION) {
+          gelBtn.disabled = true;
+          gelSub.textContent = `🔒 Cool ${MIN_COOLING_FOR_GELATION - passed}s`;
+        } else {
+          gelBtn.disabled = false;
+          gelSub.textContent = '+Next Layer';
+        }
+      }
+    }
+
+    /* ==========================================================================
+       PARAMETER UPDATES
+       ========================================================================== */
+    function updateSpecimenName(id, val) {
+      const spec = specimens.find(s => s.id === id);
+      if (!spec) return;
+      spec.name = val.trim() || `Specimen ${id}`;
+      persistState();
+    }
+
+    function updateSpinParam(id, key, val) {
+      const spec = specimens.find(s => s.id === id);
+      if (!spec) return;
+      spec[key] = val.trim();
+      persistState();
+    }
+
+    function updatePreset(id, key, val) {
+      const spec = specimens.find(s => s.id === id);
+      if (!spec) return;
+      spec[key] = parseInt(val, 10);
+      persistState();
+      renderAllSubstrates();
+      triggerToast(`${spec.name}: ${key === 'gelPreset' ? 'Gelation' : 'Drying'} set to ${val}s`);
+    }
+
+    /* ==========================================================================
+       THEME & MODAL HANDLERS
+       ========================================================================== */
+    function setAppTheme(theme) {
+      currentTheme = (theme === 'light') ? 'light' : 'dark';
+      const body = document.body;
+      const btnDark = document.getElementById('btnThemeDark');
+      const btnLight = document.getElementById('btnThemeLight');
+      const icon = document.getElementById('themeCurrentIcon');
+
+      if (currentTheme === 'light') {
+        body.classList.add('theme-light');
+        if (btnLight) btnLight.classList.add('active');
+        if (btnDark) btnDark.classList.remove('active');
+        if (icon) icon.textContent = '☀️';
+      } else {
+        body.classList.remove('theme-light');
+        if (btnDark) btnDark.classList.add('active');
+        if (btnLight) btnLight.classList.remove('active');
+        if (icon) icon.textContent = '🌙';
+      }
+      try { localStorage.setItem('bfo_suite_theme', currentTheme); } catch (e) {}
+      playChime('tap');
+      triggerToast(`Switched to ${currentTheme === 'light' ? 'Light' : 'Dark'} Lab Theme`);
+    }
+
+    function initTheme() {
+      try {
+        const saved = localStorage.getItem('bfo_suite_theme');
+        if (saved === 'light') setAppTheme('light');
+        else setAppTheme('dark');
+      } catch (e) { setAppTheme('dark'); }
+    }
+
+    function openInfoModal() {
+      initAudio();
+      playChime('tap');
+      document.getElementById('infoModal').classList.remove('hidden');
+    }
+
+    function closeInfoModal() {
+      document.getElementById('infoModal').classList.add('hidden');
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('audioToggleBtn');
+      const icon = document.getElementById('audioIcon');
+      const txt = document.getElementById('audioText');
+
+      if (audioEnabled) {
+        btn.className = 'btn-tool btn-audio-on';
+        icon.textContent = '🔊';
+        txt.textContent = 'Audio ON';
+        initAudio();
+        playChime('tap');
+      } else {
+        btn.className = 'btn-tool';
+        icon.textContent = '🔇';
+        txt.textContent = 'Audio OFF';
+      }
+      persistState();
+    }
+
+    function openHistoryModal(id) {
+      activeModalId = id;
+      const spec = specimens.find(s => s.id === id);
+      if (!spec) return;
+
+      document.getElementById('historyModalTitle').textContent = `${spec.name} • Layer History Log`;
+      const tbody = document.getElementById('historyTableBody');
+      const records = [...spec.history];
+
+      if (records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:#64748b; font-style:italic;">No completed layers recorded yet for this substrate.</td></tr>`;
+      } else {
+        tbody.innerHTML = records.map(r => `
+          <tr>
+            <td style="font-weight:700; color:var(--accent-cyan);">L${r.layer}</td>
+            <td>${escapeStr(r.recipe)}</td>
+            <td style="color:var(--accent-amber); font-weight:600;">${r.gelation}</td>
+            <td style="color:var(--accent-rose); font-weight:600;">${r.drying}</td>
+            <td style="color:var(--accent-emerald); font-weight:600;">${r.cooling}</td>
+            <td style="color:#64748b;">${r.timestamp}</td>
+          </tr>
+        `).join('');
+      }
+      document.getElementById('historyModal').classList.remove('hidden');
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModal').classList.add('hidden');
+      activeModalId = null;
+    }
+
+    function clearCurrentSpecimenHistory() {
+      if (!activeModalId) return;
+      const spec = specimens.find(s => s.id === activeModalId);
+      if (!spec) return;
+      spec.history = [];
+      persistState();
+      openHistoryModal(spec.id);
+      renderAllSubstrates();
+      triggerToast(`Cleared history for ${spec.name}`);
+    }
+
+    function confirmResetAll() {
+      if (window.confirm("Reset all 6 specimens, timers, and synthesis progress?")) {
+        specimens.forEach(spec => {
+          spec.layer = 0;
+          spec.stage = 'idle';
+          spec.timerRunning = false;
+          spec.startSysSec = null;
+          spec.elapsedSec = 0;
+          spec.isOverdue = false;
+          spec.gelationSecLogged = null;
+          spec.gelationLogged = null;
+          spec.dryingLogged = null;
+          spec.coolingRemaining = 0;
+          spec.coolingStartSysSec = null;
+          spec.coolingActive = false;
+          spec.isCooled = false;
+        });
+        resetSynthesisToDefaults();
+        persistState();
+        renderAllSubstrates();
+        triggerToast("All specimens and synthesis timers reset");
+      }
+    }
+
+    /* ==========================================================================
+       EXCEL & CSV EXPORTS
+       ========================================================================== */
+    function exportBatchExcel() {
+      const nowStr = new Date().toLocaleString();
+      const filename = `BFO_Batch_Deposition_Tables_${new Date().toISOString().slice(0, 10)}.xls`;
+
+      let excelContent = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Calibri, Arial, sans-serif; }
+            .main-title { font-size: 16pt; font-weight: bold; color: #1e3a8a; }
+            .specimen-header { font-size: 13pt; font-weight: bold; background-color: #0284c7; color: #ffffff; padding: 6px; }
+            .th-col { font-size: 10pt; font-weight: bold; background-color: #e2e8f0; border: 1px solid #cbd5e1; text-align: center; }
+            .td-cell { font-size: 10pt; border: 1px solid #cbd5e1; padding: 4px 8px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <table>
+            <tr><td colspan="10" class="main-title">BFO SPIN COATING LOG - INDIVIDUAL SPECIMEN TABLES</td></tr>
+            <tr><td colspan="10">Generated: ${nowStr} | Copyright Sukanto Biswas, Mechanical Engineer</td></tr>
+            <tr><td colspan="10"></td></tr>
+      `;
+
+      specimens.forEach(spec => {
+        const records = [...spec.history];
+        if (spec.layer > 0 && !records.some(r => r.layer === spec.layer)) {
+          records.push({
+            layer: spec.layer,
+            recipe: `S1: ${spec.s1_rpm}/${spec.s1_time} | S2: ${spec.s2_rpm}/${spec.s2_time} | ${spec.vol}`,
+            gelation: spec.gelationLogged || (spec.stage === 'gelation' ? formatMinSec(spec.elapsedSec) : '--:--'),
+            drying: spec.dryingLogged || (spec.stage === 'drying' ? formatMinSec(spec.elapsedSec) : '--:--'),
+            cooling: spec.isCooled ? 'Cooled & Ready' : (spec.coolingRemaining > 0 ? `Cooling (${formatMinSec(spec.coolingRemaining)})` : 'In Progress'),
+            timestamp: 'Active Layer'
+          });
+        }
+
+        excelContent += `
+          <tr><td colspan="10" class="specimen-header">TABLE: ${escapeStr(spec.name.toUpperCase())} (ID: ${spec.id})</td></tr>
+          <tr>
+            <th class="th-col">Layer #</th>
+            <th class="th-col">Specimen ID</th>
+            <th class="th-col">Stage 1 Spread</th>
+            <th class="th-col">Stage 2 Thinning</th>
+            <th class="th-col">Volume</th>
+            <th class="th-col">Gel Target</th>
+            <th class="th-col">Actual Gelation</th>
+            <th class="th-col">Dry Target</th>
+            <th class="th-col">Actual Drying</th>
+            <th class="th-col">Cooling Status</th>
+          </tr>
+        `;
+
+        if (records.length === 0) {
+          excelContent += `<tr><td colspan="10" style="text-align:center; padding:8px; font-style:italic;">No layers executed yet.</td></tr>`;
+        } else {
+          records.forEach(r => {
+            excelContent += `
+              <tr>
+                <td class="td-cell" style="font-weight:bold; color:#0284c7;">Layer ${r.layer}</td>
+                <td class="td-cell">${escapeStr(spec.name)}</td>
+                <td class="td-cell">${escapeStr(spec.s1_rpm)} / ${escapeStr(spec.s1_time)}</td>
+                <td class="td-cell">${escapeStr(spec.s2_rpm)} / ${escapeStr(spec.s2_time)}</td>
+                <td class="td-cell">${escapeStr(spec.vol)}</td>
+                <td class="td-cell">${spec.gelPreset}s</td>
+                <td class="td-cell" style="font-weight:bold; color:#b45309;">${r.gelation}</td>
+                <td class="td-cell">${formatMinSec(spec.dryPreset)}</td>
+                <td class="td-cell" style="font-weight:bold; color:#be123c;">${r.drying}</td>
+                <td class="td-cell" style="font-weight:bold; color:#047857;">${r.cooling}</td>
+              </tr>
+            `;
+          });
+        }
+        excelContent += `<tr><td colspan="10"></td></tr>`;
+      });
+
+      excelContent += `</table></body></html>`;
+
+      const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      triggerToast("Excel (.xls) export complete with individual specimen tables");
+    }
+
+    function exportBatchCSV() {
+      let csv = "Specimen ID,Specimen Name,Layer,Stage 1 Profile,Stage 2 Profile,Volume,Gel Preset,Dry Preset,Gelation Duration,Drying Duration,Cooling State,Timestamp\n";
+      let count = 0;
+
+      specimens.forEach(spec => {
+        spec.history.forEach(r => {
+          csv += `${spec.id},"${spec.name}",${r.layer},"${spec.s1_rpm} / ${spec.s1_time}","${spec.s2_rpm} / ${spec.s2_time}","${spec.vol}",${spec.gelPreset}s,${spec.dryPreset}s,${r.gelation},${r.drying},"${r.cooling}","${r.timestamp}"\n`;
+          count++;
+        });
+      });
+
+      if (count === 0) {
+        triggerToast("No historical layer data available yet");
+        return;
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `BFO_Synthesis_Deposition_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      triggerToast("CSV Exported successfully");
+    }
+
+    /* ==========================================================================
+       PERSISTENCE & UTILITIES
+       ========================================================================== */
+    function persistState() {
+      try {
+        localStorage.setItem('bfo_suite_specimens', JSON.stringify(specimens));
+        localStorage.setItem('bfo_suite_calc', JSON.stringify(calculatedValues));
+        localStorage.setItem('bfo_suite_active_synth', JSON.stringify(activeSynthValues));
+        localStorage.setItem('bfo_suite_synth', JSON.stringify(synthState));
+        localStorage.setItem('bfo_suite_presets', JSON.stringify(synthPresets));
+        localStorage.setItem('bfo_suite_audio', JSON.stringify(audioEnabled));
+      } catch (err) {}
+    }
+
+    function loadPersistedState() {
+      try {
+        const sSpec = localStorage.getItem('bfo_suite_specimens');
+        const sCalc = localStorage.getItem('bfo_suite_calc');
+        const sActiveSynth = localStorage.getItem('bfo_suite_active_synth');
+        const sSynth = localStorage.getItem('bfo_suite_synth');
+        const sPresets = localStorage.getItem('bfo_suite_presets');
+        const sAudio = localStorage.getItem('bfo_suite_audio');
+
+        if (sSpec) specimens = JSON.parse(sSpec);
+        if (sCalc) calculatedValues = JSON.parse(sCalc);
+        if (sActiveSynth) activeSynthValues = JSON.parse(sActiveSynth);
+        else if (sCalc) activeSynthValues = JSON.parse(sCalc);
+        if (sPresets) synthPresets = JSON.parse(sPresets);
+        if (sSynth) {
+          synthState = JSON.parse(sSynth);
+          synthState.timerRunning = false; // pause on reload
+        }
+        if (sAudio !== null) audioEnabled = JSON.parse(sAudio);
+      } catch (err) {}
+    }
+
+    function formatMinSec(sec) {
+      if (sec === null || sec === undefined || isNaN(sec)) return '--:--';
+      const m = Math.floor(Math.max(0, sec) / 60);
+      const s = Math.max(0, sec) % 60;
+      return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    let toastTimeout = null;
+    function triggerToast(message) {
+      const box = document.getElementById('toastBox');
+      box.textContent = message;
+      box.classList.add('show');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => box.classList.remove('show'), 3000);
+    }
+
+    function escapeStr(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      loadPersistedState();
+      performFormulationCalculation();
+      renderSynthesisView();
+      renderAllSubstrates();
+    });
+  </script>
+</body>
+</html>
