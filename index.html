@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sukanto Biswas — Photovoltaics & Thermal-Fluid Research</title>
+<meta name="description" content="Sukanto Biswas — M.Sc. student at BUET researching photovoltaics, thermal management and CFD. Publications, interactive research demos, and AI-assisted apps and games.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090f; --bg2:#0d1220; --card:#111827cc; --line:#1f2a3d;
+  --ink:#e8edf6; --muted:#8b97ad; --hot:#ff8a3d; --sun:#ffc94a; --cool:#3ddcff; --violet:#9b7bff;
+  --grad:linear-gradient(100deg,var(--sun),var(--hot) 40%,#ff5e7a 60%,var(--violet) 80%,var(--cool));
+  --r:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.6;overflow-x:hidden}
+a{color:inherit}
+h1,h2,h3{font-family:"Space Grotesk",sans-serif;line-height:1.1;margin:0}
+.mono{font-family:"JetBrains Mono",monospace}
+.wrap{max-width:1140px;margin:0 auto;padding:0 20px}
+section{padding:110px 0;position:relative}
+.eyebrow{font-family:"JetBrains Mono",monospace;color:var(--cool);font-size:.82rem;letter-spacing:.18em;text-transform:uppercase}
+.h2{font-size:clamp(2rem,4.5vw,3.2rem);margin:.35em 0 .5em}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% auto;animation:shine 8s linear infinite}
+@keyframes shine{to{background-position:200% center}}
+.lead{color:var(--muted);max-width:640px;font-size:1.05rem}
+
+/* progress + nav */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad);z-index:100}
+nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:.3s}
+nav.scrolled{background:#07090fcc;backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:66px}
+.logo{font-family:"Space Grotesk";font-weight:700;font-size:1.25rem;text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo i{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff6,transparent 40%),conic-gradient(var(--sun),var(--hot),var(--violet),var(--cool),var(--sun));animation:spin 8s linear infinite;display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.links{display:flex;gap:4px}
+.links a{text-decoration:none;color:var(--muted);font-size:.92rem;padding:8px 12px;border-radius:999px;transition:.2s}
+.links a:hover,.links a.active{color:var(--ink);background:#ffffff10}
+#menuBtn{display:none;background:none;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:6px 10px;font-size:1.1rem}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding:0;overflow:hidden}
+#flow{position:absolute;inset:0;width:100%;height:100%}
+#hero .wrap{position:relative;z-index:2;pointer-events:none;width:100%}
+#hero .wrap *{pointer-events:auto}
+.hello{font-family:"JetBrains Mono";color:var(--sun)}
+.name{font-size:clamp(2.4rem,11vw,7.5rem);font-weight:700;letter-spacing:-.03em;margin:.1em 0}
+.role{font-size:clamp(1.15rem,2.6vw,1.6rem);color:var(--muted);min-height:2.2em}
+.role b{color:var(--ink);font-weight:500}
+.caret{display:inline-block;width:2px;height:1.1em;background:var(--cool);vertical-align:-3px;margin-left:3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:999px;text-decoration:none;font-weight:600;border:1px solid var(--line);background:#ffffff08;color:var(--ink);cursor:pointer;font:600 .95rem Inter;transition:transform .2s,box-shadow .2s,background .2s}
+.btn:hover{transform:translateY(-2px);background:#ffffff14}
+.btn.primary{background:var(--grad);background-size:200% auto;color:#111;border:none;box-shadow:0 10px 40px -10px var(--hot)}
+.btn.primary:hover{background-position:100% center;box-shadow:0 14px 50px -8px var(--hot)}
+.hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:2;color:var(--muted);font-size:.8rem;font-family:"JetBrains Mono";text-align:center}
+.hint span{display:block;width:22px;height:36px;border:2px solid var(--muted);border-radius:12px;margin:8px auto 0;position:relative}
+.hint span:after{content:"";position:absolute;left:50%;top:6px;width:4px;height:8px;border-radius:2px;background:var(--cool);transform:translateX(-50%);animation:scrolly 1.6s infinite}
+@keyframes scrolly{to{top:20px;opacity:0}}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:46px;max-width:760px}
+.stat{background:#0b1020aa;border:1px solid var(--line);border-radius:14px;padding:14px 16px;backdrop-filter:blur(6px)}
+.stat b{font-family:"Space Grotesk";font-size:1.9rem;display:block}
+.stat small{color:var(--muted);font-size:.8rem}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px;position:relative;overflow:hidden;transition:border-color .3s,transform .25s}
+.card:before{content:"";position:absolute;inset:0;background:radial-gradient(500px circle at var(--mx,50%) var(--my,50%),#ff8a3d1c,transparent 40%);opacity:0;transition:.3s;pointer-events:none}
+.card:hover:before{opacity:1}
+.card:hover{border-color:#ff8a3d55}
+.tag{display:inline-block;font:500 .74rem "JetBrains Mono";padding:4px 10px;border-radius:999px;background:#ffffff0d;border:1px solid var(--line);color:var(--muted);margin:3px 4px 0 0}
+
+/* about */
+.about{display:grid;grid-template-columns:300px 1fr;gap:56px;align-items:center}
+.avatar{width:260px;height:260px;border-radius:50%;position:relative;margin:auto;display:grid;place-items:center}
+.avatar:before{content:"";position:absolute;inset:-8px;border-radius:50%;background:conic-gradient(var(--sun),var(--hot),var(--violet),var(--cool),var(--sun));animation:spin 10s linear infinite;filter:blur(1px)}
+.avatar .in{position:absolute;inset:0;border-radius:50%;background:var(--bg2);display:grid;place-items:center;overflow:hidden}
+.avatar .in b{font-family:"Space Grotesk";font-size:5.5rem}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+.fact{border-left:2px solid var(--hot);padding:4px 14px}
+.fact small{color:var(--muted);display:block;font-size:.8rem}
+
+/* research */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.rcard{transform-style:preserve-3d;will-change:transform}
+.rcard .ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:1.6rem;margin-bottom:18px;background:linear-gradient(135deg,#ff8a3d33,#3ddcff22);border:1px solid var(--line)}
+.rcard h3{font-size:1.25rem;margin-bottom:6px}
+.rcard .when{font:.8rem "JetBrains Mono";color:var(--sun)}
+.rcard p{color:var(--muted);font-size:.95rem}
+
+/* lab */
+.lab{display:grid;grid-template-columns:1fr 1.1fr;gap:26px;margin-top:30px}
+.ctrl{margin-bottom:20px}
+.ctrl label{display:flex;justify-content:space-between;font-size:.92rem;margin-bottom:8px}
+.ctrl label span{font-family:"JetBrains Mono";color:var(--sun)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--cool),var(--violet),var(--hot));outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--hot);cursor:pointer;box-shadow:0 0 14px var(--hot)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--hot);cursor:pointer}
+.panelviz{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;padding:14px;border-radius:14px;background:#05070c;border:1px solid var(--line);transform:perspective(700px) rotateX(18deg);margin-bottom:22px}
+.panelviz div{aspect-ratio:1;border-radius:3px;transition:background .4s}
+.readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ro{background:#0b1020;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.ro b{font:700 1.6rem "Space Grotesk";display:block}
+.ro small{color:var(--muted);font-size:.78rem}
+.note{color:var(--muted);font-size:.8rem;margin-top:16px}
+.bar{height:8px;border-radius:8px;background:#ffffff10;overflow:hidden;margin-top:14px}
+.bar i{display:block;height:100%;background:var(--grad);transition:width .4s}
+
+/* pubs */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.chip{border:1px solid var(--line);background:#ffffff08;color:var(--muted);padding:8px 16px;border-radius:999px;cursor:pointer;font:500 .88rem Inter;transition:.2s}
+.chip.on{background:var(--ink);color:#111;border-color:var(--ink)}
+.pub{display:grid;grid-template-columns:70px 1fr auto;gap:18px;align-items:start;margin-bottom:14px}
+.pub .yr{font:700 1.4rem "Space Grotesk";color:var(--sun)}
+.pub h3{font-size:1.08rem;margin-bottom:6px;font-family:Inter;font-weight:600;line-height:1.4}
+.pub p{margin:0;color:var(--muted);font-size:.9rem}
+.pub p b{color:var(--ink)}
+.pub .acts{display:flex;flex-direction:column;gap:8px}
+.mini{font:600 .8rem Inter;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:#ffffff08;color:var(--ink);cursor:pointer;text-decoration:none;text-align:center;white-space:nowrap}
+.mini:hover{border-color:var(--cool);color:var(--cool)}
+.pub.hide{display:none}
+
+/* projects */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.proj .thumb{height:160px;border-radius:12px;margin:-6px -6px 18px;display:grid;place-items:center;font-size:3rem;position:relative;overflow:hidden}
+.proj h3{font-size:1.2rem;margin-bottom:6px}
+.proj p{color:var(--muted);font-size:.93rem;min-height:3em}
+.proj .row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge{position:absolute;top:10px;right:10px;font:600 .7rem "JetBrains Mono";background:#000a;padding:4px 8px;border-radius:999px;color:var(--sun)}
+
+/* game */
+.game{margin-top:46px;display:grid;grid-template-columns:1fr 280px;gap:22px}
+#gameWrap{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:#05070c}
+#game{display:block;width:100%;height:380px;touch-action:none}
+#overlay{position:absolute;inset:0;display:grid;place-items:center;text-align:center;background:#05070cd0;backdrop-filter:blur(3px);padding:20px}
+#overlay h3{font-size:1.8rem;margin-bottom:8px}
+#overlay p{color:var(--muted);max-width:380px;margin:0 auto 16px}
+.legend div{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:.92rem;color:var(--muted)}
+.dot{width:14px;height:14px;border-radius:50%;flex:none}
+.hud{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+
+/* timeline */
+.tl{position:relative;margin-top:30px;padding-left:30px}
+.tl:before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--sun),var(--hot),var(--violet),var(--cool))}
+.ti{position:relative;margin-bottom:26px}
+.ti:before{content:"";position:absolute;left:-28px;top:6px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:3px solid var(--hot);box-shadow:0 0 12px var(--hot)}
+.ti .when{font:.82rem "JetBrains Mono";color:var(--sun)}
+.ti h3{font-size:1.1rem;margin:2px 0;font-family:Inter;font-weight:600}
+.ti p{margin:0;color:var(--muted);font-size:.92rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.skills{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.skill{padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:#ffffff06;font-size:.92rem;transition:.25s;cursor:default}
+.skill:hover{border-color:var(--cool);box-shadow:0 0 24px -6px var(--cool);transform:translateY(-3px)}
+.skill em{font-style:normal;color:var(--muted);font-size:.78rem;margin-left:6px}
+
+/* contact */
+#contact{text-align:center}
+.big{font-size:clamp(2.2rem,6vw,4.6rem);margin:.2em 0 .4em}
+.mail{font:600 clamp(1rem,2.6vw,1.5rem) "JetBrains Mono";padding:16px 26px;border-radius:16px;border:1px solid var(--line);background:#ffffff08;color:var(--ink);cursor:pointer;transition:.25s}
+.mail:hover{border-color:var(--hot);box-shadow:0 0 40px -10px var(--hot)}
+.socials{display:flex;gap:12px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:40px 0;border-top:1px solid var(--line)}
+#toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,120px);background:var(--ink);color:#111;padding:10px 18px;border-radius:999px;font-weight:600;transition:.35s;z-index:200}
+#toast.show{transform:translate(-50%,0)}
+
+/* glow cursor */
+#glow{position:fixed;width:420px;height:420px;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,#ff8a3d14,transparent 60%);transform:translate(-50%,-50%);transition:opacity .3s;left:-500px;top:-500px}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(34px);transition:opacity .8s,transform .8s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+
+@media (max-width:900px){
+  .links{display:none;position:absolute;top:66px;right:16px;flex-direction:column;background:#0d1220;border:1px solid var(--line);border-radius:14px;padding:8px}
+  .links.open{display:flex}
+  #menuBtn{display:block}
+  .about,.lab,.game,.two{grid-template-columns:1fr}
+  .grid3,.pgrid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pub{grid-template-columns:1fr}
+  .pub .acts{flex-direction:row}
+  #glow{display:none}
+  section{padding:80px 0}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="glow"></div>
+
+<nav id="nav"><div class="wrap">
+  <a class="logo" href="#hero"><i></i>Sukanto<span class="grad-text">.</span></a>
+  <div class="links" id="links">
+    <a href="#about">About</a><a href="#research">Research</a><a href="#lab">Lab</a>
+    <a href="#publications">Papers</a><a href="#projects">Projects</a><a href="#journey">Journey</a><a href="#contact">Contact</a>
+  </div>
+  <button id="menuBtn" aria-label="Menu">☰</button>
+</div></nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="flow"></canvas>
+  <div class="wrap">
+    <div class="hello">// hello, world. I'm</div>
+    <h1 class="name"><span class="grad-text">Sukanto Biswas</span></h1>
+    <div class="role">I'm a <b id="typed"></b><span class="caret"></span></div>
+    <div class="cta">
+      <a class="btn primary" href="#research">Explore my research →</a>
+      <a class="btn" href="Sukanto_Biswas_CV.pdf" download>⤓ Download CV</a>
+      <a class="btn" href="#projects">🎮 Play my game</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><b data-count="3">0</b><small>peer-reviewed publications</small></div>
+      <div class="stat"><b data-count="1">0</b><small>international conference talk</small></div>
+      <div class="stat"><b data-count="3">0</b><small>competition awards</small></div>
+      <div class="stat"><b>∞</b><small>curiosity about sunlight</small></div>
+    </div>
+  </div>
+  <div class="hint">move your cursor — stir the flow<span></span></div>
+</section>
+
+<!-- ABOUT -->
+<section id="about"><div class="wrap about">
+  <div class="avatar rv"><div class="in">
+    <!-- To use your photo: replace <b>SB</b> with <img src="photo.jpg" alt="Sukanto Biswas"> -->
+    <b class="grad-text">SB</b>
+  </div></div>
+  <div class="rv">
+    <div class="eyebrow">01 · About</div>
+    <h2 class="h2">Where <span class="grad-text">heat, flow & sunlight</span> meet.</h2>
+    <p class="lead">I'm an M.Sc. student in Materials and Metallurgical Engineering at BUET, with a B.Sc. in Mechanical Engineering from KUET. I study how heat and fluid flow shape the performance of solar cells, and I'm now focused on next-generation perovskite photovoltaics.</p>
+    <p class="lead">Outside the lab, I build apps and games with AI as my co-pilot. It's how I prototype ideas fast.</p>
+    <div class="facts">
+      <div class="fact"><small>Now</small>M.Sc., BUET</div>
+      <div class="fact"><small>Degree</small>B.Sc. Mech. Eng., KUET (2023)</div>
+      <div class="fact"><small>Focus</small>Perovskite & bifacial PV</div>
+      <div class="fact"><small>Seeking</small>Funded Master's / PhD</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- RESEARCH -->
+<section id="research"><div class="wrap">
+  <div class="rv">
+    <div class="eyebrow">02 · Research</div>
+    <h2 class="h2">What I've been <span class="grad-text">simulating</span>.</h2>
+    <p class="lead">From bifacial solar modules to heat exchangers and supersonic airfoils, I solve thermal-fluid problems with CFD and validate the results.</p>
+  </div>
+  <div class="grid3" style="margin-top:36px">
+    <div class="card rcard rv">
+      <div class="ico">☀️</div><div class="when">Present · Independent</div>
+      <h3>Cooling bifacial solar cells</h3>
+      <p>Bifacial modules collect light on both faces, and the extra heat lowers their efficiency. I model heat transfer and cooling mechanisms to recover it, and I'm preparing numerical and experimental studies.</p>
+      <span class="tag">thermal management</span><span class="tag">PV</span><span class="tag">modelling</span>
+    </div>
+    <div class="card rcard rv">
+      <div class="ico">🌀</div><div class="when">2022 · KUET · ICMIEE</div>
+      <h3>Corrugated plate heat exchanger</h3>
+      <p>I ran CFD simulations of heat transfer and fluid flow in corrugated channels in ANSYS Fluent, validated them against theory, and presented the work at ICMIEE-2022.</p>
+      <span class="tag">ANSYS Fluent</span><span class="tag">CFD</span><span class="tag">validation</span>
+    </div>
+    <div class="card rcard rv">
+      <div class="ico">✈️</div><div class="when">2025 · Journal papers</div>
+      <h3>Engine fins & biconvex airfoils</h3>
+      <p>In two collaborative studies, I optimized fin geometry and material to cool an engine cylinder, and analyzed how Mach number affects the aerodynamics of a biconvex airfoil.</p>
+      <span class="tag">heat transfer</span><span class="tag">compressible flow</span>
+    </div>
+  </div>
+</div></section>
+
+<!-- LAB -->
+<section id="lab" style="background:linear-gradient(180deg,transparent,#0d122055,transparent)"><div class="wrap">
+  <div class="rv">
+    <div class="eyebrow">03 · Interactive lab</div>
+    <h2 class="h2">Heat a solar panel. <span class="grad-text">Then cool it.</span></h2>
+    <p class="lead">This is the problem my research tackles. Hotter cells convert less light into electricity. Drag the sliders to see why cooling matters.</p>
+  </div>
+  <div class="lab">
+    <div class="card rv">
+      <div class="ctrl"><label>☀️ Sunlight (irradiance) <span id="vG"></span></label><input type="range" id="G" min="200" max="1200" step="10" value="1000"></div>
+      <div class="ctrl"><label>🌡️ Air temperature <span id="vTa"></span></label><input type="range" id="Ta" min="0" max="45" step="1" value="35"></div>
+      <div class="ctrl"><label>💨 Wind speed <span id="vV"></span></label><input type="range" id="V" min="0" max="10" step="0.5" value="1"></div>
+      <div class="ctrl"><label>❄️ Active cooling (added h) <span id="vH"></span></label><input type="range" id="H" min="0" max="100" step="1" value="0"></div>
+      <p class="note">Illustrative model, not results from my study. Cell temperature follows the Faiman correlation, T<sub>c</sub> = T<sub>a</sub> + G / (U₀ + U₁·v + h), with U₀ = 25 W/m²K and U₁ = 6.84 W·s/m³K. Efficiency η = η<sub>ref</sub>[1 − β(T<sub>c</sub> − 25 °C)], with η<sub>ref</sub> = 21 % and β = 0.4 %/°C, typical of crystalline silicon. Power is for a 2 m² module.</p>
+    </div>
+    <div class="card rv">
+      <div class="panelviz" id="pv"></div>
+      <div class="readouts">
+        <div class="ro"><b id="oT">–</b><small>cell temperature</small></div>
+        <div class="ro"><b id="oE">–</b><small>efficiency</small></div>
+        <div class="ro"><b id="oP">–</b><small>power output</small></div>
+      </div>
+      <div style="margin-top:18px;font-size:.92rem" id="oLoss"></div>
+      <div class="bar"><i id="oBar"></i></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- PUBLICATIONS -->
+<section id="publications"><div class="wrap">
+  <div class="rv">
+    <div class="eyebrow">04 · Publications</div>
+    <h2 class="h2">Peer-reviewed <span class="grad-text">work</span>.</h2>
+  </div>
+  <div class="chips rv" id="chips">
+    <button class="chip on" data-f="all">All · 3</button>
+    <button class="chip" data-f="journal">Journal · 2</button>
+    <button class="chip" data-f="conf">Conference · 1</button>
+  </div>
+  <div id="pubs"></div>
+</div></section>
+
+<!-- PROJECTS -->
+<section id="projects"><div class="wrap">
+  <div class="rv">
+    <div class="eyebrow">05 · Built with AI</div>
+    <h2 class="h2">Apps & games I've <span class="grad-text">shipped</span>.</h2>
+    <p class="lead">I treat AI as a pair programmer. I design the idea and the logic, and use AI to move from concept to working build fast. Here are some of them.</p>
+  </div>
+  <div class="pgrid" id="pgrid" style="margin-top:34px"></div>
+
+  <div class="game rv">
+    <div id="gameWrap">
+      <canvas id="game"></canvas>
+      <div id="overlay"><div>
+        <h3 class="grad-text">Photon Catcher</h3>
+        <p>Move the solar panel to catch photons ☀️ and coolant ❄️. Dodge heat blobs 🔥. If the panel passes 85 °C, it's game over.</p>
+        <button class="btn primary" id="startBtn">▶ Play</button>
+      </div></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:12px">Live stats</div>
+      <div class="hud">
+        <div class="ro"><b id="gE">0</b><small>energy (J)</small></div>
+        <div class="ro"><b id="gT">25°</b><small>panel temp</small></div>
+        <div class="ro"><b id="gEff">21%</b><small>efficiency</small></div>
+        <div class="ro"><b id="gBest">0</b><small>best</small></div>
+      </div>
+      <div class="legend">
+        <div><span class="dot" style="background:var(--sun);box-shadow:0 0 10px var(--sun)"></span>Photon: energy × efficiency</div>
+        <div><span class="dot" style="background:var(--cool);box-shadow:0 0 10px var(--cool)"></span>Coolant: −8 °C</div>
+        <div><span class="dot" style="background:#ff4d4d;box-shadow:0 0 10px #ff4d4d"></span>Heat blob: +9 °C</div>
+      </div>
+      <p class="note">Controls: mouse, touch or ← →. It uses the same efficiency formula as the lab above.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- JOURNEY -->
+<section id="journey"><div class="wrap two">
+  <div class="rv">
+    <div class="eyebrow">06 · Journey</div>
+    <h2 class="h2">The path <span class="grad-text">so far</span>.</h2>
+    <div class="tl">
+      <div class="ti"><div class="when">Present</div><h3>M.Sc., Materials & Metallurgical Eng. — BUET</h3><p>Focus: perovskite solar cells. Independent research on cooling bifacial PV modules.</p></div>
+      <div class="ti"><div class="when">2025</div><h3>Two journal papers published</h3><p><i>Next Research</i> (Elsevier) and <i>Engineering and Applied Science</i>.</p></div>
+      <div class="ti"><div class="when">2023</div><h3>B.Sc., Mechanical Engineering — KUET</h3><p>Undergraduate research in CFD for heat exchangers.</p></div>
+      <div class="ti"><div class="when">2022</div><h3>ICMIEE-2022 presentation</h3><p>7th International Conference on Mechanical, Industrial and Energy Engineering, Khulna.</p></div>
+      <div class="ti"><div class="when">2017 – 2018</div><h3>Robotics, rovers & CAD</h3><p>Founding member, KUET Mars Rover (Team Durbar). Project Manager & Instructor at LOOP. 2nd place (×2) and 3rd place in KUET competitions.</p></div>
+    </div>
+  </div>
+  <div class="rv">
+    <div class="eyebrow">07 · Toolkit</div>
+    <h2 class="h2">Tools I <span class="grad-text">work with</span>.</h2>
+    <div class="skills">
+      <span class="skill">ANSYS Fluent<em>CFD</em></span><span class="skill">Heat transfer</span><span class="skill">Fluid mechanics</span>
+      <span class="skill">Photovoltaics</span><span class="skill">SOLIDWORKS<em>CAD</em></span><span class="skill">AutoCAD</span>
+      <span class="skill">OriginPro<em>data</em></span><span class="skill">C / C++</span><span class="skill">Arduino</span>
+      <span class="skill">AI-assisted development</span><span class="skill">Adobe Illustrator</span><span class="skill">Photoshop</span>
+      <span class="skill">Premiere Pro</span><span class="skill">Technical writing</span>
+    </div>
+  </div>
+</div></section>
+
+<!-- CONTACT -->
+<section id="contact"><div class="wrap rv">
+  <div class="eyebrow">08 · Contact</div>
+  <h2 class="big">Let's work on <span class="grad-text">the sun</span>.</h2>
+  <p class="lead" style="margin:0 auto 28px">I'm looking for funded Master's and PhD positions in photovoltaics and energy materials. If your lab works on this, I'd love to talk.</p>
+  <button class="mail" id="mail">sukantojessore@gmail.com ⧉</button>
+  <div class="socials">
+    <a class="btn" href="mailto:sukantojessore@gmail.com">✉ Email me</a>
+    <!-- TODO: put your real LinkedIn URL here -->
+    <a class="btn" href="https://www.linkedin.com/in/sukanto-biswas" target="_blank" rel="noopener">in LinkedIn</a>
+    <a class="btn" href="Sukanto_Biswas_CV.pdf" download>⤓ CV (PDF)</a>
+  </div>
+</div></section>
+
+<footer>© <span id="yr"></span> Sukanto Biswas · Built with curiosity, CFD intuition, and an AI pair programmer.</footer>
+<div id="toast"></div>
+
+<script>
+/* ================= DATA (edit me) ================= */
+const PUBS = [
+  {yr:2025,type:'journal',title:'Numerical investigation on optimizing engine cooling using different fin geometry and material on an engine cylinder',
+   authors:'S. Bakchi, R. Mustak, D. Biswas, <b>S. Biswas</b>',venue:'<i>Next Research</i>, vol. 2, no. 3, Art. 100674, Sep. 2025',doi:'10.1016/j.nexres.2025.100674'},
+  {yr:2025,type:'journal',title:'Influence of Mach Number on the Aerodynamic Performance of a Biconvex Airfoil',
+   authors:'D. Biswas, R. Mustak, S. Bakchi, <b>S. Biswas</b>',venue:'<i>Engineering and Applied Science</i>, vol. 10, no. 2, pp. 11–17, Apr. 2025',doi:'10.11648/j.eas.20251002.11'},
+  {yr:2022,type:'conf',title:'Heat Transfer and Fluid Flow Analysis in a Corrugated Plate Heat Exchanger',
+   authors:'<b>S. Biswas</b>, M. I. Inam, P. C. Roy',venue:'Proc. ICMIEE-2022, Khulna · <i>SciEn Conf. Series: Engineering</i>, vol. 1, pp. 107–112, 2025',doi:'10.38032/scse.2025.1.20'}
+];
+
+/* Your AI-built apps & games. Replace the placeholders:
+   title, desc, emoji, tags, demo (live link), code (GitHub link), hue (thumbnail color 0-360) */
+const PROJECTS = [
+  {title:'Photon Catcher',desc:'A browser game about keeping a solar panel cool. It\'s playable below, and it runs on real PV efficiency physics.',emoji:'☀️',tags:['JavaScript','Canvas','Game'],demo:'#gameWrap',code:'',hue:30,badge:'PLAY BELOW'},
+  {title:'Your App #1',desc:'Replace with one line about what it does and who it helps.',emoji:'📱',tags:['AI-assisted','App'],demo:'',code:'',hue:200,badge:'COMING SOON'},
+  {title:'Your Game #2',desc:'Replace with your game: genre, hook, and what you built.',emoji:'🎮',tags:['AI-assisted','Game'],demo:'',code:'',hue:280,badge:'COMING SOON'}
+];
+
+/* ================= helpers ================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+async function copy(txt,msg){try{await navigator.clipboard.writeText(txt);toast(msg||'Copied!')}catch(e){toast('Copy failed: select it manually')}}
+$('#yr').textContent=new Date().getFullYear();
+
+/* ================= nav, progress, glow ================= */
+addEventListener('scroll',()=>{
+  const h=document.documentElement; $('#progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+  $('#nav').classList.toggle('scrolled',scrollY>40);
+  let cur=''; $$('section').forEach(s=>{if(scrollY>=s.offsetTop-200)cur=s.id});
+  $$('.links a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+},{passive:true});
+$('#menuBtn').onclick=()=>$('#links').classList.toggle('open');
+$$('.links a').forEach(a=>a.onclick=()=>$('#links').classList.remove('open'));
+addEventListener('pointermove',e=>{const g=$('#glow');g.style.left=e.clientX+'px';g.style.top=e.clientY+'px'});
+
+/* ================= reveal + counters ================= */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+$$('.rv').forEach(el=>io.observe(el));
+$$('[data-count]').forEach(el=>{const n=+el.dataset.count;let i=0;const st=setInterval(()=>{el.textContent=++i;if(i>=n)clearInterval(st)},260)});
+
+/* ================= typewriter ================= */
+(()=>{const roles=['photovoltaics researcher.','CFD & heat-transfer engineer.','future PhD candidate.','builder of AI-assisted apps & games.'];
+let r=0,c=0,del=false;const el=$('#typed');
+(function tick(){const w=roles[r];el.textContent=w.slice(0,c);
+ if(!del&&c<w.length)c++;else if(!del){del=true;return setTimeout(tick,1600)}else if(c>0)c--;else{del=false;r=(r+1)%roles.length}
+ setTimeout(tick,del?35:65)})();})();
+
+/* ================= hero flow field ================= */
+(()=>{const cv=$('#flow'),x=cv.getContext('2d');let W,H,dpr,P=[],t=0;const m={x:-999,y:-999};
+function size(){dpr=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;x.setTransform(dpr,0,0,dpr,0,0);
+ x.fillStyle='#07090f';x.fillRect(0,0,W,H);const n=Math.min(1100,Math.floor(W*H/1400));P=Array.from({length:n},spawn)}
+function spawn(){return{x:Math.random()*W,y:Math.random()*H,l:60+Math.random()*160}}
+cv.parentElement.addEventListener('pointermove',e=>{const b=cv.getBoundingClientRect();m.x=e.clientX-b.left;m.y=e.clientY-b.top});
+cv.parentElement.addEventListener('pointerleave',()=>{m.x=m.y=-999});
+function frame(){t+=.004;x.fillStyle='rgba(7,9,15,0.075)';x.fillRect(0,0,W,H);x.lineWidth=1.1;
+ for(const p of P){const a=Math.sin(p.x*.0024+t)*Math.cos(p.y*.0031-t*.7)*Math.PI*1.6;
+  let vx=Math.cos(a)+.55,vy=Math.sin(a);const dx=p.x-m.x,dy=p.y-m.y,d=Math.hypot(dx,dy);
+  if(d<200){const f=(1-d/200)*3.2;vx+=-dy/d*f+dx/d*f*.25;vy+=dx/d*f+dy/d*f*.25}
+  const nx=p.x+vx*1.5,ny=p.y+vy*1.5,hue=30+(p.x/W)*165,sp=Math.min(1,Math.hypot(vx,vy)/3);
+  x.strokeStyle=`hsla(${hue},95%,${55+sp*15}%,${.35+sp*.45})`;x.beginPath();x.moveTo(p.x,p.y);x.lineTo(nx,ny);x.stroke();
+  p.x=nx;p.y=ny;if(--p.l<0||p.x<0||p.x>W||p.y<0||p.y>H)Object.assign(p,spawn(),Math.random()<.6?{x:Math.random()*W*.15}:{})}
+ requestAnimationFrame(frame)}
+addEventListener('resize',size);size();if(!reduce)frame();})();
+
+/* ================= card spotlight + tilt ================= */
+document.addEventListener('pointermove',e=>{const c=e.target.closest('.card');if(!c)return;const b=c.getBoundingClientRect();
+ c.style.setProperty('--mx',(e.clientX-b.left)+'px');c.style.setProperty('--my',(e.clientY-b.top)+'px');
+ if(c.classList.contains('rcard')&&!reduce){const rx=((e.clientY-b.top)/b.height-.5)*-8,ry=((e.clientX-b.left)/b.width-.5)*8;c.style.transform=`perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`}});
+$$('.rcard').forEach(c=>c.addEventListener('pointerleave',()=>c.style.transform=''));
+
+/* ================= PV physics (shared by lab + game) ================= */
+const ETA_REF=21, BETA=0.004;
+const eff=T=>Math.max(0,ETA_REF*(1-BETA*(T-25)));
+function heatColor(T){const k=Math.max(0,Math.min(1,(T-15)/70));const hue=200-k*200;return `hsl(${hue},90%,${40+k*15}%)`}
+
+/* ================= interactive lab ================= */
+(()=>{const pv=$('#pv');const cells=[];for(let i=0;i<60;i++){const d=document.createElement('div');d.dataset.n=Math.random();pv.appendChild(d);cells.push(d)}
+function upd(){const G=+$('#G').value,Ta=+$('#Ta').value,v=+$('#V').value,h=+$('#H').value;
+ $('#vG').textContent=G+' W/m²';$('#vTa').textContent=Ta+' °C';$('#vV').textContent=v+' m/s';$('#vH').textContent=h+' W/m²K';
+ const Tc=Ta+G/(25+6.84*v+h),e=eff(Tc),P=e/100*G*2,loss=(1-e/ETA_REF)*100;
+ $('#oT').textContent=Tc.toFixed(1)+'°C';$('#oT').style.color=heatColor(Tc);
+ $('#oE').textContent=e.toFixed(1)+'%';$('#oP').textContent=Math.round(P)+' W';
+ $('#oLoss').innerHTML=loss>0.5?`🔥 Heat is costing <b style="color:var(--hot)">${loss.toFixed(1)}%</b> of rated efficiency.`:`❄️ The cell is near or below 25 °C, so there's no thermal loss.`;
+ $('#oBar').style.width=(e/ETA_REF*100)+'%';
+ cells.forEach((c,i)=>{const edge=(i%10===0||i%10===9||i<10||i>=50)?-2:2;c.style.background=heatColor(Tc+edge+(c.dataset.n-.5)*3)})}
+$$('#lab input').forEach(i=>i.addEventListener('input',upd));upd();})();
+
+/* ================= publications ================= */
+(()=>{$('#pubs').innerHTML=PUBS.map((p,i)=>`<div class="card pub rv" data-t="${p.type}">
+  <div class="yr">${p.yr}</div>
+  <div><h3>${p.title}</h3><p>${p.authors}</p><p>${p.venue}</p><span class="tag">${p.type==='journal'?'Journal article':'Conference paper'}</span></div>
+  <div class="acts"><a class="mini" href="https://doi.org/${p.doi}" target="_blank" rel="noopener">DOI ↗</a><button class="mini" data-cite="${i}">Cite ⧉</button></div></div>`).join('');
+ $$('#pubs .rv').forEach(el=>io.observe(el));
+ $$('[data-cite]').forEach(b=>b.onclick=()=>{const p=PUBS[b.dataset.cite];copy(`${p.authors.replace(/<[^>]+>/g,'')}, "${p.title}," ${p.venue.replace(/<[^>]+>/g,'')}. doi:${p.doi}`,'Citation copied')});
+ $$('.chip').forEach(c=>c.onclick=()=>{$$('.chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');
+  $$('.pub').forEach(p=>p.classList.toggle('hide',c.dataset.f!=='all'&&p.dataset.t!==c.dataset.f))});
+ $('#mail').onclick=()=>copy('sukantojessore@gmail.com','Email copied')})();
+
+/* ================= projects ================= */
+$('#pgrid').innerHTML=PROJECTS.map(p=>`<div class="card proj rv">
+  <div class="thumb" style="background:radial-gradient(circle at 30% 30%,hsl(${p.hue} 90% 60% / .55),transparent 60%),linear-gradient(135deg,hsl(${p.hue} 60% 18%),#05070c)">${p.emoji}${p.badge?`<span class="badge">${p.badge}</span>`:''}</div>
+  <h3>${p.title}</h3><p>${p.desc}</p><div>${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+  <div class="row">${p.demo?`<a class="mini" href="${p.demo}" ${p.demo.startsWith('#')?'':'target="_blank" rel="noopener"'}>Live demo ↗</a>`:''}${p.code?`<a class="mini" href="${p.code}" target="_blank" rel="noopener">Code ↗</a>`:''}</div></div>`).join('');
+$$('#pgrid .rv').forEach(el=>io.observe(el));
+
+/* ================= Photon Catcher game ================= */
+(()=>{const cv=$('#game'),x=cv.getContext('2d');let W,H,dpr,run=false,items=[],px,T,E,spawnT,last,keys={},best=0,parts=[];
+try{best=+localStorage.getItem('pc_best')||0}catch(e){}$('#gBest').textContent=best;
+function size(){dpr=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;x.setTransform(dpr,0,0,dpr,0,0);if(!run)draw()}
+addEventListener('resize',size);
+const PW=()=>Math.max(80,W*.14);
+function reset(){px=W/2;T=25;E=0;items=[];parts=[];spawnT=0;last=performance.now()}
+function move(e){const b=cv.getBoundingClientRect();px=Math.max(PW()/2,Math.min(W-PW()/2,e.clientX-b.left))}
+cv.addEventListener('pointermove',move);cv.addEventListener('pointerdown',move);
+addEventListener('keydown',e=>{if(run&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){keys[e.key]=1;e.preventDefault()}});
+addEventListener('keyup',e=>keys[e.key]=0);
+function spawn(lvl){const r=Math.random(),k=r<.62?'p':r<.82?'h':'c';items.push({k,x:20+Math.random()*(W-40),y:-10,v:(120+Math.random()*80)*(1+lvl*.08),r:k==='h'?11:8})}
+function burst(x0,y0,col){for(let i=0;i<10;i++)parts.push({x:x0,y:y0,vx:(Math.random()-.5)*220,vy:-Math.random()*200,l:.5,c:col})}
+function step(now){if(!run)return;const dt=Math.min(.05,(now-last)/1000);last=now;const lvl=E/400;
+ if(keys.ArrowLeft)px-=520*dt;if(keys.ArrowRight)px+=520*dt;px=Math.max(PW()/2,Math.min(W-PW()/2,px));
+ spawnT-=dt;if(spawnT<=0){spawn(lvl);spawnT=Math.max(.18,.55-lvl*.04)}
+ T=Math.max(25,T+(dt*(0.9+lvl*.15))-(T>25?dt*.35:0));
+ const py=H-34,pw=PW();
+ for(const it of items){it.y+=it.v*dt;if(it.y>py-8&&it.y<py+14&&Math.abs(it.x-px)<pw/2+it.r){it.dead=1;
+   if(it.k==='p'){E+=Math.round(10*eff(T)/ETA_REF*10)/10;burst(it.x,py,'#ffc94a')}
+   if(it.k==='h'){T+=9;burst(it.x,py,'#ff4d4d')}
+   if(it.k==='c'){T=Math.max(25,T-8);burst(it.x,py,'#3ddcff')}}
+  if(it.y>H+20)it.dead=1}
+ items=items.filter(i=>!i.dead);
+ for(const p of parts){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=500*dt;p.l-=dt}parts=parts.filter(p=>p.l>0);
+ $('#gE').textContent=Math.floor(E);$('#gT').textContent=T.toFixed(0)+'°';$('#gT').style.color=heatColor(T);$('#gEff').textContent=eff(T).toFixed(1)+'%';
+ draw();if(T>=85)return over();requestAnimationFrame(step)}
+function draw(){x.clearRect(0,0,W,H);const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0b1430');g.addColorStop(1,'#05070c');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.fillStyle='#ffc94a';x.shadowColor='#ffc94a';x.shadowBlur=60;x.beginPath();x.arc(W-60,50,26,0,7);x.fill();x.shadowBlur=0;
+ for(const it of items){const col=it.k==='p'?'#ffc94a':it.k==='h'?'#ff4d4d':'#3ddcff';x.fillStyle=col;x.shadowColor=col;x.shadowBlur=18;x.beginPath();
+  if(it.k==='c'){x.moveTo(it.x,it.y-it.r);x.lineTo(it.x+it.r*.8,it.y+it.r*.6);x.lineTo(it.x-it.r*.8,it.y+it.r*.6);x.closePath()}else x.arc(it.x,it.y,it.r,0,7);x.fill()}
+ x.shadowBlur=0;for(const p of parts){x.globalAlpha=p.l*2;x.fillStyle=p.c;x.fillRect(p.x,p.y,3,3)}x.globalAlpha=1;
+ if(px===undefined)return;const pw=PW(),py=H-34;x.save();x.translate(px,py);
+ x.fillStyle=heatColor(T||25);x.shadowColor=heatColor(T||25);x.shadowBlur=25;x.fillRect(-pw/2,0,pw,14);x.shadowBlur=0;
+ x.strokeStyle='#ffffff55';for(let i=1;i<6;i++){x.beginPath();x.moveTo(-pw/2+pw*i/6,0);x.lineTo(-pw/2+pw*i/6,14);x.stroke()}
+ x.fillStyle='#8b97ad';x.fillRect(-3,14,6,20);x.restore();
+ x.fillStyle='#ffffff15';x.fillRect(12,12,120,8);x.fillStyle=heatColor(T||25);x.fillRect(12,12,120*Math.min(1,((T||25)-25)/60),8);
+ x.fillStyle='#8b97ad';x.font='11px JetBrains Mono';x.fillText('HEAT → 85°C',12,34)}
+function over(){run=false;const s=Math.floor(E);if(s>best){best=s;try{localStorage.setItem('pc_best',best)}catch(e){}$('#gBest').textContent=best}
+ $('#overlay').innerHTML=`<div><h3 class="grad-text">Overheated at 85 °C!</h3><p>You harvested <b style="color:var(--sun)">${s} J</b>. Best: ${best} J.<br>Grab more coolant to keep efficiency high.</p><button class="btn primary" id="startBtn">↻ Play again</button></div>`;
+ $('#overlay').style.display='grid';$('#startBtn').onclick=start}
+function start(){$('#overlay').style.display='none';reset();run=true;requestAnimationFrame(step)}
+$('#startBtn').onclick=start;size();reset();draw();})();
+</script>
+</body>
+</html>
