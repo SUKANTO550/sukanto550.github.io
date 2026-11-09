@@ -159,6 +159,7 @@ function del() {
 }
 
 function ac() {
+  S.histView = false;
   newExpr();
   S.done = false;
   S.error = S.note = S.fact = null;
@@ -184,6 +185,7 @@ function undo() {
 
 function move(d) {
   S.note = S.fact = null;
+  S.histView = false; // ◀ ▶ while viewing history: edit that entry
   if (S.done || S.error) {
     S.done = false;
     S.error = null;
@@ -192,16 +194,53 @@ function move(d) {
   }
   if (d > 0) moveRight(); else moveLeft();
 }
+// ▲ ▼: open history only from an empty screen (after AC / ON); while viewing history they
+// step through it; while editing they only move the cursor (slots, then wrapped rows)
 function vert(d) {
-  if (!S.done && !S.error && moveVert(d)) return;
-  hist(d);
+  if (S.histView) { hist(d); return; }
+  if (S.error || S.done) return;
+  if (!S.root.items.length) {
+    if (!S.history.length) return;
+    S.histView = true;
+    S.hIdx = d < 0 ? S.history.length - 1 : 0; // ▲ = latest, ▼ = oldest
+    showHist();
+    return;
+  }
+  if (!moveVert(d)) moveLine(d);
 }
 function hist(d) {
   if (!S.history.length) return;
   S.hIdx = Math.max(0, Math.min(S.history.length - 1, S.hIdx + d));
+  showHist();
+}
+function showHist() {
   S.root = cloneRow(S.history[S.hIdx]);
   S.cur = { row: S.root, idx: S.root.items.length };
   equals(false);
+}
+// cursor to the previous / next wrapped row of the expression, nearest horizontal position
+function moveLine(d) {
+  if (S.cur.row !== S.root) return;
+  const cur = input.querySelector('.cursor');
+  const expr = input.firstElementChild;
+  if (!cur || !expr) return;
+  const c = cur.getBoundingClientRect(), x = c.left;
+  const els = [...expr.children].filter((e) => e !== cur);
+  if (els.length !== S.root.items.length) return; // one element per item, otherwise give up
+  const mid = (r) => (r.top + r.bottom) / 2;
+  const rects = els.map((e) => e.getBoundingClientRect());
+  const side = rects.map((r, i) => ({ i, r, m: mid(r) })).filter((o) => (d < 0 ? o.m < c.top : o.m > c.bottom));
+  if (!side.length) return;
+  const lineMid = d < 0 ? Math.max(...side.map((o) => o.m)) : Math.min(...side.map((o) => o.m));
+  const tol = c.height * 0.6;
+  let best = null, bestD = Infinity;
+  side.filter((o) => Math.abs(o.m - lineMid) <= tol).forEach((o) => {
+    [[o.i, o.r.left], [o.i + 1, o.r.right]].forEach(([idx, px]) => {
+      const dist = Math.abs(px - x);
+      if (dist < bestD) { bestD = dist; best = idx; }
+    });
+  });
+  if (best !== null) S.cur = { row: S.root, idx: best };
 }
 
 function storeTo(name) {
@@ -228,7 +267,7 @@ function factCmd() {
 }
 function resetAll() {
   ac();
-  S.ans = 0; S.mem = 0; S.history = []; S.hIdx = 0; S.undo = [];
+  S.ans = 0; S.mem = 0; S.history = []; S.hIdx = 0; S.histView = false; S.undo = [];
   Object.keys(S.vars).forEach((k) => (S.vars[k] = 0));
   S.cfg = DEFAULT_CFG();
   S.note = 'Reset All';
@@ -498,6 +537,7 @@ function press(key) {
   }
   if (key.mod) { key.mod(); render(); return; }
 
+  if (key.id !== 'up' && key.id !== 'down') S.histView = false;
   const shifted = S.shift;
   const layer = S.shift ? key.s : S.alpha ? key.a : null;
   const wasSto = S.sto;
@@ -590,7 +630,7 @@ function itemHTML(it, ed) {
     case 'pow': return `<span class="nd-sup">${R('exp')}</span>`;
     case 'pow10': return `<span class="nw">10<span class="nd-sup">${R('exp')}</span></span>`;
     case 'exp': return `<span class="nw"><i>e</i><span class="nd-sup">${R('exp')}</span></span>`;
-    case 'logab': return `<span class="nw">log<span class="nd-sub">${R('base')}</span></span>${PAR(R('arg'))}`;
+    case 'logab': return `<span class="nw">log<span class="nd-sub">${R('base')}</span>${PAR(R('arg'))}</span>`;
     case 'abs': return `<span class="nd-abs">${R('arg')}</span>`;
     // integrand sits inside the template so the ∫ sign and its limits stretch with it
     case 'integ':
@@ -653,8 +693,9 @@ function render() {
   ind('STO', S.sto);
   ind('MATH', S.cfg.io === 'MathO' || S.cfg.io === 'DecO');
   ind('DISP', !!(S.multi && S.done && S.screen === 'calc'));
-  ind('HIST', S.screen === 'calc' && S.history.length > 0,
-    `${S.hIdx > 0 ? '▲' : ''}${S.hIdx < S.history.length - 1 ? '▼' : ''}`);
+  const histEmpty = !S.done && !S.error && !S.root.items.length;
+  ind('HIST', S.screen === 'calc' && S.history.length > 0 && (S.histView || histEmpty),
+    S.histView ? `${S.hIdx > 0 ? '▲' : ''}${S.hIdx < S.history.length - 1 ? '▼' : ''}` : '▲▼');
   ind('FMT', S.cfg.fmt.type !== 'Norm', S.cfg.fmt.type.toUpperCase());
   ind('E', S.cfg.engSym);
   $('#ind-angle').textContent = S.cfg.angle;

@@ -293,14 +293,22 @@ function moveLeft() {
   } else S.cur = { row: pr, idx: pr.items.indexOf(node) };
 }
 // up/down between numerator and denominator; returns false if not inside a fraction
+// [slot reached with ▲, slot reached with ▼] for each template slot
+const VERT_SLOTS = {
+  frac: { num: [null, 'den'], den: ['num', null] },
+  mixed: { whole: [null, 'den'], num: [null, 'den'], den: ['num', null] },
+  integ: { f: ['hi', 'lo'], hi: [null, 'f'], lo: ['f', null] },
+  sigma: { f: ['hi', 'lo'], hi: [null, 'f'], lo: ['f', null] },
+  deriv: { f: [null, 'at'], at: ['f', null] },
+  root: { idx: [null, 'arg'], arg: ['idx', null] },
+  logab: { base: ['arg', null], arg: [null, 'base'] },
+};
 function moveVert(d) {
   let row = S.cur.row;
   while (row.up) {
     const { node, slot, row: pr } = row.up;
-    if (node.kind === 'frac' || node.kind === 'mixed') {
-      const target = d > 0 && slot !== 'den' ? node.slots.den : d < 0 && slot === 'den' ? node.slots.num : null;
-      if (target) { S.cur = { row: target, idx: target.items.length }; return true; }
-    }
+    const to = VERT_SLOTS[node.kind] && VERT_SLOTS[node.kind][slot] && VERT_SLOTS[node.kind][slot][d < 0 ? 0 : 1];
+    if (to) { const target = node.slots[to]; S.cur = { row: target, idx: target.items.length }; return true; }
     row = pr;
   }
   return false;

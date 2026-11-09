@@ -70,6 +70,8 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
 .stat small{color:var(--muted);font-size:.8rem}
 
 /* cards */
+.proj[data-href]{cursor:pointer}
+.proj[data-href]:focus-visible{outline:2px solid #ff8a3d;outline-offset:3px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px;position:relative;overflow:hidden;transition:border-color .3s,transform .25s}
 .card:before{content:"";position:absolute;inset:0;background:radial-gradient(500px circle at var(--mx,50%) var(--my,50%),#ff8a3d1c,transparent 40%);opacity:0;transition:.3s;pointer-events:none}
 .card:hover:before{opacity:1}
@@ -498,11 +500,15 @@ $$('#lab input').forEach(i=>i.addEventListener('input',upd));upd();})();
  $('#mail').onclick=()=>copy('sukantojessore@gmail.com','Email copied')})();
 
 /* ================= projects ================= */
-$('#pgrid').innerHTML=PROJECTS.map(p=>`<div class="card proj rv">
+$('#pgrid').innerHTML=PROJECTS.map(p=>`<div class="card proj rv"${p.demo?` data-href="${p.demo}" role="link" tabindex="0" aria-label="Open ${p.title}"`:''}>
   <div class="thumb" style="background:radial-gradient(circle at 30% 30%,hsl(${p.hue} 90% 60% / .55),transparent 60%),linear-gradient(135deg,hsl(${p.hue} 60% 18%),#05070c)">${p.emoji}${p.badge?`<span class="badge">${p.badge}</span>`:''}</div>
   <h3>${p.title}</h3><p>${p.desc}</p><div>${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
   <div class="row">${p.demo?`<a class="mini" href="${p.demo}" ${p.demo.startsWith('#')?'':'target="_blank" rel="noopener"'}>Live demo ↗</a>`:''}${p.code?`<a class="mini" href="${p.code}" target="_blank" rel="noopener">Code ↗</a>`:''}</div></div>`).join('');
 $$('#pgrid .rv').forEach(el=>io.observe(el));
+/* whole project card opens its demo (buttons inside keep their own links) */
+function openCard(c){const h=c.dataset.href;if(!h)return;if(h.startsWith('#')){const t=$(h);if(t)t.scrollIntoView({behavior:'smooth'})}else window.open(h,'_blank','noopener')}
+$('#pgrid').addEventListener('click',e=>{if(e.target.closest('a'))return;const c=e.target.closest('.proj[data-href]');if(c)openCard(c)});
+$('#pgrid').addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const c=e.target.closest('.proj[data-href]');if(c&&e.target===c){e.preventDefault();openCard(c)}});
 
 /* ================= Photon Catcher game ================= */
 (()=>{const cv=$('#game'),x=cv.getContext('2d');let W,H,dpr,run=false,items=[],px,T,E,spawnT,last,keys={},best=0,parts=[];

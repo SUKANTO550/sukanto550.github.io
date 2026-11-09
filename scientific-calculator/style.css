@@ -921,3 +921,10 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .calc.screen-panel .panel[data-screen="menu"] { display: flex; flex-direction: column; justify-content: center; }
 .panel[data-screen="menu"] .mi { height: calc(98 * var(--s)); }
 .panel[data-screen="menu"] .menu-label { margin-top: calc(12 * var(--s)); }
+
+/* body labels a bit smaller so every label stays inside the gap above its key */
+.labels { font-size: calc(22 * var(--s)); gap: calc(8 * var(--s)); letter-spacing: 0; }
+.k-menu .labels { gap: calc(6 * var(--s)); font-size: calc(20.5 * var(--s)); letter-spacing: 0; }
+.k-calc .labels, .k-pow .labels, .k-dms .labels { gap: calc(4 * var(--s)); }
+.k-pow .labels .s, .k-dms .labels .s { font-size: .92em; }
+.labels .sig { font-size: 1em; }

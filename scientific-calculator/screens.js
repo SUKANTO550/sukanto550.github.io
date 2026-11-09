@@ -183,7 +183,10 @@ function constMenu() {
 }
 function confirmScreen(name, fn, back = 'calc') { S.msg = { name, back, confirm: fn }; S.screen = 'msg'; }
 function resetMenu() {
-  const memory = () => { S.ans = 0; S.mem = 0; Object.keys(S.vars).forEach((v) => (S.vars[v] = 0)); };
+  const memory = () => {
+    S.ans = 0; S.mem = 0; Object.keys(S.vars).forEach((v) => (S.vars[v] = 0));
+    S.history = []; S.hIdx = 0; S.histView = false; // history is only deleted by a memory reset
+  };
   const setup = () => { const c = S.cfg.contrast; S.cfg = DEFAULT_CFG(); S.cfg.contrast = c; };
   openList([
     { label: 'Setup Data', act: () => confirmScreen('Reset Setup Data?', () => { setup(); S.screen = 'calc'; }) },
