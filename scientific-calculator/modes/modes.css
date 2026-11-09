@@ -1,0 +1,2 @@
+/* shared styles for extra modes (each mode appends its own section) */
+.ind.app.on { border: none !important; padding: 0 !important; font-style: italic; }

@@ -1,0 +1,923 @@
+/* All sizes are measured from the reference photo (body = 845 x 1870 px)
+   and multiplied by --s, so proportions stay identical at any screen size. */
+:root {
+  --s: var(--sb);
+  --sb: max(0.3px, min(0.56px, calc((100vw - 32px) / 845), calc((100vh - 32px) / 1870)));
+
+  --body-1: #aebdd2;
+  --body-2: #95a7c0;
+  --body-edge: #7a8ca6;
+  --fn-1: #c2cedf;
+  --fn-2: #a2b2c8;
+  --fn-shadow: #6e7f97;
+  --fn-text: #2c3a4e;
+  --num-1: #8798b1;
+  --num-2: #6e809b;
+  --num-shadow: #515f75;
+  --tan-1: #ecd0b8;
+  --tan-2: #d8b091;
+  --tan-shadow: #a5826b;
+  --shift: #e8b646;
+  --alpha: #b8233a;
+  --lcd-1: #dfe7dc;
+  --lcd-2: #cad4c7;
+  --lcd-ink: #1b221d;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 16px;
+  background: radial-gradient(circle at 30% 20%, #3a4256, #171a22 70%);
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---------- Body shell (845 x 1870) ---------- */
+.calc {
+  flex: none;
+  width: calc(845 * var(--s));
+  height: calc(1870 * var(--s));
+  padding: 0 calc(52 * var(--s));
+  border-radius: calc(80 * var(--s)) calc(80 * var(--s)) calc(110 * var(--s)) calc(110 * var(--s));
+  border: calc(5 * var(--s)) solid var(--body-edge);
+  background:
+    repeating-linear-gradient(60deg, rgba(255,255,255,.035) 0 2px, transparent 2px 9px),
+    repeating-linear-gradient(-60deg, rgba(0,0,0,.035) 0 2px, transparent 2px 9px),
+    linear-gradient(170deg, var(--body-1), var(--body-2));
+  box-shadow:
+    0 30px 60px rgba(0,0,0,.55),
+    inset 0 2px 0 rgba(255,255,255,.55),
+    inset 0 -6px 12px rgba(0,0,0,.18);
+}
+
+/* ---------- Header: brand + solar panel ---------- */
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  height: calc(165 * var(--s));
+  margin-top: calc(88 * var(--s));
+}
+.brand { padding-left: calc(46 * var(--s)); color: #fff; }
+.brand-name {
+  font-weight: 800;
+  font-size: calc(38 * var(--s));
+  line-height: 1;
+  margin-top: calc(18 * var(--s));
+  letter-spacing: calc(2 * var(--s));
+}
+.brand-model { font-size: calc(26 * var(--s)); font-weight: 500; margin: calc(34 * var(--s)) 0 0 calc(24 * var(--s)); line-height: 1; }
+.brand-line { font-size: calc(24 * var(--s)); letter-spacing: calc(1 * var(--s)); white-space: nowrap; margin-top: calc(14 * var(--s)); line-height: 1; }
+
+.solar {
+  width: calc(380 * var(--s));
+  height: calc(165 * var(--s));
+  margin-right: calc(43 * var(--s));
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: calc(3 * var(--s));
+  padding: calc(6 * var(--s));
+  border-radius: calc(18 * var(--s));
+  background: #1e1719;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.4);
+}
+.solar span { background: linear-gradient(160deg, #35282b, #21171a); border-radius: calc(5 * var(--s)); }
+
+/* ---------- Display (frame 745 x 330, screen 690 x 275) ---------- */
+.lcd-frame {
+  height: calc(330 * var(--s));
+  margin: calc(25 * var(--s)) 0 0;
+  padding: calc(22 * var(--s)) calc(26 * var(--s)) calc(34 * var(--s));
+  border-radius: calc(26 * var(--s));
+  background: linear-gradient(#8597b1, #9badc4);
+  box-shadow: inset 0 3px 8px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.5);
+}
+.lcd {
+  height: 100%;
+  padding: calc(8 * var(--s)) calc(22 * var(--s)) calc(14 * var(--s));
+  border-radius: calc(6 * var(--s));
+  background: linear-gradient(170deg, var(--lcd-1), var(--lcd-2));
+  box-shadow: inset 0 3px 6px rgba(0,0,0,.35);
+  color: var(--lcd-ink);
+  font-family: "Share Tech Mono", monospace;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.calc.off .lcd > * { visibility: hidden; }
+.calc.off .lcd { background: linear-gradient(170deg, #c7cfc4, #b6c0b3); }
+
+.indicators {
+  display: flex;
+  gap: calc(16 * var(--s));
+  height: calc(28 * var(--s));
+  font-size: calc(22 * var(--s));
+  line-height: calc(26 * var(--s));
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+}
+.ind { opacity: 0; }
+.ind.on { opacity: 1; }
+.ind.angle { margin-left: auto; padding: 0 calc(7 * var(--s)); background: var(--lcd-ink); color: var(--lcd-1); border-radius: 2px; }
+.ind.on:not(.angle) { padding: 0 calc(5 * var(--s)); border: 1px solid var(--lcd-ink); border-radius: 2px; }
+
+.input-line {
+  position: relative;
+  height: calc(70 * var(--s));
+  font-size: calc(46 * var(--s));
+  line-height: calc(70 * var(--s));
+  white-space: nowrap;
+  overflow: hidden;
+}
+.input-line .tk.var { font-style: italic; }
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin: 0 1px;
+  vertical-align: -.15em;
+  background: var(--lcd-ink);
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.result-line {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  font-size: calc(72 * var(--s));
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.result-line sup { font-size: .55em; vertical-align: .8em; }
+.result-line .err { font-size: .7em; }
+.fr { display: inline-flex; flex-direction: column; align-items: center; font-size: .65em; line-height: 1.05; }
+.fr .n { border-bottom: 2px solid var(--lcd-ink); padding: 0 .15em; }
+.fr .d { padding: 0 .15em; }
+
+/* ---------- Generic key + labels ---------- */
+.key { display: flex; flex-direction: column; align-items: stretch; min-width: 0; }
+.labels {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: calc(14 * var(--s));
+  height: calc(32 * var(--s));
+  padding-bottom: calc(4 * var(--s));
+  font-size: calc(21 * var(--s));
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+.labels .s { color: var(--shift); }
+.labels .a { color: var(--alpha); }
+.labels .w { color: #fff; }
+.labels sup { font-size: .7em; }
+
+button {
+  font-family: "Inter", sans-serif;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: transform .05s, box-shadow .05s, filter .1s;
+}
+button:active, button.flash { transform: translateY(2px); }
+button:hover { filter: brightness(1.04); }
+
+/* ---------- Top controls ---------- */
+.top-controls {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: calc(158 * var(--s)) calc(92 * var(--s));
+  grid-template-areas:
+    "shift alpha pad pad menu on"
+    "optn  calc  pad pad integ xvar";
+  column-gap: calc(21 * var(--s));
+  margin-top: calc(65 * var(--s));
+}
+.top-controls .key:has(.round) { align-items: center; }
+.k-alpha { transform: translateX(calc(-17 * var(--s))); }
+.k-menu { transform: translateX(calc(15 * var(--s))); }
+
+.round {
+  width: calc(76 * var(--s));
+  height: calc(76 * var(--s));
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #8494ab, #5f6f87);
+  box-shadow: 0 3px 0 #46546a, 0 5px 8px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);
+}
+.round:active, .round.flash, .round.active { box-shadow: 0 1px 0 #46546a, inset 0 2px 4px rgba(0,0,0,.35); }
+.round.active { background: radial-gradient(circle at 40% 35%, #a1aec2, #77879f); }
+
+/* D-pad: 290 x 193 rounded rhombus, SVG buttons traced from photo */
+.dpad {
+  grid-area: pad;
+  align-self: start;
+  justify-self: center;
+  width: calc(290 * var(--s));
+  height: calc(193 * var(--s));
+  margin-top: calc(30 * var(--s));
+  filter: drop-shadow(0 4px 6px rgba(20,28,40,.35)) drop-shadow(0 -1px 0 rgba(255,255,255,.45));
+}
+.dpad svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.pad-btn { cursor: pointer; }
+.pad-btn path { stroke-width: 6; stroke-linejoin: round; }
+.pad-btn .side { fill: #46526a; stroke: #46526a; }
+.pad-btn .face { transition: transform .06s; }
+.pad-btn:hover .face { opacity: .96; }
+/* pressed: top face sinks onto its side wall */
+.pad-btn:active .face, .pad-btn.flash .face { transform: translateY(7px); }
+/* ---------- Function keys (106 x 62, row pitch 104) ---------- */
+.fn-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  column-gap: calc(21 * var(--s));
+  row-gap: calc(10 * var(--s));
+  margin-top: calc(8 * var(--s));
+}
+.fn-btn {
+  height: calc(62 * var(--s));
+  border-radius: calc(18 * var(--s)) calc(18 * var(--s)) calc(22 * var(--s)) calc(22 * var(--s));
+  background: linear-gradient(var(--fn-1), var(--fn-2));
+  color: var(--fn-text);
+  font-size: calc(32 * var(--s));
+  font-weight: 700;
+  box-shadow: 0 calc(5 * var(--s)) 0 var(--fn-shadow), 0 calc(8 * var(--s)) calc(10 * var(--s)) rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.6);
+  white-space: nowrap;
+}
+.top-controls .fn-btn { height: calc(60 * var(--s)); }
+.fn-btn:active, .fn-btn.flash { box-shadow: 0 1px 0 var(--fn-shadow), inset 0 1px 3px rgba(0,0,0,.2); }
+.fn-btn i, .num-btn i { font-family: "Times New Roman", serif; font-size: 1.2em; font-weight: 700; }
+.fn-btn sup { font-size: .6em; }
+.fn-btn.wide { font-size: calc(28 * var(--s)); }
+
+.frac-ic { display: inline-flex; flex-direction: column; align-items: center; gap: calc(4 * var(--s)); vertical-align: middle; }
+.frac-ic b { width: calc(20 * var(--s)); height: calc(14 * var(--s)); border: calc(3 * var(--s)) solid var(--fn-text); }
+.frac-ic b:first-child { background: var(--fn-text); }
+.frac-ic hr { width: calc(32 * var(--s)); border: none; border-top: calc(3 * var(--s)) solid var(--fn-text); }
+
+/* ---------- Number keys (130 x 85, row pitch 125) ---------- */
+.num-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  column-gap: calc(22 * var(--s));
+  row-gap: calc(8 * var(--s));
+  margin-top: calc(18 * var(--s));
+}
+.num-grid .labels { height: calc(32 * var(--s)); }
+.num-btn {
+  height: calc(85 * var(--s));
+  border-radius: calc(20 * var(--s)) calc(20 * var(--s)) calc(26 * var(--s)) calc(26 * var(--s));
+  background: linear-gradient(var(--num-1), var(--num-2));
+  color: #fff;
+  font-size: calc(54 * var(--s));
+  font-weight: 500;
+  box-shadow: 0 calc(6 * var(--s)) 0 var(--num-shadow), 0 calc(10 * var(--s)) calc(12 * var(--s)) rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35);
+  text-shadow: 0 1px 0 rgba(0,0,0,.2);
+}
+.num-btn:active, .num-btn.flash { box-shadow: 0 1px 0 var(--num-shadow), inset 0 2px 4px rgba(0,0,0,.3); }
+.num-btn.tan {
+  background: linear-gradient(var(--tan-1), var(--tan-2));
+  color: #3b2b20;
+  text-shadow: none;
+  font-size: calc(48 * var(--s));
+  box-shadow: 0 calc(6 * var(--s)) 0 var(--tan-shadow), 0 calc(10 * var(--s)) calc(12 * var(--s)) rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.num-btn.tan:active, .num-btn.tan.flash { box-shadow: 0 1px 0 var(--tan-shadow), inset 0 2px 4px rgba(0,0,0,.25); }
+.num-btn.small { font-size: calc(42 * var(--s)); }
+.num-btn sup { font-size: .55em; }
+
+/* =========================================================
+   Key face typography (matched to reference photo)
+   ========================================================= */
+.fn-btn, .num-btn, .labels {
+  font-family: "Saira Semi Condensed", "Inter", sans-serif;
+}
+/* white lettering with a dark outline, like the printed keys */
+.fn-btn, .num-btn {
+  --ink: #4a566b;
+  color: #fff;
+  -webkit-text-stroke: calc(3 * var(--s)) var(--ink);
+  paint-order: stroke fill;
+  text-shadow: none;
+  font-weight: 600;
+  letter-spacing: calc(1 * var(--s));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.fn-btn { font-size: calc(36 * var(--s)); }
+.num-btn { font-size: calc(58 * var(--s)); font-weight: 500; --ink: #46536a; }
+.num-btn.small { font-size: calc(46 * var(--s)); }
+.num-btn.tan {
+  color: #3d3631;
+  -webkit-text-stroke: 0;
+  font-size: calc(52 * var(--s));
+  font-weight: 600;
+}
+.fn-btn i, .num-btn i, .labels i {
+  font-family: "Times New Roman", Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+}
+.fn-btn i { font-size: 1.25em; }
+.fn-btn sup, .num-btn sup { font-size: .55em; align-self: flex-start; margin-top: .1em; }
+.fn-btn sub { font-size: .55em; align-self: flex-end; margin-bottom: .05em; }
+
+/* template squares */
+.sq, .bx {
+  display: inline-block;
+  width: .5em;
+  height: .5em;
+  vertical-align: baseline;
+}
+.sq { background: currentColor; }
+.bx { border: .09em solid currentColor; }
+.fn-btn .sq, .fn-btn .bx { box-shadow: 0 0 0 calc(2 * var(--s)) var(--ink); }
+.fn-btn sup .sq { width: .75em; height: .75em; }
+.fn-btn .bx { width: .55em; height: .7em; margin-left: .08em; }
+.fn-btn sub .sq { width: .7em; height: .7em; }
+.labels .sq { width: .7em; height: .7em; margin-left: .1em; }
+.labels sup .sq { width: .9em; height: .9em; }
+.labels .bx { width: .7em; height: .8em; }
+
+/* radical with box */
+.rt { display: inline-flex; align-items: center; font-weight: 700; }
+.rt-in { display: inline-flex; align-items: center; height: 1em; border-top: .09em solid currentColor; padding: 0 .06em 0 .02em; margin-left: -.05em; }
+.fn-btn .rt-in { box-shadow: 0 calc(-2 * var(--s)) 0 var(--ink) inset 0; }
+.fn-btn .rt-in .sq { width: .55em; height: .55em; }
+
+/* fraction key icon */
+.frac-ic { display: inline-flex; flex-direction: column; align-items: center; gap: .1em; }
+.frac-ic b { width: .55em; height: .4em; border: .09em solid currentColor; background: transparent; }
+.frac-ic b:first-child { background: currentColor; }
+.frac-ic hr { width: .85em; border: none; border-top: .09em solid currentColor; }
+.fn-btn .frac-ic b, .fn-btn .frac-ic hr { box-shadow: 0 0 0 calc(2 * var(--s)) var(--ink); }
+.frac-ic.mini { font-size: .8em; gap: .05em; margin-left: .15em; vertical-align: middle; }
+
+/* integral key */
+.integ { display: inline-flex; align-items: center; font-family: "Times New Roman", serif; font-style: italic; font-size: 1.15em; }
+.integ .lim { display: inline-flex; flex-direction: column-reverse; justify-content: space-between; height: 1em; margin: 0 .08em; }
+.integ .lim .bx { width: .32em; height: .32em; border-width: .07em; }
+.integ .bar { display: inline-block; width: .9em; height: .4em; background: currentColor; box-shadow: 0 0 0 calc(2 * var(--s)) var(--ink); }
+
+/* number-key operators */
+.opr { font-family: "Inter", sans-serif; font-weight: 500; font-size: 1.05em; line-height: 1; }
+.dot { width: calc(16 * var(--s)); height: calc(16 * var(--s)); border-radius: 50%; background: #fff; box-shadow: 0 0 0 calc(3 * var(--s)) var(--ink); }
+.x10 { display: inline-flex; align-items: flex-start; }
+.x10 sup { margin-top: -.15em; }
+
+/* tiny stacked fractions in labels (d/dx, a b/c) */
+.tf { display: inline-flex; flex-direction: column; align-items: center; font-size: .62em; line-height: .95; vertical-align: middle; margin: 0 .05em; }
+.tf span:first-child { border-bottom: 1px solid currentColor; }
+
+/* label colours */
+.labels .b { color: #1f3d7a; letter-spacing: calc(1 * var(--s)); }
+.labels .nv { color: #1f3d7a; font-weight: 700; }
+.labels .hex {
+  display: inline-block;
+  padding: 0 calc(10 * var(--s)) 0 calc(10 * var(--s));
+  border: calc(3 * var(--s)) solid #1f3d7a;
+  border-bottom: none;
+  line-height: .95;
+}
+.labels .cpx {
+  display: inline-block;
+  padding: 0 calc(6 * var(--s));
+  border: calc(3 * var(--s)) solid #1f3d7a;
+  border-bottom: none;
+  color: #1f3d7a;
+  margin-right: calc(10 * var(--s));
+}
+.labels .dbl { display: inline-block; transform: scaleX(1.6); font-weight: 800; }
+.labels .sig { font-size: 1.1em; }
+.labels { letter-spacing: calc(.5 * var(--s)); }
+
+/* inline key face: keeps sup/sub on the text line */
+.face { display: inline-block; white-space: nowrap; line-height: 1; }
+.fn-btn sup, .num-btn sup { align-self: auto; margin: 0; font-size: .55em; vertical-align: .75em; line-height: 0; }
+.fn-btn sub { align-self: auto; margin: 0; font-size: .55em; vertical-align: -.25em; line-height: 0; }
+.fn-btn sup .sq { width: .8em; height: .8em; }
+.fn-btn sub .sq { width: .8em; height: .8em; }
+.fn-btn .bx { width: .42em; height: .58em; vertical-align: -.02em; }
+.fn-btn .rt-in .sq { width: .5em; height: .5em; }
+.integ .lim .bx { width: .26em; height: .26em; }
+.integ .bar { width: .65em; height: .32em; }
+.x10 { display: inline; }
+.x10 sup { vertical-align: .7em; }
+.opr, .dot { display: inline-block; vertical-align: middle; }
+
+/* =========================================================
+   3D body pass: light from upper-left, extruded shell & keys
+   ========================================================= */
+body { padding-bottom: calc(40px + 20 * var(--s)); }
+
+/* ---- shell: rim + visible thickness + sculpted face ---- */
+.calc {
+  position: relative;
+  border: none;
+  background:
+    radial-gradient(120% 60% at 22% 6%, rgba(255,255,255,.30), transparent 60%),
+    radial-gradient(90% 50% at 85% 100%, rgba(40,55,80,.18), transparent 70%),
+    repeating-linear-gradient(60deg, rgba(255,255,255,.035) 0 2px, transparent 2px 9px),
+    repeating-linear-gradient(-60deg, rgba(0,0,0,.035) 0 2px, transparent 2px 9px),
+    linear-gradient(165deg, #b6c4d8, #9cadc5 55%, #8d9fb9);
+  box-shadow:
+    inset 0 calc(5 * var(--s)) calc(3 * var(--s)) rgba(255,255,255,.65),
+    inset calc(5 * var(--s)) 0 calc(6 * var(--s)) rgba(255,255,255,.25),
+    inset calc(-8 * var(--s)) 0 calc(10 * var(--s)) rgba(40,55,80,.25),
+    inset 0 calc(-12 * var(--s)) calc(16 * var(--s)) rgba(40,55,80,.35),
+    0 0 0 calc(7 * var(--s)) #8294ad,
+    0 0 0 calc(9 * var(--s)) #6c7d96,
+    0 calc(10 * var(--s)) 0 calc(9 * var(--s)) #66778f,
+    0 calc(20 * var(--s)) 0 calc(9 * var(--s)) #536178,
+    0 calc(24 * var(--s)) 0 calc(9 * var(--s)) #3a4558,
+    0 calc(50 * var(--s)) calc(70 * var(--s)) rgba(0,0,0,.6);
+}
+/* raised border ring around the face */
+.calc::before {
+  content: "";
+  position: absolute;
+  inset: calc(16 * var(--s));
+  border-radius: calc(66 * var(--s)) calc(66 * var(--s)) calc(96 * var(--s)) calc(96 * var(--s));
+  border: calc(3 * var(--s)) solid rgba(255,255,255,.28);
+  box-shadow:
+    0 0 0 calc(2 * var(--s)) rgba(60,75,100,.18),
+    inset 0 0 0 calc(2 * var(--s)) rgba(60,75,100,.12);
+  pointer-events: none;
+}
+
+/* embossed lettering */
+.brand { text-shadow: 0 calc(-1.5 * var(--s)) 0 rgba(60,75,100,.45), 0 calc(2 * var(--s)) calc(2 * var(--s)) rgba(255,255,255,.25); }
+
+/* ---- solar panel sunk into the body ---- */
+.solar {
+  box-shadow:
+    inset 0 calc(6 * var(--s)) calc(10 * var(--s)) rgba(0,0,0,.85),
+    0 calc(-2 * var(--s)) 0 rgba(60,75,100,.45),
+    0 calc(3 * var(--s)) 0 rgba(255,255,255,.55);
+}
+.solar span { box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
+
+/* ---- display: deep bezel + glass reflection ---- */
+.lcd-frame {
+  background: linear-gradient(180deg, #7a8ca6, #95a7bf 40%, #a5b5ca);
+  box-shadow:
+    inset 0 calc(8 * var(--s)) calc(14 * var(--s)) rgba(20,30,45,.5),
+    inset 0 calc(-3 * var(--s)) 0 rgba(255,255,255,.35),
+    0 calc(-3 * var(--s)) 0 rgba(60,75,100,.4),
+    0 calc(3 * var(--s)) 0 rgba(255,255,255,.6);
+}
+.lcd {
+  position: relative;
+  box-shadow:
+    inset 0 calc(6 * var(--s)) calc(8 * var(--s)) rgba(0,0,0,.4),
+    inset 0 calc(-2 * var(--s)) 0 rgba(255,255,255,.4),
+    0 calc(2 * var(--s)) 0 rgba(255,255,255,.35);
+}
+.lcd::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(165deg, rgba(255,255,255,.38) 0%, rgba(255,255,255,.08) 38%, transparent 39%);
+  pointer-events: none;
+}
+
+/* ---- function keys: domed face + tall side wall ---- */
+.fn-btn {
+  background: radial-gradient(130% 100% at 45% 0%, #dbe3ee 0%, #c2cedf 38%, #9fb0c7 100%);
+  box-shadow:
+    inset 0 calc(3 * var(--s)) 0 rgba(255,255,255,.8),
+    inset 0 calc(-5 * var(--s)) calc(6 * var(--s)) rgba(60,75,100,.35),
+    0 calc(7 * var(--s)) 0 #6a7b93,
+    0 calc(10 * var(--s)) 0 #56667d,
+    0 calc(16 * var(--s)) calc(14 * var(--s)) rgba(0,0,0,.35);
+  transition: transform .06s, box-shadow .06s;
+}
+.fn-btn:active, .fn-btn.flash {
+  transform: translateY(calc(8 * var(--s)));
+  box-shadow:
+    inset 0 calc(2 * var(--s)) 0 rgba(255,255,255,.6),
+    inset 0 calc(-3 * var(--s)) calc(4 * var(--s)) rgba(60,75,100,.35),
+    0 calc(2 * var(--s)) 0 #56667d,
+    0 calc(4 * var(--s)) calc(5 * var(--s)) rgba(0,0,0,.3);
+}
+
+/* ---- number keys ---- */
+.num-btn {
+  background: radial-gradient(130% 100% at 45% 0%, #9fb0c7 0%, #8597b0 40%, #667894 100%);
+  box-shadow:
+    inset 0 calc(3 * var(--s)) 0 rgba(255,255,255,.4),
+    inset 0 calc(-6 * var(--s)) calc(8 * var(--s)) rgba(30,40,60,.35),
+    0 calc(8 * var(--s)) 0 #4d5b71,
+    0 calc(12 * var(--s)) 0 #3c475a,
+    0 calc(20 * var(--s)) calc(16 * var(--s)) rgba(0,0,0,.4);
+  transition: transform .06s, box-shadow .06s;
+}
+.num-btn:active, .num-btn.flash {
+  transform: translateY(calc(10 * var(--s)));
+  box-shadow:
+    inset 0 calc(2 * var(--s)) 0 rgba(255,255,255,.3),
+    inset 0 calc(-3 * var(--s)) calc(5 * var(--s)) rgba(30,40,60,.35),
+    0 calc(2 * var(--s)) 0 #3c475a,
+    0 calc(4 * var(--s)) calc(6 * var(--s)) rgba(0,0,0,.35);
+}
+.num-btn.tan {
+  background: radial-gradient(130% 100% at 45% 0%, #f8e4d2 0%, #ecd0b8 40%, #d3a888 100%);
+  box-shadow:
+    inset 0 calc(3 * var(--s)) 0 rgba(255,255,255,.7),
+    inset 0 calc(-6 * var(--s)) calc(8 * var(--s)) rgba(120,80,50,.3),
+    0 calc(8 * var(--s)) 0 #a5826b,
+    0 calc(12 * var(--s)) 0 #85664f,
+    0 calc(20 * var(--s)) calc(16 * var(--s)) rgba(0,0,0,.4);
+}
+.num-btn.tan:active, .num-btn.tan.flash {
+  transform: translateY(calc(10 * var(--s)));
+  box-shadow:
+    inset 0 calc(2 * var(--s)) 0 rgba(255,255,255,.5),
+    inset 0 calc(-3 * var(--s)) calc(5 * var(--s)) rgba(120,80,50,.3),
+    0 calc(2 * var(--s)) 0 #85664f,
+    0 calc(4 * var(--s)) calc(6 * var(--s)) rgba(0,0,0,.35);
+}
+
+/* ---- round keys: spherical caps ---- */
+.round {
+  background: radial-gradient(circle at 35% 28%, #b2bfd1 0%, #8292a9 35%, #5f6f87 70%, #4a576c 100%);
+  box-shadow:
+    inset 0 calc(-4 * var(--s)) calc(6 * var(--s)) rgba(20,30,45,.35),
+    inset 0 calc(2 * var(--s)) calc(2 * var(--s)) rgba(255,255,255,.35),
+    0 calc(6 * var(--s)) 0 #46546a,
+    0 calc(8 * var(--s)) 0 #364254,
+    0 calc(14 * var(--s)) calc(12 * var(--s)) rgba(0,0,0,.4),
+    0 0 0 calc(5 * var(--s)) rgba(60,75,100,.18);
+  transition: transform .06s, box-shadow .06s;
+}
+.round:active, .round.flash, .round.active {
+  transform: translateY(calc(6 * var(--s)));
+  box-shadow:
+    inset 0 calc(3 * var(--s)) calc(6 * var(--s)) rgba(20,30,45,.45),
+    0 calc(2 * var(--s)) 0 #364254,
+    0 calc(4 * var(--s)) calc(5 * var(--s)) rgba(0,0,0,.35),
+    0 0 0 calc(5 * var(--s)) rgba(60,75,100,.18);
+}
+.round.active { background: radial-gradient(circle at 35% 28%, #c6d0de 0%, #9aa8bd 40%, #74849c 100%); }
+
+/* =========================================================
+   Natural Textbook Display + MENU / SETUP screens
+   ========================================================= */
+.lcd { --lcd-ink: #1b221d; color: var(--lcd-ink); }
+.indicators .math { display: inline-flex; align-items: center; gap: 1px; }
+.indicators .math.on:not(.angle) { border: none; padding: 0; }
+.mbox { display: inline-block; width: .55em; height: .6em; border: 1px solid currentColor; }
+
+/* expression line: one inline block that can scroll sideways */
+.input-line {
+  height: calc(130 * var(--s));
+  display: flex;
+  align-items: center;
+  line-height: 1.15;
+  overflow: hidden;
+}
+.input-line .expr, .result-line .res { display: inline-block; white-space: nowrap; flex-shrink: 0; }
+.result-line { flex: 1; align-items: center; }
+.result-line .res { line-height: 1; }
+
+.nd-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 .08em;
+  font-size: .86em;
+  line-height: 1.08;
+}
+.nd-frac > .num { border-bottom: calc(3 * var(--s)) solid var(--lcd-ink); padding: 0 .12em .03em; min-width: .6em; text-align: center; }
+.nd-frac > .den { padding: .03em .12em 0; min-width: .6em; text-align: center; }
+.nd-frac.r { font-size: .62em; }
+.nd-sqrt { display: inline-flex; align-items: flex-end; vertical-align: bottom; }
+.nd-sqrt .rad { line-height: 1.1; margin-right: -.02em; }
+.nd-sqrt .ov { border-top: calc(3 * var(--s)) solid var(--lcd-ink); padding: .04em .06em 0; line-height: 1.05; }
+.nd-sqrt .idx { font-size: .55em; align-self: flex-start; margin-right: -.2em; }
+.nd-sup { display: inline-block; font-size: .62em; vertical-align: .75em; line-height: 1; }
+.nd-sub { display: inline-block; font-size: .62em; vertical-align: -.45em; line-height: 1; }
+.nd-abs { display: inline-block; border-left: calc(3 * var(--s)) solid var(--lcd-ink); border-right: calc(3 * var(--s)) solid var(--lcd-ink); padding: 0 .1em; }
+.slot {
+  display: inline-block;
+  min-width: .55em;
+  height: .8em;
+  border: calc(2 * var(--s)) dashed var(--lcd-ink);
+  vertical-align: middle;
+  line-height: .8em;
+  text-align: left;
+}
+.slot .cursor { height: .7em; vertical-align: top; }
+.cursor { background: var(--lcd-ink); }
+.dsep { display: inline-block; width: .25em; }
+
+/* MENU / SETUP panel replaces the calculation lines */
+.panel { display: none; position: relative; flex: 1; font-size: calc(42 * var(--s)); line-height: 1.12; overflow: hidden; }
+.calc.screen-panel .panel { display: block; }
+.calc.screen-panel .input-line, .calc.screen-panel .result-line { display: none; }
+.panel .ln { white-space: nowrap; padding-right: calc(14 * var(--s)); }
+.panel .hint { position: absolute; bottom: 0; right: 0; font-size: .7em; }
+.panel .sb { position: absolute; right: 0; top: calc(4 * var(--s)); bottom: calc(4 * var(--s)); width: calc(7 * var(--s)); }
+.panel .sb b { position: absolute; left: 0; right: 0; background: var(--lcd-ink); border-radius: 2px; }
+
+.menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: calc(6 * var(--s)) calc(8 * var(--s)); }
+.mi {
+  position: relative;
+  height: calc(70 * var(--s));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: calc(3 * var(--s)) solid var(--lcd-ink);
+  border-bottom: calc(3 * var(--s)) solid var(--lcd-ink);
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: calc(28 * var(--s));
+  line-height: .95;
+}
+.mi.on { background: var(--lcd-ink); color: var(--lcd-1); }
+.mi .n {
+  position: absolute; right: calc(2 * var(--s)); bottom: calc(2 * var(--s));
+  font-size: calc(17 * var(--s)); line-height: 1;
+  padding: 0 calc(2 * var(--s)); background: var(--lcd-ink); color: var(--lcd-1);
+}
+.mi.on .n { background: var(--lcd-1); color: var(--lcd-ink); }
+.ic2 { display: inline-block; text-align: center; letter-spacing: calc(2 * var(--s)); }
+.ic2.sm { font-size: .75em; }
+.ic-box { display: inline-block; border: calc(3 * var(--s)) solid currentColor; padding: 0 calc(5 * var(--s)); margin-right: calc(3 * var(--s)); font-style: italic; }
+.ic-big { font-size: 1.5em; }
+.ic-bars { display: inline-flex; align-items: flex-end; gap: calc(3 * var(--s)); height: 1.3em; border-bottom: calc(3 * var(--s)) solid currentColor; }
+.ic-bars b { width: calc(9 * var(--s)); background: currentColor; }
+.menu-label { margin-top: calc(10 * var(--s)); font-size: calc(46 * var(--s)); white-space: nowrap; position: relative; }
+.menu-label .arr { position: absolute; right: 0; top: 0; font-size: .5em; }
+.contrast { display: flex; align-items: center; gap: calc(8 * var(--s)); font-size: .6em; }
+.contrast span { display: inline-flex; gap: calc(3 * var(--s)); }
+.contrast b { width: calc(14 * var(--s)); height: calc(26 * var(--s)); border: 1px solid var(--lcd-ink); }
+.contrast b.on { background: var(--lcd-ink); }
+
+/* calculus templates */
+.nd-int { display: inline-flex; align-items: center; vertical-align: middle; }
+.nd-int .sym { font-size: 1.5em; line-height: 1; font-family: "Times New Roman", serif; font-style: italic; transform: scaleY(1.15); }
+.nd-int .lims { display: inline-flex; flex-direction: column; justify-content: space-between; font-size: .55em; height: 2.4em; margin: 0 .1em 0 .05em; }
+.nd-int .lo { margin-left: -.35em; }
+.dx { font-family: "Times New Roman", serif; margin-left: .1em; }
+.nd-at { display: inline-flex; align-items: stretch; vertical-align: middle; }
+.nd-at .bar { width: calc(3 * var(--s)); background: var(--lcd-ink); margin: 0 .08em; height: 1.3em; }
+.nd-at .sub { font-size: .55em; align-self: flex-end; }
+.nd-sig { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1; }
+.nd-sig .sym { font-size: 1.3em; line-height: .9; }
+.nd-sig .hi, .nd-sig .lo { font-size: .5em; }
+.input-line .expr .tk.eqs { margin: 0 .1em; }
+
+/* SOLVE / CALC variable list */
+.panel .eqn { white-space: nowrap; overflow: hidden; min-height: calc(80 * var(--s)); display: flex; align-items: center; }
+.panel .vr { display: flex; align-items: baseline; white-space: nowrap; padding: 0 calc(6 * var(--s)); }
+.panel .vr.on { background: var(--lcd-ink); color: var(--lcd-1); }
+.panel .vr .val { margin-left: auto; }
+.panel .vr .val.l { margin-left: calc(10 * var(--s)); }
+.panel .vr.center { justify-content: center; margin-top: calc(30 * var(--s)); }
+.panel .vr.big { margin-top: calc(60 * var(--s)); font-size: 1.1em; }
+.panel > .arr { position: absolute; top: 0; right: 0; font-size: .5em; }
+
+.panel .eqn .tk.var { font-style: italic; }
+
+/* =========================================================
+   LCD refresh: crisp dot-matrix style like the real screen
+   ========================================================= */
+.lcd {
+  --lcd-1: #dfe6da;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, .028) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, .028) 0 1px, transparent 1px 3px),
+    linear-gradient(176deg, #e4ebe0 0%, #d6dfd2 55%, #ccd6c8 100%);
+  font-family: "Courier Prime", "Courier New", monospace;
+  font-weight: 700;
+  letter-spacing: -.03em;
+  /* faint LCD "ghost" under each segment */
+  text-shadow: calc(1.2 * var(--s)) calc(1.6 * var(--s)) 0 rgba(0, 0, 0, .10);
+}
+.lcd::after {
+  background: linear-gradient(168deg, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, .05) 28%, transparent 29%);
+}
+.calc.off .lcd { text-shadow: none; }
+
+/* status bar */
+.indicators {
+  height: calc(30 * var(--s));
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: calc(19 * var(--s));
+  letter-spacing: 0;
+  text-shadow: none;
+  align-items: center;
+}
+.ind.angle { padding: 0 calc(6 * var(--s)); border-radius: calc(3 * var(--s)); }
+.ind.on:not(.angle) { border-width: calc(2 * var(--s)); border-radius: calc(3 * var(--s)); padding: 0 calc(4 * var(--s)); line-height: 1.2; }
+
+/* calculation lines */
+.input-line { font-size: calc(50 * var(--s)); }
+.result-line { font-size: calc(70 * var(--s)); }
+.result-line .res { letter-spacing: -.04em; }
+.result-line sup { font-size: .5em; vertical-align: .85em; }
+.nd-frac { font-size: .84em; line-height: 1.02; }
+.nd-frac.r { font-size: .7em; }
+.nd-frac > .num, .nd-sqrt .ov, .nd-abs { border-color: var(--lcd-ink); }
+.nd-frac > .num { border-bottom-width: calc(4 * var(--s)); }
+.nd-sqrt .ov { border-top-width: calc(4 * var(--s)); }
+.tk.var, .lcd i { font-family: "Courier Prime", serif; font-style: italic; }
+.result-line .err { font-size: .62em; letter-spacing: 0; }
+.cursor { width: calc(4 * var(--s)); }
+
+/* MENU */
+.menu-grid { gap: calc(5 * var(--s)) calc(10 * var(--s)); }
+.mi {
+  height: calc(76 * var(--s));
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: calc(26 * var(--s));
+  text-shadow: none;
+  letter-spacing: 0;
+}
+.mi .ico { display: flex; align-items: center; justify-content: center; }
+.mi-svg { width: calc(68 * var(--s)); height: calc(44 * var(--s)); display: block; }
+.mi .n { font-size: calc(16 * var(--s)); font-weight: 800; }
+.menu-label { font-size: calc(48 * var(--s)); margin-top: calc(8 * var(--s)); }
+
+/* lists, SETUP, SOLVE, app panels */
+.panel { font-size: calc(44 * var(--s)); line-height: 1.16; }
+.panel .ln { letter-spacing: -.03em; }
+.panel .hint { font-size: .62em; }
+.panel .vr.on, .mi.on { text-shadow: none; }
+.ic-ratio { display: inline-flex; align-items: center; gap: calc(4 * var(--s)); }
+.ic-ratio b { width: calc(16 * var(--s)); height: calc(16 * var(--s)); border: calc(3 * var(--s)) solid currentColor; }
+.ic-box { border-width: calc(3 * var(--s)); }
+
+/* two-column numbered lists (CONV, engineering symbols, hyperbolic) */
+.grid-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: calc(14 * var(--s)); font-size: calc(32 * var(--s)); line-height: 1.22; }
+.grid-list.dense { font-size: calc(27 * var(--s)); line-height: 1.12; }
+.gl-cell { white-space: nowrap; overflow: hidden; }
+.gl-cell small { font-size: .8em; }
+
+/* Pol/Rec results, history arrows */
+.result-line .pair { font-size: .55em; letter-spacing: 0; }
+.ind.hist.on { border: none !important; padding: 0 !important; font-size: .8em; }
+
+/* MENU polish: uniform icons, lighter grid, compact badges */
+.menu-grid { gap: calc(4 * var(--s)) calc(12 * var(--s)); margin-top: calc(2 * var(--s)); }
+.mi {
+  height: calc(72 * var(--s));
+  border-right-width: calc(2.5 * var(--s));
+  border-bottom-width: calc(2.5 * var(--s));
+  border-radius: 0 0 calc(3 * var(--s)) 0;
+}
+.mi.on { border-radius: calc(4 * var(--s)); }
+.mi-svg { width: calc(62 * var(--s)); height: calc(40 * var(--s)); overflow: visible; }
+.mi-txt text {
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  text-anchor: middle;
+  fill: currentColor;
+  stroke: none;
+  letter-spacing: .5px;
+}
+.mi .n {
+  font-family: "Inter", sans-serif;
+  font-size: calc(14 * var(--s));
+  padding: calc(1 * var(--s)) calc(3 * var(--s));
+  border-radius: calc(2 * var(--s));
+  right: calc(3 * var(--s));
+  bottom: calc(3 * var(--s));
+}
+.menu-label { font-size: calc(44 * var(--s)); margin-top: calc(10 * var(--s)); padding-left: calc(2 * var(--s)); }
+.menu-label .arr { top: calc(-2 * var(--s)); }
+.mi-txt.big text { font-size: 14px; letter-spacing: 1px; white-space: pre; }
+
+/* =========================================================
+   Bigger display: header (solar panel + model name) removed,
+   its space goes to the LCD, whose content is scaled up 1.25x
+   ========================================================= */
+.lcd-frame {
+  height: calc(560 * var(--sb));
+  margin-top: calc(66 * var(--sb));
+  padding: calc(24 * var(--sb)) calc(22 * var(--sb)) calc(30 * var(--sb));
+  border-radius: calc(30 * var(--sb));
+}
+.lcd { --s: calc(var(--sb) * 1.25); padding: calc(10 * var(--sb)) calc(18 * var(--sb)) calc(12 * var(--sb)); }
+.mi { height: calc(116 * var(--s)); }
+.mi-svg { width: calc(78 * var(--s)); height: calc(52 * var(--s)); }
+.menu-grid { row-gap: calc(8 * var(--s)); margin-top: calc(6 * var(--s)); }
+.menu-label { margin-top: calc(16 * var(--s)); }
+.input-line { height: calc(150 * var(--s)); }
+
+/* =========================================================
+   Performance (mobile): keep each key press from repainting
+   the big shaded body, the d-pad rim filters or the LCD
+   ========================================================= */
+/* each key on its own GPU layer: pressing it repaints only that key */
+.fn-btn, .num-btn, .round { will-change: transform; transition: transform .06s; }
+/* sticky hover after a tap would run a CSS filter on the key */
+button:hover { filter: none; }
+@media (hover: hover) { button:hover { filter: brightness(1.04); } }
+/* d-pad: static rim (expensive lighting filters) painted once; keys in a separate layer above */
+.dpad { position: relative; filter: none; }
+.dpad .dpad-base { filter: drop-shadow(0 4px 6px rgba(20,28,40,.35)) drop-shadow(0 -1px 0 rgba(255,255,255,.45)); }
+.dpad .dpad-keys { position: absolute; inset: 0; will-change: transform; }
+/* LCD updates stay inside the LCD; blinking cursor runs on the compositor */
+.lcd { contain: layout paint; will-change: transform; }
+.cursor { will-change: opacity; }
+
+/* =========================================================
+   7-row screen: status bar + 5 rows of wrapping input + 2 rows of result.
+   Long input wraps onto the next row and scrolls up instead of sideways.
+   ========================================================= */
+.lcd { --row: calc((484 - 37.5) * var(--sb) / 7); }
+.input-line {
+  display: block;
+  flex: 5 1 0;
+  min-height: 0;
+  height: auto;
+  font-size: calc(var(--row) * .72);
+  line-height: var(--row);
+  overflow: hidden;
+}
+.input-line .expr { display: block; white-space: normal; word-break: break-all; overflow-wrap: anywhere; }
+.input-line .tk, .nw { white-space: nowrap; }
+.result-line { flex: 2 1 0; min-height: 0; font-size: calc(var(--row) * 1.05); }
+.panel .sb { cursor: pointer; }
+.panel [role="button"], .panel .ln, .mi, .menu-label { cursor: pointer; }
+
+/* templates never break across rows; they grow taller instead */
+.nd-frac, .nd-sqrt, .nd-sup, .nd-sub, .nd-abs, .nd-int, .nd-der, .nd-sum, .nd-par { white-space: nowrap; }
+.nd-abs { line-height: 1.15; }
+/* nested fractions / powers keep their size and stack vertically */
+.nd-frac .nd-frac { font-size: 1em; }
+.nd-sup .nd-sup { font-size: .85em; }
+
+/* stretchy SVG glyphs (∫ sign, parentheses) */
+.nd-int > .sym, .nd-par > .pl, .nd-par > .pr { align-self: stretch; display: block; }
+.nd-int > .sym svg, .nd-par > .pl svg, .nd-par > .pr svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.nd-int > .sym path, .nd-par > .pl path, .nd-par > .pr path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: calc(3.5 * var(--s));
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* integral: sign at least ~2 rows of text tall, limits pinned to its top and bottom ends */
+.nd-int, .nd-der, .nd-sum, .nd-par { display: inline-flex; align-items: center; vertical-align: middle; line-height: 1.15; }
+.nd-int > .sym { font-size: 1em; font-style: normal; transform: none; width: .42em; min-height: 2.1em; }
+.nd-int > .lims {
+  align-self: stretch;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: .55em;
+  line-height: 1.05;
+  margin: 0 .2em 0 .1em;
+}
+.nd-int > .lims .hi { margin-left: .3em; }
+.nd-int > .lims .lo { margin-left: -.3em; }
+.nd-int > .body { padding: .35em 0; }
+.nd-int > .dx { margin-left: .12em; }
+
+/* d/dx( f )|x=a  and  Σ( f ): parentheses and bar grow with f */
+.nd-par > .pl, .nd-par > .pr { width: .32em; min-height: 1.15em; }
+.nd-par > .body { padding: .06em .02em; }
+.nd-der > .bar { align-self: stretch; width: calc(3 * var(--s)); background: var(--lcd-ink); margin: 0 .08em; }
+.nd-der > .sub { font-size: .55em; align-self: flex-end; }
+.nd-sum > .nd-sig { margin-right: .04em; }
+
+/* fraction bar spans the wider of numerator and denominator */
+.nd-frac > .num, .nd-frac > .den, .fr > .n, .fr > .d { align-self: stretch; text-align: center; }
+
+/* key labels: larger, and the yellow SHIFT labels darker with a thin outline so they
+   stay readable on the light body (short ones like nPr, Pol, %, ≈ looked tiny) */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+.labels { font-size: calc(25 * var(--s)); height: calc(34 * var(--s)); gap: calc(10 * var(--s)); }
+.num-grid .labels { height: calc(34 * var(--s)); }
+.labels .s {
+  color: #f0b323;
+  -webkit-text-stroke: calc(.6 * var(--s)) #7a5a10;
+  paint-order: stroke fill;
+}
+.labels .one { font-size: 1.3em; line-height: .8; }
+
+/* MENU sits in the middle of the big display: equal space above and below */
+.calc.screen-panel .panel[data-screen="menu"] { display: flex; flex-direction: column; justify-content: center; }
+.panel[data-screen="menu"] .mi { height: calc(98 * var(--s)); }
+.panel[data-screen="menu"] .menu-label { margin-top: calc(12 * var(--s)); }

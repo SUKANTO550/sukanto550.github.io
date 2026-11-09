@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scientific Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@500;700;800&family=Saira+Semi+Condensed:wght@500;600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="modes/modes.css" />
+</head>
+<body>
+  <main class="calc" id="calc">
+
+    <!-- Display -->
+    <section class="lcd-frame">
+      <div class="lcd">
+        <div class="indicators">
+          <span id="ind-S" class="ind">S</span>
+          <span id="ind-A" class="ind">A</span>
+          <span id="ind-M" class="ind">M</span>
+          <span id="ind-STO" class="ind">STO</span>
+          <span id="ind-FMT" class="ind">FIX</span>
+          <span id="ind-E" class="ind">E</span>
+          <span id="ind-APP" class="ind app"></span>
+          <span id="ind-DISP" class="ind">Disp</span>
+          <span id="ind-HIST" class="ind hist"></span>
+          <span id="ind-MATH" class="ind math">√<b class="mbox"></b>/</span>
+          <span id="ind-angle" class="ind on angle">D</span>
+        </div>
+        <div class="input-line" id="input"></div>
+        <div class="result-line" id="result"></div>
+        <div class="panel" id="panel"></div>
+      </div>
+    </section>
+
+    <!-- Top controls (shift/alpha, d-pad, menu/on) -->
+    <section class="top-controls" id="top"></section>
+
+    <!-- Function keys -->
+    <section class="fn-grid" id="fn"></section>
+
+    <!-- Number keys -->
+    <section class="num-grid" id="num"></section>
+  </main>
+
+  <script src="engine.js"></script>
+  <script src="screens.js"></script>
+  <script src="modes/equation.js"></script>
+  <script src="modes/stats.js"></script>
+  <script src="modes/table.js"></script>
+  <script src="modes/matvec.js"></script>
+  <script src="modes/complex.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
