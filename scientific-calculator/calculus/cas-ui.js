@@ -198,10 +198,32 @@
     r.sx = Math.max(0, Math.min(max, x + d * el.clientWidth * 0.4));
     return true;
   }
+  // balanced fractions pad short denominators to keep the bar on the centre line, which can
+  // leave blank space above/below the answer: cut the answer box to what is actually drawn
+  function trimAnswer(el) {
+    const inner = el.querySelector('.cas-ans-in');
+    if (!inner) return;
+    const box = inner.getBoundingClientRect();
+    let top = Infinity, bot = -Infinity;
+    const take = (r) => { if (r.height > 0) { top = Math.min(top, r.top); bot = Math.max(bot, r.bottom); } };
+    const range = document.createRange();
+    const tw = document.createTreeWalker(inner, NodeFilter.SHOW_TEXT);
+    for (let n = tw.nextNode(); n; n = tw.nextNode()) {
+      if (!n.textContent.trim()) continue;
+      range.selectNodeContents(n);
+      for (const r of range.getClientRects()) take(r);
+    }
+    inner.querySelectorAll('svg').forEach((s) => take(s.getBoundingClientRect()));
+    if (top === Infinity) return;
+    const pad = 2;
+    inner.style.marginTop = `${Math.min(0, box.top - top + pad)}px`;
+    inner.style.marginBottom = `${Math.min(0, bot - box.bottom + pad)}px`;
+  }
   // the result line is rebuilt on every render: restore the scroll position
   function afterResult() {
     const el = ansEl(), r = S.symRes;
     if (!el || !r) return;
+    trimAnswer(el);
     el.scrollLeft = r.sx || 0;
     r.sx = el.scrollLeft;
     el.addEventListener('scroll', () => { r.sx = el.scrollLeft; }, { passive: true });

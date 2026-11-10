@@ -759,7 +759,10 @@ function render() {
   }
   result.innerHTML = `<span class="res">${r}</span>`;
   balanceFracs(result);
-  if (symShown) CASUI.afterResult(); // keep the sideways scroll of a long answer
+  if (symShown) {
+    CASUI.afterResult(); // fit the answer, keep its sideways scroll
+    input.scrollTop = input.scrollHeight; // answer took extra room: question scrolls up
+  }
 }
 
 /* ---------- Keyboard support ---------- */

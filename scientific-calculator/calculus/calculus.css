@@ -3,7 +3,11 @@
    ========================================================= */
 
 /* ∫ f dx without limits */
-.nd-int.cas-int > .sym { margin-right: .08em; }
+.nd-int.cas-int > .sym { margin-right: .08em; min-height: 1.5em; position: relative; }
+/* the SVG fills the slot; otherwise its 1:10 viewBox sets the height from the width */
+.nd-int.cas-int > .sym svg { position: absolute; inset: 0; }
+/* no limits to make room for: the sign hugs the integrand */
+.nd-int.cas-int > .body { padding: .12em 0; }
 
 /* stretchy ( ) and ∫ in answers and steps: the SVG fills its slot instead of
    setting the slot height (otherwise it falls back to 150px and every bracket grows) */
@@ -14,10 +18,13 @@
 .cas-scroll .nd-par > .pl svg, .cas-scroll .nd-par > .pr svg, .cas-scroll .nd-int > .sym svg,
 .sr-out .nd-par > .pl svg, .sr-out .nd-par > .pr svg { position: absolute; inset: 0; }   /* MENU D: Series results */
 
-/* result shown: input gets 4 rows, answer + buttons get 3 */
+/* result shown: input gets 4 rows, answer + buttons get 3; a taller answer takes
+   the room it needs (up to 85% of the screen) and the question scrolls up */
 .calc.cas-sym .input-line { flex: 4 1 0; }
 .calc.cas-sym .result-line {
-  flex: 3 1 0;
+  flex: 3 0 0;
+  min-height: min-content;
+  max-height: calc(100% - 1.6 * var(--row));
   align-items: stretch;
   font-size: calc(var(--row) * .72);
   line-height: 1.15;
