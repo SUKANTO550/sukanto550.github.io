@@ -928,3 +928,14 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .k-calc .labels, .k-pow .labels, .k-dms .labels { gap: calc(4 * var(--s)); }
 .k-pow .labels .s, .k-dms .labels .s { font-size: .92em; }
 .labels .sig { font-size: 1em; }
+
+/* About screen (SHIFT OPTN / SETUP > About) */
+.about { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: calc(6 * var(--s)); }
+.about .ab-t { font-weight: 700; font-size: calc(34 * var(--s)); }
+.about .ab-rule { width: 70%; border-top: calc(2 * var(--s)) solid var(--lcd-ink); margin: calc(6 * var(--s)) 0; }
+.about .ab-s { font-size: calc(28 * var(--s)); }
+.about .ab-n { font-weight: 700; font-size: calc(40 * var(--s)); margin: calc(2 * var(--s)) 0; }
+.about .ab-c { font-size: calc(24 * var(--s)); margin-top: calc(8 * var(--s)); }
+
+/* highlighted row in option lists (▲▼ move, ▶ or = enters, ◀ back) */
+.panel .ln.on, .panel .gl-cell.on { background: var(--lcd-ink); color: var(--lcd-1); text-shadow: none; }

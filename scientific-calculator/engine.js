@@ -17,6 +17,7 @@ const DEFAULT_CFG = () => ({
   decMark: '.',
   digitSep: false,
   contrast: 5,
+  calc: 'def',                 // SETUP Calculus: 'def' (definite) | 'indef' (indefinite, symbolic); not saved, so every start is 'def'
 });
 
 const S = {
@@ -197,6 +198,9 @@ const SLOTS = {
   integ: ['f', 'lo', 'hi'],
   deriv: ['f', 'at'],
   sigma: ['f', 'lo', 'hi'],
+  // Indefinite mode (calculus/cas.js): ∫ f dx and d/dx(f) without limits / point
+  iinteg: ['f'],
+  ideriv: ['f'],
 };
 const isTpl = (it) => it && it.t === 'tpl';
 const Row = (up = null) => ({ items: [], up });
@@ -628,7 +632,7 @@ function collectVars(row, out = []) {
   for (const it of row.items) {
     if (isTpl(it)) {
       for (const s of SLOTS[it.kind]) {
-        if (s === 'f' && ['integ', 'deriv', 'sigma'].includes(it.kind)) continue;
+        if (s === 'f' && ['integ', 'deriv', 'sigma', 'iinteg', 'ideriv'].includes(it.kind)) continue;
         collectVars(it.slots[s], out);
       }
     } else if (it.var && !out.includes(it.d)) out.push(it.d);

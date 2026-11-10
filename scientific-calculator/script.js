@@ -18,6 +18,7 @@ function startEdit(continues) {
     newExpr();
     if (continues) insertItem(TK.ans);
     S.done = false;
+    S.symRes = null;
   }
   S.error = S.note = S.fact = null;
   S.engExp = null;
@@ -37,7 +38,13 @@ function ins(tok) {
   insertItem(tok);
 }
 // slot that receives the wrapped value for INS
-const INS_SLOT = { sqrt: 'arg', root: 'arg', abs: 'arg', logab: 'arg', pow10: 'exp', exp: 'exp', integ: 'f', deriv: 'f', sigma: 'f', frac: 'num' };
+const INS_SLOT = { sqrt: 'arg', root: 'arg', abs: 'arg', logab: 'arg', pow10: 'exp', exp: 'exp', integ: 'f', deriv: 'f', sigma: 'f', frac: 'num', iinteg: 'f', ideriv: 'f' };
+// ∫ and d/dx keys: limits / point in Definite mode, symbolic templates in Indefinite mode (SETUP Calculus)
+function calcTpl(kind) {
+  if (S.cfg.calc !== 'indef') { insTpl(kind); return; }
+  insTpl(kind === 'integ' ? 'iinteg' : 'ideriv');
+  if (kind === 'integ' && window.CASUI) CASUI.warm(); // derivatives never need SymPy
+}
 // insert a Natural Display template; opts.fill pre-fills slots, opts.enter = slot to put the cursor in (null = after it)
 // start index of the operand just left of `idx`: a number, a constant/variable, a template
 // or a bracketed group (incl. "sin(...)"), plus any trailing x², x⁻¹, ! etc. Returns idx if none.
@@ -111,6 +118,7 @@ function eqKey() {
 }
 function equals(record = true, part = 0) {
   if (!S.root.items.length) return;
+  if (window.CASUI && CASUI.handles(S.root)) { CASUI.run(S.root, record); return; } // indefinite ∫ / d/dx
   S.note = S.fact = null;
   S.engExp = null;
   try {
@@ -162,6 +170,7 @@ function ac() {
   S.histView = false;
   newExpr();
   S.done = false;
+  S.symRes = null;
   S.error = S.note = S.fact = null;
   S.sto = false;
   S.engExp = null;
@@ -321,10 +330,10 @@ const TOP = [
   { id: 'alpha', area: 'alpha', round: true, top: ['a', 'ALPHA'], mod: () => { S.alpha = !S.alpha; S.shift = false; } },
   { id: 'menu', area: 'menu', round: true, top: ['w', 'MENU'], top2: ['s', 'SETUP'], m: openMenu, s: ['SETUP', openSetup] },
   { id: 'on', area: 'on', round: true, top: ['w', 'ON'], m: () => { S.screen = 'calc'; ac(); } },
-  K('optn', 'OPTN', calcOptn, ['QR', null]),
+  K('optn', 'OPTN', calcOptn, ['ABOUT', () => openAbout()]),
   K('calc', 'CALC', () => startSolve('calc'), ['SOLVE', () => startSolve('solve')], ['<span class="dbl">=</span>', I(TK.eqs)]),
-  K('integ', `<span class="integ">∫<span class="lim">${BX}${BX}</span><b class="bar"></b></span>`, T('integ'),
-    [`${FRAC('d', 'dx')}${SQ}`, T('deriv')], [':', I(TK.colon)]),
+  K('integ', `<span class="integ">∫<span class="lim">${BX}${BX}</span><b class="bar"></b></span>`, () => calcTpl('integ'),
+    [`${FRAC('d', 'dx')}${SQ}`, () => calcTpl('deriv')], [':', I(TK.colon)]),
   K('xvar', '<i>x</i>', () => ins(varTok('x')), [`<span class="sig">Σ</span>${SQ}`, T('sigma')]),
 ];
 TOP[4].area = 'optn'; TOP[5].area = 'calc'; TOP[6].area = 'integ'; TOP[7].area = 'xvar';
@@ -545,6 +554,8 @@ function press(key) {
 
   const alpha = layer === key.a && !shifted && !!key.a;
   if (S.screen !== 'calc') { screenKey(key.id, shifted, alpha); render(); return; }
+  // after an indefinite result: 1 = Steps, 2 = Steps with notation (only while those buttons show)
+  if (window.CASUI && CASUI.calcKey(key.id, shifted, alpha)) { render(); return; }
 
   // an active extra mode may take over keys on the calculation screen (e.g. OPTN, i, hex digits)
   const app = curApp();
@@ -607,6 +618,8 @@ function itemLine(it, ed) {
     case 'integ': return `∫(${R('f')},${R('lo')},${R('hi')})`;
     case 'deriv': return `<span class="tf"><span>d</span><span>d<i>x</i></span></span>(${R('f')},${R('at')})`;
     case 'sigma': return `Σ(${R('f')},${R('lo')},${R('hi')})`;
+    case 'iinteg': return `∫(${R('f')})d<i>x</i>`;
+    case 'ideriv': return `<span class="tf"><span>d</span><span>d<i>x</i></span></span>(${R('f')})`;
   }
   return '';
 }
@@ -642,6 +655,11 @@ function itemHTML(it, ed) {
     case 'sigma':
       return `<span class="nd-sum"><span class="nd-sig"><span class="hi">${R('hi')}</span><span class="sym">Σ</span>`
         + `<span class="lo"><i>x</i>=${R('lo')}</span></span>${PAR(R('f'))}</span>`;
+    // Indefinite mode: no limits, no evaluation point
+    case 'iinteg':
+      return `<span class="nd-int cas-int">${INT_SIGN}<span class="body">${R('f')}</span><i class="dx">dx</i></span>`;
+    case 'ideriv':
+      return `<span class="nd-der"><span class="nd-frac"><span class="num">d</span><span class="den"><i>dx</i></span></span>${PAR(R('f'))}</span>`;
   }
   return '';
 }
@@ -707,7 +725,14 @@ function render() {
   const onCalc = S.screen === 'calc';
   calc.classList.toggle('screen-panel', !onCalc);
   panel.dataset.screen = S.screen; // lets CSS lay out individual screens (e.g. centre the MENU)
-  if (!onCalc) { panel.innerHTML = panelHTML(); balanceFracs(panel); return; }
+  const symShown = onCalc && !!(S.done && S.symRes && !S.error && window.CASUI);
+  calc.classList.toggle('cas-sym', symShown);
+  if (!onCalc) {
+    panel.innerHTML = panelHTML();
+    balanceFracs(panel);
+    if (S.screen === 'steps') CASUI.afterRender(); // keep the scroll position of the steps
+    return;
+  }
 
   // expression line
   input.innerHTML = `<span class="expr">${S.note || rowHTML(S.root, !S.done)}</span>`;
@@ -716,7 +741,8 @@ function render() {
 
   // result line
   let r = '';
-  if (S.error) r = `<span class="err">${S.error}</span>`;
+  if (symShown) r = CASUI.resultHTML(); // indefinite ∫ / d/dx answer + step buttons
+  else if (S.error) r = `<span class="err">${S.error}</span>`;
   else if (S.fact) r = S.fact;
   else if (S.done && typeof S.ans !== 'number') {
     const h = TYPES[typeOf(S.ans)];

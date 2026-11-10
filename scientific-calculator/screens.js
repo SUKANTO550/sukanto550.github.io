@@ -20,16 +20,18 @@ const MENU_ITEMS = [
   { k: 'A', name: 'Equation/Func', icon: svgIcon('<g class="mi-txt big"><text x="20" y="11">x y</text><text x="26" y="25">0</text></g><path d="M9 17h8M9 21h8"/>') },
   { k: 'B', name: 'Inequality', icon: svgIcon('<g class="mi-txt big"><text x="20" y="11">x y</text><text x="26" y="25">0</text></g><path d="M10 15.5l7 3.5-7 3.5"/>') },
   { k: 'C', name: 'Ratio', icon: svgIcon('<rect x="4" y="7" width="11" height="12"/><rect x="25" y="7" width="11" height="12"/><g fill="currentColor" stroke="none"><circle cx="20" cy="9.5" r="1.8"/><circle cx="20" cy="16.5" r="1.8"/></g>') },
+  { k: 'D', name: 'Series', icon: svgIcon('<path d="M30 4H10l9 9-9 9h20" stroke-linejoin="miter"/><g fill="currentColor" stroke="none"><circle cx="33" cy="22" r="1.6"/></g>') },
+  { k: 'E', name: 'Algebra', icon: svgIcon('<g class="mi-txt big"><text x="20" y="11">a b</text></g><path d="M8 14c-2.5 3-2.5 7 0 10M15 14c2.5 3 2.5 7 0 10M25 14c-2.5 3-2.5 7 0 10M32 14c2.5 3 2.5 7 0 10" stroke-width="2"/>') },
 ];
-// keys that type a menu number: digits plus A/B/C on (−), °'", x⁻¹
+// keys that type a menu number: digits plus A/B/C/D/E on (−), °'", x⁻¹, sin, cos
 const KEY_TO_NUM = { neg: 10, dms: 11, inv: 12, sin: 13, cos: 14, tan: 15, mplus: 16, xvar: 17 };
 const keyNum = (id) => (/^[0-9]$/.test(id) ? +id : KEY_TO_NUM[id] ?? null);
 
 const SETUP_PAGES = [
-  [['Input/Output', 'io'], ['Angle Unit', 'angle'], ['Number Format', 'fmt'], ['Engineer Symbol', 'engSym']],
+  [['Input/Output', 'io'], ['Angle Unit', 'angle'], ['Number Format', 'fmt'], ['Engineer Symbol', 'engSym'], ['Calculus', 'calcMode']],
   [['Fraction Result', 'fracRes'], ['Complex', 'complex'], ['Statistics', 'stat'], ['Spreadsheet', 'sheet']],
   [['Equation/Func', null], ['Table', 'table'], ['Decimal Mark', 'decMark'], ['Digit Separator', 'digitSep']],
-  [['MultiLine Font', null], ['QR Code', null], ['Contrast', 'contrast']],
+  [['MultiLine Font', null], ['About', 'about'], ['Contrast', 'contrast']],
 ];
 const SETUP_SUB = {
   io: { opts: ['MathI/MathO', 'MathI/DecimalO', 'LineI/LineO', 'LineI/DecimalO'], vals: ['MathO', 'DecO', 'LineO', 'LineDecO'] },
@@ -39,6 +41,12 @@ const SETUP_SUB = {
   fracRes: { opts: ['a<sup>b</sup>/<sub>c</sub>', 'd/c'], vals: ['abc', 'dc'] },
   decMark: { title: 'Decimal Mark?', opts: ['Dot', 'Comma'], vals: ['.', ','] },
   digitSep: { title: 'Digit Separator?', opts: ['On', 'Off'], vals: [true, false] },
+  // Definite: numeric ∫ with limits and d/dx at a point. Indefinite: symbolic ∫ f dx and d/dx(f).
+  // Switching clears the current input, since the templates differ.
+  calcMode: {
+    opts: ['Definite Calculus', 'Indefinite Calculus'], vals: ['def', 'indef'],
+    apply: (v) => { if (S.cfg.calc !== v) { S.cfg.calc = v; ac(); } },
+  },
   // settings owned by the Complex / Statistics / Table / Spreadsheet apps
   sheet: { opts: ['Auto Calc', 'Show Cell'], vals: ['ssAuto', 'ssShow'], next: (v) => v },
   ssAuto: { title: 'Auto Calc?', opts: ['On', 'Off'], vals: [true, false], apply: (v) => { if (window.SpreadsheetSetup) SpreadsheetSetup.autoCalc = v; } },
@@ -52,9 +60,19 @@ const SETUP_SUB = {
 const OVERLAYS = ['menu', 'setup', 'msg', 'list'];
 function rememberScreen() { if (!OVERLAYS.includes(S.screen)) S.prevScreen = S.screen; }
 function openMenu() { rememberScreen(); S.screen = 'menu'; }
-function openSetup() { rememberScreen(); S.screen = 'setup'; S.setup = { page: 0, sub: null, fmtType: null }; }
+function openSetup() { rememberScreen(); S.screen = 'setup'; S.setup = { page: 0, row: 0, sub: null, srow: 0, fmtType: null }; }
 function backToCalc() { S.screen = S.prevScreen || 'calc'; }
 function notAvailable(name, back) { S.msg = { name, back }; S.screen = 'msg'; }
+// creator attribution (SHIFT OPTN, SETUP > About); any key returns
+function openAbout(back) { rememberScreen(); S.msg = { about: true, back: back || S.prevScreen || 'calc' }; S.screen = 'msg'; }
+const ABOUT_HTML = '<div class="about">'
+  + '<div class="ab-t">Scientific Calculator</div>'
+  + '<div class="ab-rule"></div>'
+  + '<div class="ab-s">Created by</div>'
+  + '<div class="ab-n">Sukanto Biswas</div>'
+  + '<div class="ab-s">Mechanical Engineer</div>'
+  + '<div class="ab-c">© 2026 FreeTility</div>'
+  + '</div><div class="hint msg-btn" data-act="ac" role="button">[AC] :Back</div>';
 
 /* ---------- key handling ---------- */
 function screenKey(id, shifted, alpha) {
@@ -65,6 +83,7 @@ function screenKey(id, shifted, alpha) {
   else if (S.screen === 'menu') menuKey(id);
   else if (S.screen === 'setup') setupKey(id);
   else if (S.screen === 'solve') solveKey(id);
+  else if (S.screen === 'steps') CASUI.stepsKey(id);
   else if (S.screen === 'msg') {
     if (S.msg.confirm) { if (id === 'eq') S.msg.confirm(); else if (id === 'ac') S.screen = S.msg.back; }
     else S.screen = S.msg.back;
@@ -120,42 +139,36 @@ function selectMenu(i) {
   notAvailable(MENU_ITEMS[i].name, 'menu');
 }
 
-/* Numbered option list (4 per page, keys 1-4, ▲▼ pages, AC back), e.g. OPTN menus.
+/* Numbered option list (4 per page, keys 1-4, AC back), e.g. OPTN menus.
+   ▲▼ move the highlight (paging at the edges), ▶ or = enters it, ◀ goes back like AC.
    items: [{ label, act }]; opts: { title, back } — back() runs on AC.            */
 // opts.grid: show up to 12 items in two columns numbered 1-9, A, B, C (like CONV / engineering symbols)
 function openList(items, opts = {}) {
-  S.list = { items, page: 0, title: opts.title || null, back: opts.back || null, prev: S.screen, grid: !!opts.grid, cols: opts.cols || 2 };
+  S.list = { items, page: 0, sel: 0, title: opts.title || null, back: opts.back || null, prev: S.screen, grid: !!opts.grid, cols: opts.cols || 2 };
   S.screen = 'list';
 }
 function listKey(id) {
   const L = S.list;
-  const pages = Math.ceil(L.items.length / 4);
+  const n = L.items.length;
   const k = keyNum(id);
-  if (L.grid) {
-    if (id === 'ac') { S.screen = L.prev; if (L.back) L.back(); return; }
-    const item = k >= 1 ? L.items[k - 1] : null;
-    if (item) { S.screen = L.prev; item.act(); }
-    return;
-  }
-  if (id === 'down') L.page = Math.min(pages - 1, L.page + 1);
-  else if (id === 'up') L.page = Math.max(0, L.page - 1);
-  else if (id === 'ac') { S.screen = L.prev; if (L.back) L.back(); }
-  else if (k >= 1 && k <= 4) {
-    const item = L.items[L.page * 4 + k - 1];
-    if (!item) return;
-    S.screen = L.prev;
-    item.act();
-  }
+  const run = (item) => { if (!item) return; S.screen = L.prev; item.act(); };
+  if (id === 'down') L.sel = (L.sel + 1) % n;
+  else if (id === 'up') L.sel = (L.sel + n - 1) % n;
+  else if (id === 'right' || id === 'eq') return run(L.items[L.sel]);
+  else if (id === 'ac' || id === 'left') { S.screen = L.prev; if (L.back) L.back(); return; }
+  else if (L.grid) return run(k >= 1 ? L.items[k - 1] : null);
+  else if (k >= 1 && k <= 4) return run(L.items[L.page * 4 + k - 1]);
+  if (!L.grid) L.page = Math.floor(L.sel / 4);
 }
 const numLabel = (i) => (i < 9 ? String(i + 1) : 'ABCDEFM'[i - 9] || '<i>x</i>');
 function listHTML() {
   const L = S.list;
   if (L.grid) {
-    const cells = L.items.map((it, i) => `<div class="gl-cell gl-clickable" data-list-idx="${i}" role="button">${numLabel(i)}:${it.label}</div>`).join('');
+    const cells = L.items.map((it, i) => `<div class="gl-cell gl-clickable${i === L.sel ? ' on' : ''}" data-list-idx="${i}" role="button">${numLabel(i)}:${it.label}</div>`).join('');
     return `<div class="grid-list${L.items.length > 8 ? ' dense' : ''}" style="grid-template-columns:repeat(${L.cols},1fr)">${cells}</div>`;
   }
   const pages = Math.ceil(L.items.length / 4);
-  const rows = L.items.slice(L.page * 4, L.page * 4 + 4).map((it, j) => `<div class="ln ln-clickable" data-list-idx="${L.page * 4 + j}" role="button">${j + 1}:${it.label}</div>`);
+  const rows = L.items.slice(L.page * 4, L.page * 4 + 4).map((it, j) => `<div class="ln ln-clickable${L.page * 4 + j === L.sel ? ' on' : ''}" data-list-idx="${L.page * 4 + j}" role="button">${j + 1}:${it.label}</div>`);
   return (L.title ? `<div class="ln">${L.title}</div>` : '') + rows.join('') + (pages > 1 ? scrollbar(L.page, pages) : '');
 }
 
@@ -236,7 +249,7 @@ const entryHTML = (buf) => `${buf.replace(/-/g, '−').replace('e', '×10').repl
 
 function setupKey(id) {
   const st = S.setup;
-  const k = keyNum(id);
+  let k = keyNum(id);
 
   if (st.sub === 'contrast') {
     if (id === 'left') S.cfg.contrast = Math.max(1, S.cfg.contrast - 1);
@@ -245,31 +258,38 @@ function setupKey(id) {
     return;
   }
   if (st.fmtType) { // waiting for Fix/Sci digits or Norm 1~2
-    if (id === 'ac') { st.fmtType = null; return; }
+    if (id === 'ac' || id === 'left') { st.fmtType = null; return; }
     const ok = st.fmtType === 'Norm' ? k === 1 || k === 2 : k !== null && k <= 9;
     if (ok) { S.cfg.fmt = { type: st.fmtType, n: k }; backToCalc(); }
     return;
   }
   if (st.sub) {
-    if (id === 'ac') { st.sub = null; return; }
+    if (id === 'ac' || id === 'left') { st.sub = null; return; }
     const sub = SETUP_SUB[st.sub];
+    const m = sub.opts.length;
+    if (id === 'down') { st.srow = (st.srow + 1) % m; return; }
+    if (id === 'up') { st.srow = (st.srow + m - 1) % m; return; }
+    if (id === 'right' || id === 'eq') k = st.srow + 1;
     if (k >= 1 && k <= sub.opts.length) {
       const val = sub.vals[k - 1];
       if (st.sub === 'fmt') { st.fmtType = val; return; }
-      if (sub.next) { st.sub = sub.next(val); return; } // nested setting page
+      if (sub.next) { st.sub = sub.next(val); st.srow = 0; return; } // nested setting page
       if (sub.apply) sub.apply(val); else S.cfg[st.sub] = val;
       backToCalc();
     }
     return;
   }
-  // top level list
-  if (id === 'down') st.page = Math.min(SETUP_PAGES.length - 1, st.page + 1);
-  else if (id === 'up') st.page = Math.max(0, st.page - 1);
-  else if (id === 'ac') backToCalc();
+  // top level list: the highlight walks across pages
+  const P = SETUP_PAGES.length;
+  if (id === 'right' || id === 'eq') k = st.row + 1;
+  if (id === 'down') { if (++st.row >= SETUP_PAGES[st.page].length) { st.page = (st.page + 1) % P; st.row = 0; } }
+  else if (id === 'up') { if (--st.row < 0) { st.page = (st.page + P - 1) % P; st.row = SETUP_PAGES[st.page].length - 1; } }
+  else if (id === 'ac' || id === 'left') backToCalc();
   else if (k >= 1 && k <= SETUP_PAGES[st.page].length) {
     const [name, key] = SETUP_PAGES[st.page][k - 1];
     if (!key) notAvailable(name, 'setup');
-    else st.sub = key;
+    else if (key === 'about') openAbout('setup');
+    else { st.sub = key; st.srow = 0; }
   }
 }
 
@@ -404,16 +424,18 @@ function panelHTML() {
       return `<div class="mi${i === S.menuSel ? ' on' : ''}" data-menu-idx="${i}" role="button" tabindex="0"><span class="ico">${m.icon}</span><span class="n">${m.k}</span></div>`;
     }).join('');
     const sel = MENU_ITEMS[S.menuSel];
-    const arrows = `<span class="arr">${S.menuTop > 0 ? '<b data-arr="up" title="Previous page">▲</b>' : ''}${S.menuTop < 1 ? '<b data-arr="down" title="Next page">▼</b>' : ''}</span>`;
+    const arrows = `<span class="arr">${S.menuTop > 0 ? '<b data-arr="up" title="Previous page">▲</b>' : ''}${(S.menuTop + 2) * 4 < MENU_ITEMS.length ? '<b data-arr="down" title="Next page">▼</b>' : ''}</span>`;
     return `<div class="menu-grid">${cells}</div><div class="menu-label" data-menu-label="${S.menuSel}" role="button">${sel.k}:${sel.name}${arrows}</div>`;
   }
 
   if (S.screen === 'solve') return solveHTML();
+  if (S.screen === 'steps') return CASUI.stepsHTML();
   if (S.screen === 'list') return listHTML();
   if (S.screen === 'app') { const app = curApp(); return app && app.render ? app.render() : ''; }
 
   if (S.screen === 'recall') return recallHTML();
   if (S.screen === 'msg') {
+    if (S.msg.about) return ABOUT_HTML;
     if (S.msg.confirm) return lines([S.msg.name, '', '<span class="msg-btn" data-act="eq" role="button">[=] :Yes</span>', '<span class="msg-btn" data-act="ac" role="button">[AC] :Cancel</span>']);
     if (S.msg.title) return `<div class="vr center big">${S.msg.name}</div><div class="hint msg-btn" data-act="ac" role="button">[AC] :Back</div>`;
     return lines([S.msg.name, '', 'Not available', 'in this version']) + '<div class="hint msg-btn" data-act="ac" role="button">[AC] :Back</div>';
@@ -431,15 +453,15 @@ function panelHTML() {
   }
   if (st.sub) {
     const sub = SETUP_SUB[st.sub];
-    const opts = sub.opts.map((o, i) => `<div class="ln ln-clickable" data-setup-k="${i + 1}" role="button">${i + 1}:${o}</div>`);
+    const opts = sub.opts.map((o, i) => `<div class="ln ln-clickable${i === st.srow ? ' on' : ''}" data-setup-k="${i + 1}" role="button">${i + 1}:${o}</div>`);
     return (sub.title ? `<div class="ln">${sub.title}</div>` : '') + opts.join('');
   }
-  const items = SETUP_PAGES[st.page].map(([name], i) => `<div class="ln ln-clickable" data-setup-k="${i + 1}" role="button">${i + 1}:${name}</div>`);
+  const items = SETUP_PAGES[st.page].map(([name], i) => `<div class="ln ln-clickable${i === st.row ? ' on' : ''}" data-setup-k="${i + 1}" role="button">${i + 1}:${name}</div>`);
   return items.join('') + scrollbar(st.page, SETUP_PAGES.length);
 }
 
 /* ---------- Tapping the LCD: MENU icons, SETUP rows, lists, dialogs ---------- */
-const NUM_KEY = { A: 'neg', B: 'dms', C: 'inv' }; // menu numbers A-C live on these keys
+const NUM_KEY = { A: 'neg', B: 'dms', C: 'inv', D: 'sin', E: 'cos' }; // menu numbers A-E live on these keys
 function panelTap(e) {
   if (!S.power || S.screen === 'calc') return;
   const hit = (sel) => e.target.closest(sel);
@@ -458,14 +480,15 @@ function panelTap(e) {
   else if ((el = hit('[data-act]'))) {
     const a = el.dataset.act;
     if (a !== 'sb') screenKey(a);
-    else if (S.screen === 'setup') S.setup.page = (S.setup.page + 1) % SETUP_PAGES.length;
-    else if (S.screen === 'list' && S.list) S.list.page = (S.list.page + 1) % Math.max(1, Math.ceil(S.list.items.length / 4));
+    else if (S.screen === 'setup') { S.setup.page = (S.setup.page + 1) % SETUP_PAGES.length; S.setup.row = 0; }
+    else if (S.screen === 'app') screenKey('down');
+    else if (S.screen === 'list' && S.list) { S.list.page = (S.list.page + 1) % Math.max(1, Math.ceil(S.list.items.length / 4)); S.list.sel = S.list.page * 4; }
   } else if ((el = hit('.ln, .hint, .vr, .gl-cell'))) {
     // app screens: rows written as "2:Name" or "[=] :Yes" act like pressing that key
     const t = el.textContent.trim();
     let m;
     if ((m = t.match(/^\[(=|AC)\]/))) screenKey(m[1] === '=' ? 'eq' : 'ac');
-    else if ((m = t.match(/^([1-9A-C]):/))) screenKey(NUM_KEY[m[1]] || m[1], false, false);
+    else if ((m = t.match(/^([1-9A-E]):/))) screenKey(NUM_KEY[m[1]] || m[1], false, false);
     else return;
   } else return;
   if (window.triggerHaptic) window.triggerHaptic();

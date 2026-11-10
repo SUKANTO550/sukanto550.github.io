@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@500;700;800&family=Saira+Semi+Condensed:wght@500;600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="modes/modes.css" />
+  <link rel="stylesheet" href="calculus/calculus.css" />
 </head>
 <body>
   <main class="calc" id="calc">
@@ -52,6 +53,11 @@
   <script src="modes/table.js"></script>
   <script src="modes/matvec.js"></script>
   <script src="modes/complex.js"></script>
+  <script src="modes/series.js"></script>
+  <script src="modes/algebra.js"></script>
   <script src="script.js"></script>
+  <!-- Indefinite calculus: JS engine + UI. SymPy (calculus/pyodide/) loads only when an integral needs it. -->
+  <script src="calculus/cas.js"></script>
+  <script src="calculus/cas-ui.js"></script>
 </body>
 </html>
