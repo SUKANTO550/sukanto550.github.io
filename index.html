@@ -162,6 +162,26 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .skill:hover{border-color:var(--cool);box-shadow:0 0 24px -6px var(--cool);transform:translateY(-3px)}
 .skill em{font-style:normal;color:var(--muted);font-size:.78rem;margin-left:6px}
 
+/* YouTube teaser button */
+.ytb{--a:0deg;position:relative;display:flex;align-items:center;gap:16px;margin-top:28px;max-width:560px;padding:14px 18px 14px 14px;border-radius:20px;text-decoration:none;color:var(--ink);background:#0b1020;isolation:isolate;transition:transform .25s}
+.ytb:before{content:"";position:absolute;inset:-2px;border-radius:22px;z-index:-1;background:conic-gradient(from var(--a),#ff0033,var(--sun),var(--cool),var(--violet),#ff0033);animation:ytspin 6s linear infinite}
+.ytb:after{content:"";position:absolute;inset:0;border-radius:20px;z-index:-1;background:#0b1020}
+@property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes ytspin{to{--a:360deg}}
+.ytb:hover{transform:translateY(-3px)}
+.ytb:hover:before{filter:drop-shadow(0 0 18px #ff003366)}
+.ytb-play{position:relative;flex:none;width:58px;height:42px;border-radius:12px;background:#ff0033;display:grid;place-items:center;box-shadow:0 6px 24px -6px #ff0033}
+.ytb-play:before{content:"";position:absolute;inset:0;border-radius:12px;border:2px solid #ff0033;animation:ytping 2s ease-out infinite}
+@keyframes ytping{to{transform:scale(1.5);opacity:0}}
+.ytb-play i{width:0;height:0;border-left:15px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px;transition:transform .25s}
+.ytb:hover .ytb-play i{transform:scale(1.2)}
+.ytb-txt{flex:1;min-width:0}
+.ytb-txt small{display:block;font:600 .74rem "JetBrains Mono";letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ytb-txt b{display:block;font:600 1.02rem Inter;line-height:1.35;margin-top:2px;transition:opacity .35s,transform .35s}
+.ytb-txt b.out{opacity:0;transform:translateY(6px)}
+.ytb-go{flex:none;font:600 .85rem Inter;color:var(--sun);white-space:nowrap}
+@media (max-width:520px){.ytb-go{display:none}}
+
 /* contact */
 #contact{text-align:center}
 .big{font-size:clamp(2.2rem,6vw,4.6rem);margin:.2em 0 .4em}
@@ -246,6 +266,11 @@ footer{text-align:center;color:var(--muted);font-size:.82rem;padding:40px 0;bord
       <div class="fact"><small>Focus</small>Perovskite & bifacial PV</div>
       <div class="fact"><small>Seeking</small>Funded Master's / PhD</div>
     </div>
+    <a class="ytb" href="https://www.youtube.com/@AcademicGuideBySukanto" target="_blank" rel="noopener" aria-label="Academic Guide by Sukanto on YouTube: concept videos in Bangla">
+      <span class="ytb-play"><i></i></span>
+      <span class="ytb-txt"><small>I also teach · Academic Guide on YouTube</small><b id="ytQ">Tough concepts, explained simply.</b></span>
+      <span class="ytb-go">Find out ↗</span>
+    </a>
   </div>
 </div></section>
 
@@ -553,6 +578,10 @@ function over(){run=false;const s=Math.floor(E);if(s>best){best=s;try{localStora
  $('#overlay').style.display='grid';$('#startBtn').onclick=start}
 function start(){$('#overlay').style.display='none';reset();run=true;requestAnimationFrame(step)}
 $('#startBtn').onclick=start;size();reset();draw();})();
+/* ================= YouTube teaser: rotating lines ================= */
+(()=>{const Q=['Tough concepts, explained simply.','Understand the why, not just the formula.','Step-by-step lessons, in Bangla.','Learn it once. Understand it for good.','Free academic videos. Press play.'];
+ const el=$('#ytQ');if(!el||reduce)return;let i=0;
+ setInterval(()=>{el.classList.add('out');setTimeout(()=>{i=(i+1)%Q.length;el.textContent=Q[i];el.classList.remove('out')},350)},3200)})();
 </script>
 </body>
 </html>
