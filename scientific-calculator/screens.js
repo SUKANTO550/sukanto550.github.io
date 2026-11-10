@@ -65,8 +65,11 @@ function backToCalc() { S.screen = S.prevScreen || 'calc'; }
 function notAvailable(name, back) { S.msg = { name, back }; S.screen = 'msg'; }
 // creator attribution (SHIFT OPTN, SETUP > About); any key returns
 function openAbout(back) { rememberScreen(); S.msg = { about: true, back: back || S.prevScreen || 'calc' }; S.screen = 'msg'; }
-const ABOUT_HTML = '<div class="about">'
+const APP_VERSION = '1.4.1'; // keep in step with versionName in the Android app's build.gradle
+const PORTFOLIO_URL = 'https://sukanto550.github.io/';
+const ABOUT_HTML = `<div class="about" data-href="${PORTFOLIO_URL}" role="link" title="Open Sukanto's portfolio">`
   + '<div class="ab-t">Scientific Calculator</div>'
+  + `<div class="ab-v">Version ${APP_VERSION}</div>`
   + '<div class="ab-rule"></div>'
   + '<div class="ab-s">Created by</div>'
   + '<div class="ab-n">Sukanto Biswas</div>'
@@ -466,6 +469,12 @@ function panelTap(e) {
   if (!S.power || S.screen === 'calc') return;
   const hit = (sel) => e.target.closest(sel);
   let el;
+  // About: open the portfolio (the Android app hands non-app links to the external browser)
+  if ((el = hit('[data-href]'))) {
+    if (window.AndroidBridge) location.href = el.dataset.href;
+    else window.open(el.dataset.href, '_blank', 'noopener');
+    return;
+  }
   if ((el = hit('[data-menu-idx]'))) { S.menuSel = +el.dataset.menuIdx; selectMenu(S.menuSel); }
   else if ((el = hit('[data-arr]'))) menuKey(el.dataset.arr);
   else if (hit('.menu-label')) selectMenu(S.menuSel);

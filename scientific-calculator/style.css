@@ -932,9 +932,11 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 /* About screen (SHIFT OPTN / SETUP > About) */
 .about { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: calc(6 * var(--s)); }
 .about .ab-t { font-weight: 700; font-size: calc(34 * var(--s)); }
+.about .ab-v { font-size: calc(22 * var(--s)); }
 .about .ab-rule { width: 70%; border-top: calc(2 * var(--s)) solid var(--lcd-ink); margin: calc(6 * var(--s)) 0; }
 .about .ab-s { font-size: calc(28 * var(--s)); }
 .about .ab-n { font-weight: 700; font-size: calc(40 * var(--s)); margin: calc(2 * var(--s)) 0; }
+.about[data-href] { cursor: pointer; }
 .about .ab-c { font-size: calc(24 * var(--s)); margin-top: calc(8 * var(--s)); }
 
 /* highlighted row in option lists (▲▼ move, ▶ or = enters, ◀ back) */
