@@ -176,11 +176,35 @@
     S.casSteps = { mode, sx: 0, sy: 0 };
     S.screen = 'steps';
   }
-  // keys 1 / 2 open the steps only while the two buttons are on screen
+  // keys 1 / 2 open the steps only while the two buttons are on screen;
+  // ◀ ▶ scroll an answer wider than the screen (◀ at its left end edits as usual)
   function calcKey(id, shifted, alpha) {
-    if (shifted || alpha || !ready() || (id !== '1' && id !== '2')) return false;
+    if (shifted || alpha || !ready()) return false;
+    if (id === 'left' || id === 'right') return scrollAns(id === 'left' ? -1 : 1);
+    if (id !== '1' && id !== '2') return false;
     openSteps(+id);
     return true;
+  }
+
+  /* ---------- sideways scrolling of a long answer ---------- */
+  function ansEl() { return document.querySelector('#result .cas-ans'); }
+  function scrollAns(d) {
+    const el = ansEl(), r = S.symRes;
+    if (!el) return false;
+    const max = el.scrollWidth - el.clientWidth;
+    if (max <= 1) return false; // answer fits: ◀ ▶ edit
+    const x = Math.min(r.sx || 0, max);
+    if (d < 0 && x <= 0) { r.sx = 0; return false; } // already at the start: edit
+    r.sx = Math.max(0, Math.min(max, x + d * el.clientWidth * 0.4));
+    return true;
+  }
+  // the result line is rebuilt on every render: restore the scroll position
+  function afterResult() {
+    const el = ansEl(), r = S.symRes;
+    if (!el || !r) return;
+    el.scrollLeft = r.sx || 0;
+    r.sx = el.scrollLeft;
+    el.addEventListener('scroll', () => { r.sx = el.scrollLeft; }, { passive: true });
   }
   function stepsHTML() {
     const st = S.casSteps, r = S.symRes;
@@ -223,5 +247,5 @@
     render();
   });
 
-  window.CASUI = { handles, run, warm, calcKey, resultHTML, stepsHTML, stepsKey, afterRender, ready, bridge: B, ask };
+  window.CASUI = { handles, run, warm, calcKey, resultHTML, afterResult, stepsHTML, stepsKey, afterRender, ready, bridge: B, ask };
 })();

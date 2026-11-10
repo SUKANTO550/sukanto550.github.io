@@ -22,6 +22,9 @@
   font-size: calc(var(--row) * .72);
   line-height: 1.15;
 }
+/* the answer wrapper takes the line width (not the answer's), so a long answer
+   scrolls inside .cas-ans instead of overflowing off the left edge */
+.calc.cas-sym .result-line .res { display: flex; flex: 1 1 0; min-width: 0; }
 .cas-res { display: flex; flex-direction: column; width: 100%; min-width: 0; }
 /* long answers scroll sideways; margin-left:auto keeps short ones right-aligned */
 .cas-ans {

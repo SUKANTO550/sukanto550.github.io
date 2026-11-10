@@ -759,6 +759,7 @@ function render() {
   }
   result.innerHTML = `<span class="res">${r}</span>`;
   balanceFracs(result);
+  if (symShown) CASUI.afterResult(); // keep the sideways scroll of a long answer
 }
 
 /* ---------- Keyboard support ---------- */
