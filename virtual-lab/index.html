@@ -160,16 +160,16 @@ body.touch #joy{display:block} body.touch #joyUD{display:flex}
 <div id="loading">Loading the lab…</div>
 
 <!-- Equipment models: one file per tool (plain scripts, so opening index.html by double-click works) -->
-<script src="equipment/tweezers.js?v=1.0"></script>
-<script src="equipment/spatula.js?v=1.0"></script>
-<script src="equipment/pipette.js?v=1.0"></script>
-<script src="equipment/micropipette.js?v=1.0"></script>
-<script src="equipment/syringe.js?v=1.0"></script>
-<script src="equipment/hotplate.js?v=1.0"></script>
-<script src="equipment/consumables.js?v=1.0"></script>
-<script src="equipment/tools.js?v=1.0"></script>
-<script src="equipment/stands.js?v=1.0"></script>
-<script src="equipment/slidecutter.js?v=1.0"></script>
+<script src="equipment/tweezers.js?v=1.1"></script>
+<script src="equipment/spatula.js?v=1.1"></script>
+<script src="equipment/pipette.js?v=1.1"></script>
+<script src="equipment/micropipette.js?v=1.1"></script>
+<script src="equipment/syringe.js?v=1.1"></script>
+<script src="equipment/hotplate.js?v=1.1"></script>
+<script src="equipment/consumables.js?v=1.1"></script>
+<script src="equipment/tools.js?v=1.1"></script>
+<script src="equipment/stands.js?v=1.1"></script>
+<script src="equipment/slidecutter.js?v=1.1"></script>
 <script type="importmap">
 {"imports":{
   "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
@@ -1675,7 +1675,8 @@ function showTip(it, x, y) {
   tipEl.style.left = Math.min(x + 16, innerWidth - w - 8) + 'px'; tipEl.style.top = Math.min(y + 16, innerHeight - h - 8) + 'px';
 }
 // Settings (remembered in this browser): bottom bar tips / "Holding …" line
-const SET = { tips: !COARSE, holding: true };       // touch: tips bar off by default (joystick lives at the bottom)
+const SET_ROT = { pivot: 'depth', speed: 1, smooth: 14, thr: 8, grab: 0, invX: false, invY: false, dot: true };   // rotation defaults
+const SET = { tips: !COARSE, holding: true, ...SET_ROT };       // touch: tips bar off by default (joystick lives at the bottom)
 try { Object.assign(SET, JSON.parse(localStorage.getItem('vl_settings') || '{}')); } catch (e) {}
 const saveSet = () => { try { localStorage.setItem('vl_settings', JSON.stringify(SET)); } catch (e) {} };
 function updateHand() {
@@ -1686,7 +1687,7 @@ function updateHand() {
   if (held) el.innerHTML = COARSE ? `Holding <b></b> — tap a free spot (or slide your finger there and lift) · tap another item to use it with <button class="pb">Put back</button>`
     : `Holding <b></b> — click a free spot to put it down · click another item to use it with · <b>Esc</b> puts it back <button class="pb">Put back</button>`;
   else if (COARSE) el.innerHTML = `<b>Tap</b> to pick up / place / open · <b>drag an item</b> to move it · <b>one finger</b> look around · <b>two fingers</b> pinch to go closer, drag to pan · <b>long-press</b> info · <b>joystick</b> walk`;
-  else el.innerHTML = `<b>Drag</b> an item to move it (drop it on another item to use them together) · <b>Left-click</b> to pick up / open a machine · <b>W A S D</b> walk · <b>Q/E</b> crouch/stand · <b>Wheel</b> move towards what is under the cursor · <b>Right-drag</b> rotate around the spot under the mouse · <b>Middle-drag</b> pan`;
+  else el.innerHTML = `<b>Drag</b> an item to move it (drop it on another item to use them together) · <b>Left-click</b> to pick up / open a machine · <b>W A S D</b> walk · <b>Q/E</b> crouch/stand · <b>Wheel</b> move towards what is under the cursor · <b>Right-drag</b> rotate · <b>Middle-drag</b> pan`;
   if (held) { el.querySelector('b').textContent = held.name; el.querySelector('.pb').onclick = () => putBack(); }
 }
 
@@ -1721,22 +1722,47 @@ function amountDialog({ title, text, min, max, step, value, unit, fmt, ok }) {
 }
 
 $('#bHelp').onclick = () => openDlg(`<h3>How to use the Virtual Lab</h3>
-<p><b>Camera:</b> the area buttons put you where a person would stand. Walk with W A S D, crouch/stand with Q/E. Scroll the mouse wheel over anything to move straight towards it — you can go right up to a label or display. Scroll back to move away. Right-drag rotates smoothly around the spot under the mouse (a small blue dot shows the centre). Middle-drag pans. Arrow keys also walk. (F jumps to a close view of the item under the cursor.) The buttons at the top jump back to each area.</p>
+<p><b>Camera:</b> the area buttons put you where a person would stand. Walk with W A S D, crouch/stand with Q/E. Scroll the mouse wheel over anything to move straight towards it — you can go right up to a label or display. Scroll back to move away. Right-drag rotates smoothly around the middle of the screen, at the depth of what you are looking at (a small blue dot shows the centre; change it in Settings). Middle-drag pans. Arrow keys also walk. (F jumps to a close view of the item under the cursor.) The buttons at the top jump back to each area.</p>
 <p><b>Drag and drop:</b> press the left button on any item (machines too), move the mouse and let go on a free spot. Let go on another item to open the menu of what you can do with the two (pour, draw, wash at the basin…). If the spot is not allowed it goes back where it was.</p>
 <p><b>Pick and place:</b> left-click an item to pick it up. Click a free spot on any table, shelf, rack, hotplate, oven shelf or balance pan to put it down. Esc puts it back where it was.</p>
 <p><b>Use things together:</b> while holding an item, click another item. A menu shows what you can do (pour, draw with a pipette, scoop with a spatula, drop in a stir bar, wash at the basin, throw in the waste bin…).</p>
 <p><b>Machines:</b> click a hotplate, the oven or the balance to open its controls. The hotplates live on the shelf under the main table — click one and choose Move to bring it up.</p>
 <p><b>Good practice:</b> items from the rack are dirty. Wash in the basin, rinse with acetone, ethanol or IPA (wash bottles are at the basin), and let them dry. Pour from the stock bottle into a working container first; never pipette from the stock bottle. Keep stock bottles on the chemical rack.</p>
-<p><b>Touch screens:</b> tap to pick up, put down or open a machine. Put a finger on an item and slide to move it. One finger on empty space looks around the spot under it; two fingers pinch to move closer or further and slide to pan. Long-press anything for its info card (with “Look closer”). The joystick (bottom left) walks; ▲ / ▼ stand up / crouch. While holding something, “Put back” is on the bottom bar.</p>
+<p><b>Touch screens:</b> tap to pick up, put down or open a machine. Put a finger on an item and slide to move it. One finger on empty space rotates the view; two fingers pinch to move closer or further and slide to pan. Long-press anything for its info card (with “Look closer”). The joystick (bottom left) walks; ▲ / ▼ stand up / crouch. While holding something, “Put back” is on the bottom bar.</p>
 <p>Warnings never stop you — they go to the mistake log.</p>
 <div class="row"><button onclick="document.getElementById('dlg').style.display='none'">Close</button></div>`);
 $('#bSet').onclick = () => openDlg(`<h3>Settings</h3><div class="set">
 <label><input type="checkbox" class="tips"> Show the control tips at the bottom</label>
-<label><input type="checkbox" class="hold"> Show what you are holding (bottom line)</label></div>
+<label><input type="checkbox" class="hold"> Show what you are holding (bottom line)</label>
+<div style="margin-top:14px;font-weight:700">Rotation (right-drag / one finger)</div>
+<div style="margin-top:8px">Rotation centre</div>
+<select data-k="pivot" style="width:100%;margin-top:6px;padding:8px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px">
+  <option value="depth">Middle of the screen, at viewing depth</option>
+  <option value="volume">Centre of the visible volume</option>
+  <option value="center">Surface at the middle of the screen</option>
+  <option value="cursor">Spot under the mouse / finger</option>
+</select>
+<div style="margin-top:10px">Speed <b class="v" data-f="speed"></b></div><input type="range" data-k="speed" min="0.3" max="2.5" step="0.05" style="width:100%">
+<div style="margin-top:6px">Smoothing <b class="v" data-f="smooth"></b></div><input type="range" data-k="smooth" min="4" max="60" step="1" style="width:100%">
+<div style="margin-top:6px">Start after finger moves <b class="v" data-f="thr"></b></div><input type="range" data-k="thr" min="2" max="30" step="1" style="width:100%">
+<div style="margin-top:6px">Finger on an item: moving it needs a hold of <b class="v" data-f="grab"></b></div><input type="range" data-k="grab" min="0" max="500" step="25" style="width:100%">
+<label><input type="checkbox" data-k="invX"> Invert left / right</label>
+<label><input type="checkbox" data-k="invY"> Invert up / down</label>
+<label><input type="checkbox" data-k="dot"> Show the rotation centre dot</label>
+<div class="row" style="justify-content:flex-start;margin-top:4px"><button class="rr">Reset rotation settings</button></div></div>
 <div class="row"><button onclick="document.getElementById('dlg').style.display='none'">Close</button></div>`, box => {
   const t = box.querySelector('.tips'), h = box.querySelector('.hold'); t.checked = SET.tips; h.checked = SET.holding;
   t.onchange = () => { SET.tips = t.checked; saveSet(); updateHand(); };
   h.onchange = () => { SET.holding = h.checked; saveSet(); updateHand(); };
+  const fmt = { speed: v => `${(+v).toFixed(2)}×`, smooth: v => +v >= 60 ? 'none (exact)' : +v >= 25 ? 'light' : +v >= 12 ? 'medium' : 'strong glide', thr: v => `${v} px`, grab: v => +v ? `${v} ms` : 'none (moves at once)' };
+  const sync = () => box.querySelectorAll('[data-k]').forEach(el => {
+    const k = el.dataset.k; if (el.type === 'checkbox') el.checked = !!SET[k]; else el.value = SET[k];
+    const v = box.querySelector(`.v[data-f="${k}"]`); if (v) v.textContent = fmt[k](SET[k]);
+  }); sync();
+  box.querySelectorAll('[data-k]').forEach(el => el.addEventListener(el.type === 'range' ? 'input' : 'change', () => {
+    const k = el.dataset.k; SET[k] = el.type === 'checkbox' ? el.checked : el.type === 'range' ? +el.value : el.value; saveSet(); sync();
+  }));
+  box.querySelector('.rr').onclick = () => { Object.assign(SET, SET_ROT); saveSet(); sync(); };
 });
 $('#bAbout').onclick = () => openDlg(`<div class="about"><div class="nm">Virtual Lab</div><hr><div>Created by</div><div><b>Sukanto Biswas</b></div><div>Mechanical Engineer</div><div style="margin-top:8px">© ${new Date().getFullYear()} FreeTility</div></div>
 <div class="row"><button onclick="document.getElementById('dlg').style.display='none'">Close</button></div>`);
@@ -2840,6 +2866,54 @@ qBtn.onclick = () => { QUALITY = QUALITY === 'high' ? 'normal' : 'high'; showQ()
   toast(QUALITY === 'high' ? 'High quality: soft contact shadows on.' : 'Normal quality: faster on slow PCs.'); };
 let clockAcc = 1;
 
+/* ---------- rotation centre (Settings: SET.pivot) ----------
+   depth  (default) middle of the screen, at the depth you are looking at
+   volume  centre of the visible volume in front of you
+   center  surface at the middle of the screen (single ray)
+   cursor  spot under the mouse / finger (the original behaviour) */
+const _vr = new THREE.Raycaster(), _v2 = new THREE.Vector2();
+const pickablesNow = () => scene.children.filter(o => o !== ring && o !== pivotDot && o.visible);
+function firstHit(list) {
+  for (const h of _vr.intersectObjects(list, true)) {
+    const o = h.object; if (!o.visible || o.material === HITMAT || (held && isInside(o, held.obj))) continue; return h;
+  }
+  return null;
+}
+// always on the line through the middle of the screen (so the middle stays put while turning), at the
+// weighted MEDIAN depth of a 5 x 5 grid of rays over the central half of the screen (middle rays count more)
+function viewDepthCenter() {
+  const cam = camera.position, fwd = new THREE.Vector3(); camera.getWorldDirection(fwd);
+  const list = pickablesNow(), samples = [];
+  for (let i = 0; i < 5; i++) for (let j = 0; j < 5; j++) {
+    const x = -0.5 + i * 0.25, y = -0.5 + j * 0.25; _v2.set(x, y); _vr.setFromCamera(_v2, camera);
+    const h = firstHit(list); if (h) samples.push({ d: h.point.clone().sub(cam).dot(fwd), w: Math.exp(-(x * x + y * y) / 0.18) });
+  }
+  let D = 1.5;
+  if (samples.length) {
+    samples.sort((a, b) => a.d - b.d);
+    const half = samples.reduce((t, q) => t + q.w, 0) / 2; let acc = 0;
+    for (const q of samples) { acc += q.w; if (acc >= half) { D = q.d; break; } }
+  }
+  return cam.clone().addScaledVector(fwd, Math.max(0.08, D));
+}
+// 7 x 5 rays; each ray to its first hit is a thin cone of visible space: centre 3/4 along, weight length^3
+function viewVolumeCenter() {
+  const c = new THREE.Vector3(), q = new THREE.Vector3(), list = pickablesNow(); let W = 0;
+  for (let i = 0; i < 7; i++) for (let j = 0; j < 5; j++) {
+    _v2.set(-0.9 + i * 0.3, -0.85 + j * 0.425); _vr.setFromCamera(_v2, camera);
+    const h = firstHit(list), L = h ? h.distance : 6, w = L * L * L;
+    q.copy(_vr.ray.origin).addScaledVector(_vr.ray.direction, 0.75 * L); c.addScaledVector(q, w); W += w;
+  }
+  return c.divideScalar(W);
+}
+const rotDX = dx => (SET.invX ? -1 : 1) * dx * 0.0055 * SET.speed, rotDY = dy => (SET.invY ? -1 : 1) * dy * 0.0045 * SET.speed;
+function rotationPivot(e) {
+  if (SET.pivot === 'volume') return viewVolumeCenter();
+  if (SET.pivot === 'center') return surfaceUnderMouse({ clientX: innerWidth / 2, clientY: innerHeight / 2 });
+  if (SET.pivot === 'cursor') return surfaceUnderMouse(e);
+  return viewDepthCenter();
+}
+
 /* ---------- rotate around the point under the mouse ---------- */
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const pivotDot = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), new THREE.MeshBasicMaterial({ color:0x4fb0ff, depthTest:false, transparent:true, opacity:0.9 }));
@@ -2880,15 +2954,15 @@ renderer.domElement.addEventListener('pointerdown', e => {
   if (e.button !== 2 && e.button !== 1) return;
   e.preventDefault(); camAnim = null;
   orbit.mode = e.button === 2 ? 'rotate' : 'pan';
-  orbit.pivot.copy(surfaceUnderMouse(e)); orbit.pivotDist = Math.max(0.05, orbit.pivot.distanceTo(camera.position));
+  orbit.pivot.copy(orbit.mode === 'rotate' ? rotationPivot(e) : surfaceUnderMouse(e)); orbit.pivotDist = Math.max(0.05, orbit.pivot.distanceTo(camera.position));
   orbit.lx = e.clientX; orbit.ly = e.clientY;
-  if (orbit.mode === 'rotate') { pivotDot.position.copy(orbit.pivot); pivotDot.visible = true; }
+  if (orbit.mode === 'rotate') { pivotDot.position.copy(orbit.pivot); pivotDot.visible = SET.dot; }
   renderer.domElement.setPointerCapture(e.pointerId);
 });
 renderer.domElement.addEventListener('pointermove', e => {
   if (!orbit.mode) return;
   const dx = e.clientX - orbit.lx, dy = e.clientY - orbit.ly; orbit.lx = e.clientX; orbit.ly = e.clientY;
-  if (orbit.mode === 'rotate') { orbit.yaw -= dx * 0.0055; orbit.pitch -= dy * 0.0045; }
+  if (orbit.mode === 'rotate') { orbit.yaw -= rotDX(dx); orbit.pitch -= rotDY(dy); }
   else { orbit.panX += dx; orbit.panY += dy; }
 });
 const endOrbit = e => { if (orbit.mode && (e.button === 2 || e.button === 1 || e.type === 'pointercancel')) orbit.mode = null; };
@@ -2896,7 +2970,7 @@ renderer.domElement.addEventListener('pointerup', endOrbit);
 renderer.domElement.addEventListener('pointercancel', endOrbit);
 // eased each frame -> smooth motion that glides to a stop
 function orbitTick(dt) {
-  const k = 1 - Math.exp(-dt * 14);
+  const k = SET.smooth >= 60 ? 1 : 1 - Math.exp(-dt * SET.smooth);   // 60 = no smoothing (follows exactly)
   const y = orbit.yaw * k, p = orbit.pitch * k, px = orbit.panX * k, py = orbit.panY * k;
   orbit.yaw -= y; orbit.pitch -= p; orbit.panX -= px; orbit.panY -= py;
   if (Math.abs(y) > 1e-6 || Math.abs(p) > 1e-6) orbitApply(y, p);
@@ -2954,7 +3028,7 @@ renderer.domElement.addEventListener('pointerdown', e => {
   tPts.set(e.pointerId, { x: e.clientX, y: e.clientY });
   mx = e.clientX; my = e.clientY; mouse.set((mx / innerWidth) * 2 - 1, -(my / innerHeight) * 2 + 1); hoverDirty = true;
   if (tPts.size === 1) {
-    tStart = { x: e.clientX, y: e.clientY }; tMode = null; tLongFired = false; clearTimeout(tLong);
+    tStart = { x: e.clientX, y: e.clientY, t: performance.now() }; tMode = null; tLongFired = false; clearTimeout(tLong);
     tLong = setTimeout(() => {                                                  // long-press: info card, no tap
       if (tPts.size === 1 && !dragging && !tMode && !held) { tLongFired = true; downAt = null; touchCard(tStart.x, tStart.y); }
     }, window.__longPressMs || 520);   // (tests on very slow software rendering can raise it)
@@ -2969,15 +3043,19 @@ renderer.domElement.addEventListener('pointermove', e => {
   if (tPts.size >= 2) { if (pinch) pinchMove(); return; }
   if (tMode === 'done' || tLongFired) return;
   const moved = Math.hypot(e.clientX - tStart.x, e.clientY - tStart.y);
-  if (moved > 8) clearTimeout(tLong);
+  if (moved > SET.thr) clearTimeout(tLong);
   if (dragging || held || (downAt && downAt.item && tMode !== 'orbit')) return;   // item drag / drop preview handle it
-  if (tMode !== 'orbit' && moved > 8) {                                         // start looking around
+  if (tMode !== 'orbit' && moved > SET.thr) {                                   // start rotating
     tMode = 'orbit'; downAt = null; camAnim = null; orbit.mode = 'rotate';
-    orbit.pivot.copy(surfaceUnderMouse({ clientX: tStart.x, clientY: tStart.y })); orbit.pivotDist = Math.max(0.05, orbit.pivot.distanceTo(camera.position));
-    pivotDot.position.copy(orbit.pivot); pivotDot.visible = true;
+    orbit.pivot.copy(rotationPivot({ clientX: tStart.x, clientY: tStart.y })); orbit.pivotDist = Math.max(0.05, orbit.pivot.distanceTo(camera.position));
+    pivotDot.position.copy(orbit.pivot); pivotDot.visible = SET.dot;
   }
-  if (tMode === 'orbit') { orbit.yaw -= dx * 0.0055; orbit.pitch -= dy * 0.0045; }
+  if (tMode === 'orbit') { orbit.yaw -= rotDX(dx); orbit.pitch -= rotDY(dy); }
 });
+renderer.domElement.addEventListener('pointermove', e => {     // item hold time (capture: runs before the item-drag code)
+  if (e.pointerType !== 'touch' || !tStart || !downAt || !downAt.item || dragging || held || !SET.grab) return;
+  if (performance.now() - tStart.t < SET.grab && Math.hypot(e.clientX - tStart.x, e.clientY - tStart.y) > 6) downAt.item = null;   // quick slide = rotate
+}, { capture: true });
 const touchEnd = e => {
   if (e.pointerType !== 'touch' || !tPts.has(e.pointerId)) return;
   tPts.delete(e.pointerId); clearTimeout(tLong);
