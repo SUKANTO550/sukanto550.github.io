@@ -160,16 +160,16 @@ body.touch #joy{display:block} body.touch #joyUD{display:flex}
 <div id="loading">Loading the lab…</div>
 
 <!-- Equipment models: one file per tool (plain scripts, so opening index.html by double-click works) -->
-<script src="equipment/tweezers.js?v=1.1"></script>
-<script src="equipment/spatula.js?v=1.1"></script>
-<script src="equipment/pipette.js?v=1.1"></script>
-<script src="equipment/micropipette.js?v=1.1"></script>
-<script src="equipment/syringe.js?v=1.1"></script>
-<script src="equipment/hotplate.js?v=1.1"></script>
-<script src="equipment/consumables.js?v=1.1"></script>
-<script src="equipment/tools.js?v=1.1"></script>
-<script src="equipment/stands.js?v=1.1"></script>
-<script src="equipment/slidecutter.js?v=1.1"></script>
+<script src="equipment/tweezers.js?v=1.2"></script>
+<script src="equipment/spatula.js?v=1.2"></script>
+<script src="equipment/pipette.js?v=1.2"></script>
+<script src="equipment/micropipette.js?v=1.2"></script>
+<script src="equipment/syringe.js?v=1.2"></script>
+<script src="equipment/hotplate.js?v=1.2"></script>
+<script src="equipment/consumables.js?v=1.2"></script>
+<script src="equipment/tools.js?v=1.2"></script>
+<script src="equipment/stands.js?v=1.2"></script>
+<script src="equipment/slidecutter.js?v=1.2"></script>
 <script type="importmap">
 {"imports":{
   "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
@@ -1675,7 +1675,7 @@ function showTip(it, x, y) {
   tipEl.style.left = Math.min(x + 16, innerWidth - w - 8) + 'px'; tipEl.style.top = Math.min(y + 16, innerHeight - h - 8) + 'px';
 }
 // Settings (remembered in this browser): bottom bar tips / "Holding …" line
-const SET_ROT = { pivot: 'depth', speed: 1, smooth: 14, thr: 8, grab: 0, invX: false, invY: false, dot: true };   // rotation defaults
+const SET_ROT = { pivot: 'depth', pull: 0.45, speed: 1, smooth: 14, thr: 8, grab: 0, invX: false, invY: false, dot: true };   // rotation defaults
 const SET = { tips: !COARSE, holding: true, ...SET_ROT };       // touch: tips bar off by default (joystick lives at the bottom)
 try { Object.assign(SET, JSON.parse(localStorage.getItem('vl_settings') || '{}')); } catch (e) {}
 const saveSet = () => { try { localStorage.setItem('vl_settings', JSON.stringify(SET)); } catch (e) {} };
@@ -1731,7 +1731,7 @@ $('#bHelp').onclick = () => openDlg(`<h3>How to use the Virtual Lab</h3>
 <p><b>Touch screens:</b> tap to pick up, put down or open a machine. Put a finger on an item and slide to move it. One finger on empty space rotates the view; two fingers pinch to move closer or further and slide to pan. Long-press anything for its info card (with “Look closer”). The joystick (bottom left) walks; ▲ / ▼ stand up / crouch. While holding something, “Put back” is on the bottom bar.</p>
 <p>Warnings never stop you — they go to the mistake log.</p>
 <div class="row"><button onclick="document.getElementById('dlg').style.display='none'">Close</button></div>`);
-$('#bSet').onclick = () => openDlg(`<h3>Settings</h3><div class="set">
+const openSettings = $('#bSet').onclick = () => openDlg(`<h3>Settings</h3><div class="set">
 <label><input type="checkbox" class="tips"> Show the control tips at the bottom</label>
 <label><input type="checkbox" class="hold"> Show what you are holding (bottom line)</label>
 <div style="margin-top:14px;font-weight:700">Rotation (right-drag / one finger)</div>
@@ -1742,6 +1742,7 @@ $('#bSet').onclick = () => openDlg(`<h3>Settings</h3><div class="set">
   <option value="center">Surface at the middle of the screen</option>
   <option value="cursor">Spot under the mouse / finger</option>
 </select>
+<div style="margin-top:10px">Pull towards where you click <b class="v" data-f="pull"></b></div><input type="range" data-k="pull" min="0" max="1" step="0.05" style="width:100%">
 <div style="margin-top:10px">Speed <b class="v" data-f="speed"></b></div><input type="range" data-k="speed" min="0.3" max="2.5" step="0.05" style="width:100%">
 <div style="margin-top:6px">Smoothing <b class="v" data-f="smooth"></b></div><input type="range" data-k="smooth" min="4" max="60" step="1" style="width:100%">
 <div style="margin-top:6px">Start after finger moves <b class="v" data-f="thr"></b></div><input type="range" data-k="thr" min="2" max="30" step="1" style="width:100%">
@@ -1754,7 +1755,7 @@ $('#bSet').onclick = () => openDlg(`<h3>Settings</h3><div class="set">
   const t = box.querySelector('.tips'), h = box.querySelector('.hold'); t.checked = SET.tips; h.checked = SET.holding;
   t.onchange = () => { SET.tips = t.checked; saveSet(); updateHand(); };
   h.onchange = () => { SET.holding = h.checked; saveSet(); updateHand(); };
-  const fmt = { speed: v => `${(+v).toFixed(2)}×`, smooth: v => +v >= 60 ? 'none (exact)' : +v >= 25 ? 'light' : +v >= 12 ? 'medium' : 'strong glide', thr: v => `${v} px`, grab: v => +v ? `${v} ms` : 'none (moves at once)' };
+  const fmt = { pull: v => `${Math.round(v * 100)} %${+v === 0 ? ' (ignore the click)' : +v === 1 ? ' (exactly where you click)' : ''}`, speed: v => `${(+v).toFixed(2)}×`, smooth: v => +v >= 60 ? 'none (exact)' : +v >= 25 ? 'light' : +v >= 12 ? 'medium' : 'strong glide', thr: v => `${v} px`, grab: v => +v ? `${v} ms` : 'none (moves at once)' };
   const sync = () => box.querySelectorAll('[data-k]').forEach(el => {
     const k = el.dataset.k; if (el.type === 'checkbox') el.checked = !!SET[k]; else el.value = SET[k];
     const v = box.querySelector(`.v[data-f="${k}"]`); if (v) v.textContent = fmt[k](SET[k]);
@@ -2907,11 +2908,33 @@ function viewVolumeCenter() {
   return c.divideScalar(W);
 }
 const rotDX = dx => (SET.invX ? -1 : 1) * dx * 0.0055 * SET.speed, rotDY = dy => (SET.invY ? -1 : 1) * dy * 0.0045 * SET.speed;
-function rotationPivot(e) {
+function clickDepthPoint(e) {
+  const cam = camera.position, list = pickablesNow(), samples = [];
+  const cx = (e.clientX / innerWidth) * 2 - 1, cy = -(e.clientY / innerHeight) * 2 + 1;
+  _v2.set(cx, cy); _vr.setFromCamera(_v2, camera); const dir = _vr.ray.direction.clone();
+  for (let i = 0; i < 5; i++) for (let j = 0; j < 5; j++) {
+    const ox = (i - 2) * 0.06, oy = (j - 2) * 0.06; _v2.set(cx + ox, cy + oy); _vr.setFromCamera(_v2, camera);
+    const h = firstHit(list); if (h) samples.push({ d: h.point.clone().sub(cam).dot(dir), w: Math.exp(-(ox * ox + oy * oy) / 0.008) });
+  }
+  let D = 1.5;
+  if (samples.length) {
+    samples.sort((a, b) => a.d - b.d);
+    const half = samples.reduce((t, q) => t + q.w, 0) / 2; let acc = 0;
+    for (const q of samples) { acc += q.w; if (acc >= half) { D = q.d; break; } }
+  }
+  return cam.clone().addScaledVector(dir, Math.max(0.08, D));
+}
+function basePivot(e) {
   if (SET.pivot === 'volume') return viewVolumeCenter();
   if (SET.pivot === 'center') return surfaceUnderMouse({ clientX: innerWidth / 2, clientY: innerHeight / 2 });
   if (SET.pivot === 'cursor') return surfaceUnderMouse(e);
   return viewDepthCenter();
+}
+// The base centre, pulled towards where you click by SET.pull (0 = ignore the click, 1 = exactly there)
+function rotationPivot(e) {
+  const base = basePivot(e);
+  if (SET.pivot === 'cursor' || !SET.pull) return base;
+  return base.lerp(clickDepthPoint(e), SET.pull);
 }
 
 /* ---------- rotate around the point under the mouse ---------- */
