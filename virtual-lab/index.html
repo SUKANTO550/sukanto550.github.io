@@ -160,16 +160,32 @@ body.touch #joy{display:block} body.touch #joyUD{display:flex}
 <div id="loading">Loading the lab…</div>
 
 <!-- Equipment models: one file per tool (plain scripts, so opening index.html by double-click works) -->
-<script src="equipment/tweezers.js?v=1.2"></script>
-<script src="equipment/spatula.js?v=1.2"></script>
-<script src="equipment/pipette.js?v=1.2"></script>
-<script src="equipment/micropipette.js?v=1.2"></script>
-<script src="equipment/syringe.js?v=1.2"></script>
-<script src="equipment/hotplate.js?v=1.2"></script>
-<script src="equipment/consumables.js?v=1.2"></script>
-<script src="equipment/tools.js?v=1.2"></script>
-<script src="equipment/stands.js?v=1.2"></script>
-<script src="equipment/slidecutter.js?v=1.2"></script>
+<script src="equipment/tweezers.js?v=1.3"></script>
+<script src="equipment/spatula.js?v=1.3"></script>
+<script src="equipment/pipette.js?v=1.3"></script>
+<script src="equipment/micropipette.js?v=1.3"></script>
+<script src="equipment/syringe.js?v=1.3"></script>
+<script src="equipment/hotplate.js?v=1.3"></script>
+<script src="equipment/consumables.js?v=1.3"></script>
+<script src="equipment/tools.js?v=1.3"></script>
+<script src="equipment/stands.js?v=1.3"></script>
+<script src="equipment/slidecutter.js?v=1.3"></script>
+<script src="equipment/watchglass.js?v=1.3"></script>
+<!-- close-up action clips (actions/*.js) + the file that connects them to this lab (actions/lab_hooks.js) -->
+<script src="actions/player.js?v=1.3"></script>
+<script src="actions/spatula_transfer.js?v=1.3"></script>
+<script src="actions/stock_pour.js?v=1.3"></script>
+<script src="actions/glass_cut.js?v=1.3"></script>
+<script src="actions/wash_bottle.js?v=1.3"></script>
+<script src="actions/beaker_pour.js?v=1.3"></script>
+<script src="actions/pipette_pump.js?v=1.3"></script>
+<script src="actions/micropipette.js?v=1.3"></script>
+<script src="actions/dropper.js?v=1.3"></script>
+<script src="actions/syringe.js?v=1.3"></script>
+<script src="equipment/toolstand.js?v=1.3"></script>
+<script src="actions/tool_rules.js?v=1.3"></script>
+<script src="actions/auto_clean.js?v=1.3"></script>
+<script src="actions/lab_hooks.js?v=1.3"></script>
 <script type="importmap">
 {"imports":{
   "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
@@ -178,6 +194,7 @@ body.touch #joy{display:block} body.touch #joyUD{display:flex}
 </script>
 <script type="module">
 import * as THREE from 'three';
+const HK = window.LAB_HOOKS || {};   // actions/lab_hooks.js: close-up clips get the first say at pour / draw / dispense
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { toCreasedNormals, mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -791,6 +808,7 @@ function capOn(cap, v) {
 function capOffBeside(v, near = v) {
   const cap = v.cap; if (!cap) return;
   v.cap = null; cap.onVessel = null; v.obj.remove(cap.obj); cap.baseY = 0; cap.prevVessel = v;
+  if (HK.opened) HK.opened(v);
   // nearest free spot around the vessel (or the item it is held over; on a hotplate -> around the hotplate)
   let base = near, s = near.surface; if (s && s.snap && s.owner) { base = s.owner; s = s.owner.surface; }
   let p = null;
@@ -1462,15 +1480,69 @@ const bin = makeItem({ type:'bin', fixed:true, name:'Waste bin (chemical waste +
 /* =====================================================================
    POPULATE
    ===================================================================== */
+/* ---------- footprints ----------
+   Round items: a circle of radius it.r. LONG items (length >= 2 x width: spatula, rod, tweezers, lying
+   pipettes, stir bars, slides...) : a rectangle that turns with the item (it.rotY), so sticks can lie
+   side by side. A long item lies along the surface length (local x); 90 deg is tried when that does not fit. */
+function fpOf(it) {
+  if (it._fp !== undefined) return it._fp;
+  if (it.machine || it.fixed || it.vessel || it.slots) return (it._fp = null);
+  const wasUp = it.upright, rot = it.obj.rotation.y;
+  if (it.lie) setPose(it, false);
+  it.obj.rotation.y = 0; it.obj.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(it.obj.matrixWorld).invert(), b = new THREE.Box3(), t = new THREE.Box3(), m = new THREE.Matrix4();
+  (function walk(o) { if (!o.visible) return; if (o.isMesh && o.material !== HITMAT) { o.geometry.computeBoundingBox(); t.copy(o.geometry.boundingBox).applyMatrix4(m.multiplyMatrices(inv, o.matrixWorld)); b.union(t); } o.children.forEach(walk); })(it.obj);
+  it.obj.rotation.y = rot; if (it.lie && wasUp) setPose(it, true);
+  if (b.isEmpty()) return (it._fp = null);
+  const hx = (b.max.x - b.min.x) / 2 + 0.002, hz = (b.max.z - b.min.z) / 2 + 0.002;
+  if (Math.max(hx, hz) < 2 * Math.min(hx, hz)) return (it._fp = null);
+  return (it._fp = { hx, hz, cx: (b.max.x + b.min.x) / 2, cz: (b.max.z + b.min.z) / 2, along: hz > hx ? Math.PI / 2 : 0 });
+}
+// shape of it at (x, z) turned by rot, in surface coordinates
+function fpShape(it, x, z, rot) {
+  const f = fpOf(it); if (!f) return { c: true, x, z, r: it.r };
+  const co = Math.cos(rot), si = Math.sin(rot);
+  return { c: false, x: x + f.cx * co + f.cz * si, z: z - f.cx * si + f.cz * co, hx: f.hx, hz: f.hz, u: [co, -si], v: [si, co] };
+}
+function fpExt(it, rot) {                    // half extents along the surface x / z (edge fitting)
+  const f = fpOf(it); if (!f) return { ex: it.r, ez: it.r, ox: 0, oz: 0 };
+  const co = Math.abs(Math.cos(rot)), si = Math.abs(Math.sin(rot)), C = Math.cos(rot), S = Math.sin(rot);
+  return { ex: co * f.hx + si * f.hz, ez: si * f.hx + co * f.hz, ox: f.cx * C + f.cz * S, oz: -f.cx * S + f.cz * C };
+}
+function shapesHit(A, B, gap) {
+  if (A.c && B.c) return Math.hypot(A.x - B.x, A.z - B.z) < A.r + B.r + gap;
+  if (A.c !== B.c) {                         // rectangle vs circle
+    const R = A.c ? B : A, C = A.c ? A : B, dx = C.x - R.x, dz = C.z - R.z;
+    const lx = Math.max(-R.hx, Math.min(R.hx, dx * R.u[0] + dz * R.u[1])), lz = Math.max(-R.hz, Math.min(R.hz, dx * R.v[0] + dz * R.v[1]));
+    const px = R.x + lx * R.u[0] + lz * R.v[0], pz = R.z + lx * R.u[1] + lz * R.v[1];
+    return Math.hypot(C.x - px, C.z - pz) < C.r + gap;
+  }
+  const dx = B.x - A.x, dz = B.z - A.z;       // rectangle vs rectangle (separating axes)
+  for (const n of [A.u, A.v, B.u, B.v]) {
+    const ra = A.hx * Math.abs(A.u[0] * n[0] + A.u[1] * n[1]) + A.hz * Math.abs(A.v[0] * n[0] + A.v[1] * n[1]);
+    const rb = B.hx * Math.abs(B.u[0] * n[0] + B.u[1] * n[1]) + B.hz * Math.abs(B.v[0] * n[0] + B.v[1] * n[1]);
+    if (Math.abs(dx * n[0] + dz * n[1]) > ra + rb + gap) return false;
+  }
+  return true;
+}
+// does it, put at (x, z) turned by rot, touch anything already on s?
+function fpClash(s, it, x, z, rot, gap) {
+  const A = fpShape(it, x, z, rot);
+  return s.items.some(o => o !== it && shapesHit(A, fpShape(o, o.obj.position.x, o.obj.position.z, o.obj.rotation.y), gap));
+}
+const fpRots = it => { const f = fpOf(it); return f ? [f.along, f.along + Math.PI / 2] : [it.rotY || 0]; };
 function findFree(s, it) {
   if (s.snap) return s.items.length ? null : { x:0, z:0 };
-  const step = 0.01, zs = [];
-  for (let z = -s.d / 2 + it.r; z <= s.d / 2 - it.r + 1e-6; z += step * 2) zs.push(z);
-  zs.sort((a, b) => Math.abs(a - 0.03) - Math.abs(b - 0.03));
-  for (const z of zs)
-    for (let x = -s.w / 2 + it.r + 0.03; x <= s.w / 2 - it.r + 1e-6; x += step) {
-      if (s.items.every(o => Math.hypot(o.obj.position.x - x, o.obj.position.z - z) >= o.r + it.r + 0.02)) return { x, z };
-    }
+  const step = 0.01, long = !!fpOf(it), gap = long ? 0.008 : 0.02;
+  for (const rot of fpRots(it)) {
+    const e = fpExt(it, rot), zs = [];
+    for (let z = -s.d / 2 + e.ez - e.oz; z <= s.d / 2 - e.ez - e.oz + 1e-6; z += long ? step : step * 2) zs.push(z);
+    if (long) zs.sort((a, b) => b - a); else zs.sort((a, b) => Math.abs(a - 0.03) - Math.abs(b - 0.03));   // long items pack in rows from the front edge
+    for (const z of zs)
+      for (let x = -s.w / 2 + e.ex - e.ox + (long ? 0.01 : 0.03); x <= s.w / 2 - e.ex - e.ox + 1e-6; x += step) {
+        if (!fpClash(s, it, x, z, rot, gap)) { if (fpOf(it)) it.rotY = rot; return { x, z, rot }; }
+      }
+  }
   return null;
 }
 function placeOn(it, s, x, z) {
@@ -1479,6 +1551,7 @@ function placeOn(it, s, x, z) {
   it.obj.rotation.set(0, it.rotY || 0, 0);
   setPose(it, s.kind === 'stand');
   it.surface = s; s.items.push(it);
+  if (HK.placed) HK.placed(it, s);                     // tool holders + clean-storage rules (actions/tool_rules.js)
 }
 function removeFrom(it) { const s = it.surface; if (!s) return; s.items.splice(s.items.indexOf(it), 1); it.surface = null; }
 function autoPlace(it, list) {
@@ -1800,7 +1873,8 @@ const isContainer = x => x.type === 'vessel' || x.type === 'mainBottle';
 const canHoldLiquid = x => (isContainer(x) && !x.solidsOnly) || x.type === 'substrate';
 const CLOSED = x => !!(x && x.cap);
 const capWord = c => c.fit.startsWith('petri') ? 'lid' : 'cap';
-function getActions(H, T) {
+function getActions(H, T) { const A = getActions0(H, T); if (HK.after) HK.after(H, T, A); return A; }   // HK.after: auto-clean offer (lab_hooks.js)
+function getActions0(H, T) {
   const A = [];
   // caps & lids
   if (H.type === 'cap') {
@@ -1831,12 +1905,12 @@ function getActions(H, T) {
       if (!free) return [{ label:'The stand is full', disabled:true }];
       return [{ primary:true, label:`Put it in the ${st.name.toLowerCase()}`, fn:() => tryPlace(H, free) }];
     } }
-  if (T.type === 'basin') return basinActions(H);
+  if (T.type === 'basin') { const B = basinActions(H); if (HK.basinActions) HK.basinActions(H, B); return B; }
   if (T.type === 'bin') return binActions(H);
   if (T.machine) {
     const snapS = T.plateSurface || T.panSurface || T.chuckSurface;
     const occ = snapS && snapS.items.find(o => o !== H);
-    if (occ) return getActions(H, occ);
+    if (occ) return getActions0(H, occ);
     const s = snapS || (T.ovenSurfaces && T.ovenSurfaces.find(s => findFree(s, H)));
     if (s) A.push({ primary:true, label:`Put it on / in the ${T.name.split(' (')[0].toLowerCase()}`, fn:() => tryPlace(H, s) });
     return A;
@@ -1873,6 +1947,7 @@ function getActions(H, T) {
     if (H.kind === 'boat') A.push({ label:`Tip everything into ${T.name}`, fn:() => tipBoat(H, T) });
     else if (!(T.solidsOnly && totLiq(H.contents) > 0)) A.push({ label: H.type === 'washBottle' ? `Squirt ${short(H.solvent)} into ${T.name}` : `Pour into ${T.name}`, fn:() => startPour(H, T) });
   }
+  if (HK.actions) HK.actions(H, T, A);
   return A;
 }
 function basinActions(H) {
@@ -1913,15 +1988,17 @@ function tryPlace(it, s) {
   dropHeld(c);
 }
 function washBasin(H) {
+  if (HK.manualClean && HK.manualClean(H, 'wash', null, null, () => washDone(H))) return;   // the basin clip (actions/auto_clean.js)
   toast(`Washing ${H.name} under the tap…`);
   H.busy = true;
   basin.tapUntil = simTime + 1.6;
   { const sp = basin.obj.localToWorld(basin.spout.clone()); const pos = sp.clone(); pos.y -= 0.075 + H.h; pos.x += 0.0;
     holdFor(H, pos, 1.6, new THREE.Euler(0.45, 0, 0.2)); fxHold.wash = true; }
-  setTimeout(() => { H.busy = false; H.clean = 'basin'; H.residue.clear(); H.flags.rinsed = null; H.wet = { solvent:'water', p:0 }; toast(`${H.name} washed. Now rinse it with a solvent.`, 'ok'); }, 1500);
+  setTimeout(() => washDone(H), 1500);
 }
+function washDone(H) { H.busy = false; H.clean = 'basin'; H.residue.clear(); H.flags.rinsed = null; H.wet = { solvent:'water', p:0 }; toast(`${H.name} washed. Now rinse it with a solvent.`, 'ok'); }
 function rinse(H, sol, wb) {
-  wb.contents.liq[sol] = Math.max(0, wb.contents.liq[sol] - 5);
+  if (HK.manualClean && HK.manualClean(H, 'rinse', sol, wb, () => rinseDone(H, sol, wb))) return;   // the basin clip (actions/auto_clean.js)
   {   // hold the item over the bowl and squirt the wash bottle into it
     const over = basin.obj.localToWorld(new THREE.Vector3(0.3, 0.98, 0.02)); holdFor(H, over, 1.0, new THREE.Euler(0.6, 0, 0));
     wb.obj.updateMatrixWorld(true);
@@ -1929,6 +2006,10 @@ function rinse(H, sol, wb) {
     const into = over.clone(); into.y += H.h * 0.6;
     setStream(squirtStream, nozzle, into, 0.0014, new THREE.Color(0xe4f0ff), 0.7); squirtStream.until = simTime + 0.9;
   }
+  rinseDone(H, sol, wb);
+}
+function rinseDone(H, sol, wb) {
+  wb.contents.liq[sol] = Math.max(0, wb.contents.liq[sol] - 5);
   if (H.clean === 'dirty') { mistake('dirty', `${H.name} was rinsed but never washed in the basin — it is still dirty.`, H); H.wet = { solvent:sol, p:0 }; return; }
   H.clean = 'clean'; H.residue.clear(); H.wet = { solvent:sol, p:0 };
   toast(`${H.name} rinsed with ${sol === 'water' ? 'DI water' : CHEM[sol].name}. Let it dry (${DRY_AIR[sol]} s in air, faster in the oven).`, 'ok');
@@ -1959,7 +2040,7 @@ function setStream(m, p0, p2, r, color, opacity) {
   m.material.color.copy(color || new THREE.Color(0xd6ebff)); m.material.opacity = opacity ?? 0.65; m.visible = true;
 }
 const tapStream = makeStream(), pourStream = makeStream(), squirtStream = makeStream();
-const splash = new THREE.Mesh(new THREE.RingGeometry(0.005, 0.026, 28), new THREE.MeshBasicMaterial({ color:0xe8f4ff, transparent:true, opacity:0.65, depthWrite:false, side:THREE.DoubleSide }));
+const splash = new THREE.Mesh(new THREE.RingGeometry(0.005, 0.026, 28), new THREE.MeshBasicMaterial({ color:0xcfe8ff, transparent:true, opacity:0.85, depthWrite:false, side:THREE.DoubleSide }));
 splash.rotation.x = -Math.PI / 2; splash.visible = false; splash.renderOrder = 6; scene.add(splash);
 const drops = [];
 // little drops (liquid) or grains (solid) falling from one point to another
@@ -1987,7 +2068,7 @@ function flowTick(dt) {
     let bottomY = basin.obj.localToWorld(new THREE.Vector3(0, basin.bowlY, 0)).y;
     if (fxHold && fxHold.item && fxHold.wash) bottomY = Math.max(bottomY, fxHold.pos.y + 0.02);
     const b = new THREE.Vector3(a.x, bottomY, a.z);
-    setStream(tapStream, a, b, 0.0055, new THREE.Color(0xc4e2ff), 0.82);
+    setStream(tapStream, a, b, 0.0062, new THREE.Color(0x7fbdf5), 0.95);   // brighter / more opaque: reads against the steel sink
     splash.visible = true; splash.position.set(a.x, bottomY + 0.001, a.z); splash.scale.setScalar(0.85 + Math.sin(simTime * 40) * 0.15);
   } else { tapStream.visible = false; splash.visible = false; }
   if (squirtStream.visible && simTime > (squirtStream.until || 0)) squirtStream.visible = false;
@@ -2025,6 +2106,7 @@ function attachFilter(S, T) {
   refreshTool(S); toast('Syringe filter (0.22 µm) attached.', 'ok');
 }
 function drawLiquid(H, T) {
+  if (HK.drawLiquid && HK.drawLiquid(H, T)) return;
   if (H.type === 'micropipette' && !H.tip) { toast('Attach a tip first (click a tip box while holding the micropipette).'); return; }
   const avail = totLiq(T.contents);
   let min, max, step, value, fmt, toMl;
@@ -2048,6 +2130,7 @@ function drawLiquid(H, T) {
 }
 const TIP_Y = { pipette:-0.03, dropper:-0.05, syringe:-0.012, micropipette:-0.037 };
 function dispense(H, T, ml) {
+  if (HK.dispense && HK.dispense(H, T, ml)) return;
   const have = totLiq(H.contents); if (have <= 0) return;
   const amt = ml ? Math.min(ml, have) : have;
   if (!roomFor(T, amt)) return;
@@ -2127,6 +2210,7 @@ function rodStir(H, T) { checkClean(H); checkResidue(H, chemsIn(T.contents)); ch
 let pour = null;
 const pourEl = $('#pour');
 function startPour(src, dst) {
+  if (HK.startPour && HK.startPour(src, dst)) return;
   if (dst.isMain) mistake('pourBack', `Never pour anything back into the stock bottle (${CHEM[dst.chem].name}).`, dst);
   checkClean(dst); checkResidue(dst, chemsIn(src.contents));
   const solid = totLiq(src.contents) <= 0;
@@ -2198,7 +2282,10 @@ function pick() {
   for (const it of items) { if (!it.obj.parent) continue; if (held && isInside(it.obj, held.obj)) continue; for (const m of it.meshes) if (m.visible) list.push(m); }
   for (const s of surfaces) { if (held && isInside(s.root, held.obj)) continue; if (!s.root.parent) continue; list.push(s.hit); }
   const hits = raycaster.intersectObjects(list, false);
-  const first = hits[0]; if (!first) return null;
+  let first = hits[0]; if (!first) return null;
+  // the surface click-plane floats 1.5 mm above the top: a thin item lying under it (glass slide, piece,
+  // flat spatula) is still the thing clicked
+  if (first.object.userData.surface) { const thin = hits.find(h => h.object.userData.item && h.distance <= first.distance + 0.004); if (thin) first = thin; }
   const v = first.object.userData.item;
   if (v && v.stirBar) { const b = hits.find(h => h.object.userData.item === v.stirBar); if (b) return b; }
   return first;
@@ -2208,17 +2295,27 @@ function evalSpot(it, s, x, z) {
   let reason = null;
   if (it.machine && !MACHINE_OK.includes(s.kind)) reason = 'Machines go on a table, rack or shelf.';
   if (s.owner === it) reason = 'That is part of the item you are holding.';
+  let rot = fpOf(it) ? null : undefined;
   if (s.snap) { x = 0; z = 0; }
   else {
-    const mx2 = s.w / 2 - it.r, mz2 = s.d / 2 - it.r;
-    if (mx2 < 0 || mz2 < 0) reason = reason || 'Too big for this place.';
-    else { x = Math.max(-mx2, Math.min(mx2, x)); z = Math.max(-mz2, Math.min(mz2, z)); }
+    let best = null;
+    for (const r of fpRots(it)) {               // long items: along the surface first, then turned 90 deg
+      const e = fpExt(it, r), mx2 = s.w / 2 - e.ex, mz2 = s.d / 2 - e.ez;
+      if (mx2 < 0 || mz2 < 0) continue;
+      const cx = Math.max(-mx2 - e.ox, Math.min(mx2 - e.ox, x)), cz = Math.max(-mz2 - e.oz, Math.min(mz2 - e.oz, z));
+      const free = !fpClash(s, it, cx, cz, r, 0.003);
+      if (!best || (free && !best.free)) best = { x: cx, z: cz, r, free };
+      if (free) break;
+    }
+    if (!best) reason = reason || 'Too big for this place.';
+    else { x = best.x; z = best.z; if (rot !== undefined) rot = best.r; }
   }
   let ih = it.lie ? (s.kind === 'stand' ? it.hUp : it.hLie) : it.h;
   if (it.slots) for (const sl of it.slots) for (const t of sl.items) ih = Math.max(ih, sl.root.position.y + (t.hUp || t.h));   // stand + its tools
   if (ih + (it.cap ? it.cap.capH * 0.5 : 0) > s.clear) reason = reason || 'Too tall for this shelf.';
   if (s.kind === 'stand' && !s.accepts.includes(it.type)) reason = reason || `Only ${s.acceptName} go in this stand.`;
-  for (const o of s.items) { if (o === it) continue; if (Math.hypot(o.obj.position.x - x, o.obj.position.z - z) < o.r + it.r + 0.003) { reason = reason || 'No free space here.'; break; } }
+  if (!s.snap && fpClash(s, it, x, z, rot ?? (it.rotY || 0), 0.003)) reason = reason || 'No free space here.';
+  else if (s.snap && s.items.some(o => o !== it)) reason = reason || 'No free space here.';
   if (s.kind === 'plate' && !it.vessel) reason = reason || 'Only flat-bottomed glass vessels go on a hotplate.';
   if (s.kind === 'hood' && hood.machine.sashPos < 0.3) reason = reason || 'Raise the fume hood sash first (click the hood).';
   if (s.kind === 'pan' && !balance.machine.doorOpen) reason = reason || 'Open the draft-shield door first (click the balance).';
@@ -2227,7 +2324,7 @@ function evalSpot(it, s, x, z) {
     else if (!s.owner.machine.lidOpen) reason = reason || 'Open the spin coater lid first (click the spin coater).';
     else if (s.owner.machine.running) reason = reason || 'Wait — it is spinning.';
   }
-  return { s, x, z, ok: !reason, reason };
+  return { s, x, z, rot, ok: !reason, reason };
 }
 function candidate(hit) {
   const s = hit && hit.object.userData.surface; if (!s) return null;
@@ -2274,6 +2371,7 @@ function followHeld() {
     const wp = c.s.root.localToWorld(new THREE.Vector3(c.x, held.baseY || 0, c.z));
     held.obj.position.copy(wp);
     const q = new THREE.Quaternion(); c.s.root.getWorldQuaternion(q); held.obj.quaternion.copy(q);
+    if (c.rot != null) held.obj.rotateY(c.rot);           // long items show the way they will lie
     ring.visible = true; ring.position.copy(c.s.root.localToWorld(new THREE.Vector3(c.x, 0.004, c.z)));
     ring.scale.setScalar(held.r); ring.material.color.set(c.ok ? 0x46c37b : 0xff6a4a);
   } else {
@@ -2300,6 +2398,7 @@ function pickUp(it) {
   }
   if (it.onVessel) {                      // opening: lift the cap/lid off its vessel
     const v = it.onVessel; v.cap = null; it.onVessel = null; it.prevVessel = v; touch(v);
+    if (HK.opened) HK.opened(v);
     v.obj.remove(it.obj); it.prev = null; it.baseY = 0;
     scene.add(it.obj); it.obj.rotation.set(0, 0, 0);
     held = it; updateHand(); followHeld(); closePanel();
@@ -2312,6 +2411,7 @@ function pickUp(it) {
 }
 function dropHeld(c) {
   const it = held; held = null; ring.visible = false;
+  if (c.rot != null) it.rotY = c.rot;
   placeOn(it, c.s, c.x, c.z); onPlaced(it, c.s); updateHand();
 }
 function putBack() {
@@ -2822,6 +2922,7 @@ function onClick(x, y) {
   if (!hit) { closePanel(); return; }
   let t = resolve(hit.object.userData.item); const s = hit.object.userData.surface;
   if (!t && s && s.owner) t = s.owner;
+  if (HK.click && HK.click(t, s, x, y)) return;          // basin: auto-clean menus (actions/auto_clean.js)
   if (!t) { closePanel(); return; }
   if (t.machine || t.fixed) { if (t.fixed && !t.machine) toast(t.type === 'basin' ? 'Pick up an item, then click the basin to wash it.' : 'Pick up an item, then click the bin to throw it away or empty it.'); else openPanel(t); return; }
   if (t.dispenser) {
@@ -3186,7 +3287,7 @@ let shadowHotUntil = 0, shadowStale = false, stillFor = 0;
 const shadowPoke = () => { shadowHotUntil = performance.now() + 600; };
 for (const ev of ['pointerdown', 'pointerup', 'keydown', 'keyup']) addEventListener(ev, shadowPoke, true);
 function shadowTick(dt) {
-  let hot = held || pour || hood.sashMoving || drops.length || bin.falling.length || (bin.open > 0.005 && bin.open < 0.995) || performance.now() < shadowHotUntil;
+  let hot = held || pour || (HK.busy && HK.busy()) || hood.sashMoving || drops.length || bin.falling.length || (bin.open > 0.005 && bin.open < 0.995) || performance.now() < shadowHotUntil;
   if (!hot) for (const it of machines) { const m = it.machine; if (it.type === 'spincoater' && (m.actRpm > 0.5 || Math.abs((m.lidOpen ? 1 : 0) - it.lidAngle) > 0.002)) { hot = true; break; } }
   if (hot) { shadowStale = true; stillFor = 0; return; }
   if (shadowStale && (stillFor += dt) > 0.15) { shadowStale = false; renderer.shadowMap.needsUpdate = true; }
@@ -3228,9 +3329,10 @@ renderer.setAnimationLoop(() => {
   binTick(dt);
   flowTick(dt);
   pourTick(dt);
-  if (held && !pour) followHeld();
+  if (held && !pour && !(HK.busy && HK.busy())) followHeld();
   hoverTick();
   for (const it of animTools) if (!it.animate(dt)) animTools.delete(it);
+  if (HK.tick) HK.tick(dt);
   shadowTick(dt);
   dispAcc += dt; if (dispAcc > 0.12) { dispAcc = 0; updateDisplays(); }
   updateBadges();
@@ -3242,6 +3344,16 @@ renderer.setAnimationLoop(() => {
 // Debug/test hooks (harmless for users)
 window.__lab = { getDown: () => downAt, renderer, items, surfaces, machines, scene, camera, controls, getActions, CHEM, tick, pickUp, findFree, evalSpot, dropHeld,
   sMain, sUnder, oven, balance, focusAtCursor, mouse, refreshTool, orbit: () => orbit, mistakes, goView, getHeld: () => held, getPour: () => pour, endPour, pourTick, contentsLook };
+// internals for actions/lab_hooks.js (the close-up action clips live in their own files)
+window.LAB = { THREE, renderer, scene, camera, controls, K, M, F, CHEM, items, surfaces, R, sMain,
+  makeItem, makeVessel, finishItem, addSurface, autoPlace, placeOn, findFree, removeFrom, disposeItem, updateHand,
+  receive, takeLiquidFraction, takeSolid, addC, chemsIn, totLiq, totSol, totAll, emptyC, contentsLook, refreshTool, heightFor,
+  mistake, toast, touch, checkClean, checkResidue, amountDialog, fmtVol, roomFor,
+  getHeld: () => held, releaseHeld: () => { held = null; ring.visible = false; updateHand(); },
+  basin, bin, sCounter, binDrop, setPose, fpClash, fpOf, openMenu, closeMenu, openDlg, closeDlg, makeStream, setStream, secsLeft, now: () => simTime,
+  holdItem: (it, prev) => { if (it.surface) removeFrom(it); scene.add(it.obj); it.obj.rotation.set(0, 0, 0); setPose(it, true);
+    it.prev = prev; held = it; touch(it); updateHand(); followHeld(); } };
+if (HK.init) HK.init(window.LAB);
 </script>
 </body>
 </html>

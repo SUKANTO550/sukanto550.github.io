@@ -3,7 +3,8 @@
    (blue-grey on the 100–1000 µl, yellow on the 10–100 µl), vertical volume counter that shows the
    REAL set volume, black ring where the tip sits, clear tinted tip. Generic: no brand print.
    Contracts with index.html: upright, nose at y ~ 0; tip end at it.tipY; it.tipMesh; it.updateCounter();
-   it.press() starts a short plunger dip (animated by it.animate(dt) from the main loop). */
+   it.press() starts a short plunger dip (animated by it.animate(dt) from the main loop);
+   it.setPlunger(d) sets the plunger depth directly (clips); it.tipBottom = tip end y. */
 (function () {
   const E = window.EQUIP = window.EQUIP || {};
 
@@ -82,6 +83,9 @@
     // plunger dip when drawing / dispensing
     let t = -1;
     it.press = () => { t = 0; k.animate(it); };
+    // direct plunger depth (metres) for the close-up clips: first stop ~0.007, second stop (blow-out) ~0.0105
+    it.setPlunger = d => { t = -1; pl.position.y = ridges.position.y = -d; };
+    it.tipBottom = tipBottom;
     it.animate = dt => {
       if (t < 0) return false;
       t += dt; const d = t < 0.15 ? t / 0.15 : Math.max(0, 1 - (t - 0.15) / 0.3);

@@ -4,7 +4,7 @@
    Dropper — Pasteur pipette: short wide body, long thin capillary, red rubber bulb.
    Contracts with index.html (upright, tip down):
      pipette: tip end y = -0.03, liquid level = 0.002 + 0.32 * 0.9 * fill, straight tube to y = 0.33
-     dropper: tip end y = -0.05, liquid level = 0.002 + 0.06 * 0.9 * fill */
+     dropper: tip end y = -0.05, liquid level = 0.002 + 0.06 * 0.9 * fill, it.bulb = rubber bulb group */
 (function () {
   const E = window.EQUIP = window.EQUIP || {};
 
@@ -43,11 +43,12 @@
     it.obj.add(k.bake('dropper-glass', g => {
       g.add(k.lathe([[0.00055, -0.05], [0.0009, -0.0485], [0.001, -0.01], [0.0022, -0.004], [R, 0.002], [R, 0.07], [R + 0.0006, 0.072], [R, 0.074]], k.M.glass, 16));
     }));
-    it.obj.add(k.bake('dropper-bulb', g => {
+    const bulb = k.bake('dropper-bulb', g => {
       const b = k.lathe([[0.0001, 0.063], [0.0042, 0.063], [0.0049, 0.064], [0.0048, 0.072], [0.0055, 0.078], [0.0072, 0.083],
         [0.0074, 0.09], [0.0062, 0.098], [0.0035, 0.103], [0.0001, 0.104]], k.M.rubber, 24);
       g.add(b);
-    }));
+    });
+    it.obj.add(bulb); it.bulb = bulb;              // clips squeeze it (scale x/z)
     liquid(k, it, R * 0.72, 0.06);
   };
 })();

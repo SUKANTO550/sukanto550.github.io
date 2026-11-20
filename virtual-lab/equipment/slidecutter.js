@@ -18,4 +18,21 @@
       }
     }, { cast: true }));
   };
+  /* One part only ('base' or 'up'), same frame as E.slideCutter, so the parts can move apart in the
+     glass-cutting clip (actions/glass_cut.js). Frame (metres, from the STEP):
+       base: 96.2 x 3 x 60, rests on y = 0, centred on x/z; slide pocket x +-0.0381 (76.2), z +-0.0125 (25),
+             pocket floor y = 0.0017.
+       up (guide block, as assembled): x -0.03118 .. 0.00882, y 0.001 .. 0.015, z +-0.025. Cutter slot
+             5.5 mm wide, 22.6 mm from the block's left (mating) edge -> slot centre x = -0.00583.  */
+  E.slideCutterPart = (k, o, which) => {
+    const { THREE } = k, name = which === 'up' ? 'Slide cutter up' : 'Slide cutter base';
+    const cols = { 'Slide cutter base': '#97a3da', 'Slide cutter up': '#8a96cf' };
+    o.add(k.bake('slide-cutter-' + which, g => {
+      const p = DATA.find(d => d.name === name);
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(p.pos, 3)); geo.setIndex(p.idx);
+      geo.translate(-15.9, -23.7, -30.9); geo.scale(0.001, 0.001, 0.001);
+      g.add(new THREE.Mesh(k.creased(geo, 0.5), k.colMat(cols[name], 0.55)));
+    }, { cast: true }));
+  };
 })();
