@@ -7,7 +7,8 @@
    Stir / Heat lights, two grey ribbed knobs with printed scales.
    Mini stirrer: grey body, round plate, red LED display, one knob.
    White ceramic top plate on a steel tray and a sloped front panel, as in the photo.
-   Contracts with index.html: same W/D/H, plate centre z = -D/2 + 0.1, plate top ~ H + 0.0105;
+   Contracts with index.html: same W/D/H; it.plateZ / it.plateTop = plate centre z / plate top y (set here; mini:
+   z -0.008, top H + 0.007 - big: z -D/2 + 0.1, top H + 0.0105);
    returns { knobT, knobR, dispMesh } (knobs turn about z). */
 (function () {
   const E = window.EQUIP = window.EQUIP || {};
@@ -48,7 +49,10 @@
 
   function miniStirrer(k, it, spec, W, D, H, mini) {
     const { THREE, M } = k;
-    const zc = -D / 2 + 0.1;
+    // plate centre: the mini's round plate (r 68 mm with its seat) must stay inside the top, behind the sloped front
+    // (it overhung the front edge by ~7 mm with the big plate's -D/2 + 0.1)
+    const zc = mini ? -0.008 : -D / 2 + 0.1;
+    it.plateZ = zc; it.plateTop = H + (mini ? 0.007 : 0.0105);
     const slope = mini ? 0.015 : 0.026;              // front panel leans back (photo)
     const ang = Math.atan2(slope, H), faceL = Math.hypot(H, slope);
     it.obj.add(k.bake(mini ? 'hp-mini-body2' : 'hp-body2', g => {
@@ -115,6 +119,7 @@
   function bigHotplate(k, it, spec, W, D, H) {
     const { THREE, M } = k;
     const zc = -D / 2 + 0.1, cz0 = D / 2 - 0.072;          // plate centre z; console starts here
+    it.plateZ = zc; it.plateTop = H + 0.0105;
     const baseH = 0.052, top = H + 0.0105;                  // plate top must stay at H + 0.0105 (surface)
     const fb = [D / 2, 0.004], ft = [D / 2 - 0.012, 0.068];   // console front face: bottom / top (z, y)
     it.obj.add(k.bake('hp-big5', g => {

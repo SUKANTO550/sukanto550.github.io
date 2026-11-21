@@ -59,7 +59,7 @@
     L.items.filter(i => i.type === 'stirbar' && !i.inVessel).slice(0, ds.length).forEach((b, i) => { if (b.surface) L.removeFrom(b); L.placeOn(b, ds[i], 0, 0); });
     makeButtons();
   };
-  function makeToolStand() {
+  function makeToolStand(film) {
     const E = window.EQUIP;
     const it = L.makeItem({ type: 'stand', name: 'Tool stand (stainless, always clean)', mass: 600, toolStand: true });
     E.toolStand(L.K, it.obj); it.r = 0.105; L.finishItem(it);
@@ -72,9 +72,10 @@
       const s = L.addSurface(it.obj, { name: `${it.name} — stir bar cup`, kind: 'stand', w: 0.02, d: 0.02, x: C.x, y: C.floor + i * 0.007, z: C.z + (i - 1) * 0.012, owner: it, snap: true });
       s.accepts = ['stirbar']; s.acceptName = 'stir bars'; s.holderOf = it; s.lie = true; s.rotY = (i - 1) * 0.5; it.slots.push(s);
     }
-    stands.push(it);
+    if (!film) stands.push(it);                                  // film stands (actions/synthesis) are not lab holders
     return it;
   }
+  TR.makeToolStand = () => makeToolStand(true);              // for actions/synthesis/synth_props.js
   // holder slots inside a beaker / petri dish (made the first time they are needed)
   function vesselSlots(v) {
     if (v.slots) return v.slots;
@@ -193,6 +194,7 @@
   };
 
   /* ---------- how a tool sits in a holder ---------- */
+  TR.pose = (it, s) => pose(it, s);                          // for actions/synthesis (tool into a holder slot)
   function pose(it, s) {
     if (s.top) {                                                // lies across the rim / on the cap
       if (it.lie) L.setPose(it, false);

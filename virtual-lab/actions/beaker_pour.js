@@ -43,7 +43,7 @@
       for (let i = 0; i <= 12; i++) { const y = y0 + (inn[inn.length - 1][0] - y0) * i / 12; pts.push([rAt(inn, y) - 0.0003, y]); }
       pts.push([0.0001, inn[inn.length - 1][0]]);
       s.liq = new THREE.Mesh(new THREE.LatheGeometry(pts.map(([rr, y]) => new THREE.Vector2(rr, y)), 40),
-        new THREE.MeshStandardMaterial({ color: c.color, transparent: true, opacity: 0.4, roughness: 0.08, depthWrite: false, side: THREE.DoubleSide, clippingPlanes: [s.plane] }));
+        new THREE.MeshStandardMaterial({ color: c.color, transparent: true, opacity: 0.55, roughness: 0.08, depthWrite: false, side: THREE.DoubleSide, clippingPlanes: [s.plane] }));
       s.liq.renderOrder = 2; s.b.add(s.liq);
       s.th = 0;
       return s;

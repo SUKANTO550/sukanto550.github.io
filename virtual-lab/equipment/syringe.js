@@ -22,6 +22,9 @@
     }
   }
 
+  // the filter model alone (same shape as the loose filter): used for the pile in the filter jar
+  E.filterModel = k => k.bake('filter', g => filterParts(k, g));
+
   E.filterItem = (k, it) => {                      // loose filter lying on the table (outlet down needs support -> lies flat)
     const m = k.bake('filter', g => filterParts(k, g));
     m.rotation.x = Math.PI / 2; m.position.y = 0.0126; it.obj.add(m);

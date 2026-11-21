@@ -39,7 +39,7 @@
     return { prof, t };
   }
   function makeTipLiquid(k, it, color) {
-    const m = new k.THREE.Mesh(new k.THREE.BufferGeometry(), new k.THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.88, roughness: 0.1, depthWrite: false }));
+    const m = new k.THREE.Mesh(new k.THREE.BufferGeometry(), new k.THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.9, roughness: 0.12, metalness: 0.7, envMapIntensity: 1.8, depthWrite: false }));   // silvery shine in the narrow tip (owner)
     m.renderOrder = 4; m.visible = false; it.tipMesh.parent.add(m); return m;   // drawn after the tinted tip, so it reads clearly
   }
   function showTip(k, s, ml) {

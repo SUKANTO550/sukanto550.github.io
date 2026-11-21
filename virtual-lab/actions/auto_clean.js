@@ -338,7 +338,8 @@
     it.clean = rinsed ? 'clean' : 'basin'; it.residue.clear(); if (it.flags) it.flags.rinsed = null;
     if (it.vessel) it.contents = L.emptyC();
     it.wet = null; it.dryTick = L.now() + 2; it.busy = false; L.touch(it);
-    if (TR() && it !== L.getHeld()) TR().check(it);              // e.g. a tool left on the counter = dirty again
+    if (TR() && it !== L.getHeld()) TR().check(it);
+    if (rinsed && window.MARKER) window.MARKER.wipe(it);          // acetone / IPA take a marker label off (actions/marker.js)              // e.g. a tool left on the counter = dirty again
   }
   function finishManual(j) {
     const it = j.it; it.busy = false;

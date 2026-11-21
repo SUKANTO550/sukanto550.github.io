@@ -19,11 +19,12 @@ button{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(
 button:hover{border-color:var(--accent)}
 button:disabled{opacity:.45;cursor:default}
 .ui{position:fixed;z-index:5}
-#views{top:12px;left:12px;display:flex;flex-wrap:wrap;gap:6px;max-width:calc(100vw - 440px)}
+#views{top:12px;left:12px;display:flex;flex-wrap:wrap;gap:6px;max-width:calc(100vw - var(--trw, 560px) - 36px)}   /* --trw = width of the top-right buttons (set by script) */
 #views button{background:var(--panel);font-size:13px;padding:5px 9px}
 #views .title{font-weight:700;padding:5px 12px;letter-spacing:.3px;background:var(--panel);border:1px solid var(--line);border-radius:8px}
 #topright{top:12px;right:12px;display:flex;gap:6px}
 #topright button{background:var(--panel)}
+@media (max-width:1500px) and (pointer:fine){ #views button{padding:5px 7px;font-size:12.5px} #topright button{padding:5px 8px;font-size:12.5px} #topright{gap:5px} #views{gap:5px} }
 #hand{bottom:12px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);
   border-radius:10px;padding:8px 14px;max-width:min(860px,calc(100vw - 24px));text-align:center;color:var(--muted)}
 #hand b{color:var(--text)}
@@ -98,7 +99,7 @@ body.touch #joy{display:block} body.touch #joyUD{display:flex}
 @media (pointer:coarse){
   button{padding:9px 13px;font-size:15px}
   #views button{padding:8px 11px;font-size:14px}
-  #views{max-width:calc(100vw - 510px)}
+  #views{max-width:calc(100vw - var(--trw, 620px) - 36px)}
   #menu button{padding:12px}
   input[type=range]{height:34px}
   .set input[type=checkbox]{width:24px;height:24px}
@@ -137,6 +138,7 @@ body.touch #joy{display:block} body.touch #joyUD{display:flex}
   <button data-v="basin">Basin</button>
   <button data-v="machines">Machines</button>
   <button data-v="balance">Balance</button>
+  <button data-v="uvvis">UV-Vis</button>
   <button data-v="chem">Chemical rack</button>
 </div>
 <div id="topright" class="ui">
@@ -160,32 +162,50 @@ body.touch #joy{display:block} body.touch #joyUD{display:flex}
 <div id="loading">Loading the lab…</div>
 
 <!-- Equipment models: one file per tool (plain scripts, so opening index.html by double-click works) -->
-<script src="equipment/tweezers.js?v=1.3"></script>
-<script src="equipment/spatula.js?v=1.3"></script>
-<script src="equipment/pipette.js?v=1.3"></script>
-<script src="equipment/micropipette.js?v=1.3"></script>
-<script src="equipment/syringe.js?v=1.3"></script>
-<script src="equipment/hotplate.js?v=1.3"></script>
-<script src="equipment/consumables.js?v=1.3"></script>
-<script src="equipment/tools.js?v=1.3"></script>
-<script src="equipment/stands.js?v=1.3"></script>
-<script src="equipment/slidecutter.js?v=1.3"></script>
-<script src="equipment/watchglass.js?v=1.3"></script>
+<script src="equipment/tweezers.js?v=1.4"></script>
+<script src="equipment/spatula.js?v=1.4"></script>
+<script src="equipment/pipette.js?v=1.4"></script>
+<script src="equipment/micropipette.js?v=1.4"></script>
+<script src="equipment/syringe.js?v=1.4"></script>
+<script src="equipment/hotplate.js?v=1.4"></script>
+<script src="equipment/consumables.js?v=1.4"></script>
+<script src="equipment/tools.js?v=1.4"></script>
+<script src="equipment/stands.js?v=1.4"></script>
+<script src="equipment/slidecutter.js?v=1.4"></script>
+<script src="equipment/watchglass.js?v=1.4"></script>
 <!-- close-up action clips (actions/*.js) + the file that connects them to this lab (actions/lab_hooks.js) -->
-<script src="actions/player.js?v=1.3"></script>
-<script src="actions/spatula_transfer.js?v=1.3"></script>
-<script src="actions/stock_pour.js?v=1.3"></script>
-<script src="actions/glass_cut.js?v=1.3"></script>
-<script src="actions/wash_bottle.js?v=1.3"></script>
-<script src="actions/beaker_pour.js?v=1.3"></script>
-<script src="actions/pipette_pump.js?v=1.3"></script>
-<script src="actions/micropipette.js?v=1.3"></script>
-<script src="actions/dropper.js?v=1.3"></script>
-<script src="actions/syringe.js?v=1.3"></script>
-<script src="equipment/toolstand.js?v=1.3"></script>
-<script src="actions/tool_rules.js?v=1.3"></script>
-<script src="actions/auto_clean.js?v=1.3"></script>
-<script src="actions/lab_hooks.js?v=1.3"></script>
+<script src="actions/player.js?v=1.4"></script>
+<script src="actions/spatula_transfer.js?v=1.4"></script>
+<script src="actions/stock_pour.js?v=1.4"></script>
+<script src="actions/glass_cut.js?v=1.4"></script>
+<script src="actions/wash_bottle.js?v=1.4"></script>
+<script src="actions/beaker_pour.js?v=1.4"></script>
+<script src="actions/pipette_pump.js?v=1.4"></script>
+<script src="actions/micropipette.js?v=1.4"></script>
+<script src="actions/dropper.js?v=1.4"></script>
+<script src="actions/syringe.js?v=1.4"></script>
+<script src="actions/tweezer_move.js?v=1.4"></script>
+<script src="actions/furnace_run.js?v=1.4"></script>
+<script src="actions/chuck_load.js?v=1.4"></script>
+<script src="actions/spin_coat.js?v=1.4"></script>
+<script src="equipment/toolstand.js?v=1.4"></script>
+<script src="equipment/spincoater.js?v=1.4"></script>
+<script src="equipment/funnel.js?v=1.4"></script>
+<script src="equipment/furnace.js?v=1.4"></script>
+<script src="equipment/uvvis.js?v=1.4"></script>
+<script src="equipment/roomdecor.js?v=1.4"></script>
+<script src="equipment/marker.js?v=1.4"></script>
+<script src="actions/tool_rules.js?v=1.4"></script>
+<script src="actions/auto_clean.js?v=1.4"></script>
+<script src="actions/synthesis/synth_core.js?v=1.4"></script>
+<script src="actions/synthesis/synth_tools.js?v=1.4"></script>
+<script src="actions/synthesis/synth_props.js?v=1.4"></script>
+<script src="actions/synthesis/synth_panel.js?v=1.4"></script>
+<script src="actions/synthesis/blocks/index.js?v=1.4"></script>
+<script src="actions/synthesis/library/index.js?v=1.4"></script>
+<script src="actions/lab_hooks.js?v=1.4"></script>
+<script src="actions/furniture.js?v=1.4"></script>
+<script src="actions/marker.js?v=1.4"></script>
 <script type="importmap">
 {"imports":{
   "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
@@ -241,6 +261,12 @@ const CHEM = {
   water:  { name:'DI water', formula:'H2O', form:'liquid', bottle:'carboy', liq:null, rho:1.0, bp:100, src:'literature' },
 };
 
+// formulas shown with real subscripts (owner): a number right after an element or ')' is a subscript
+// (Bi(NO3)3·5H2O -> Bi(NO₃)₃·5H₂O); hydrate counts after '·', '2-MOE', 'PEG 4000', '~65%' stay as they are
+const SUBS = '₀₁₂₃₄₅₆₇₈₉';
+const subF = f => f.replace(/([A-Za-z)])(\d+)/g, (m, a, d) => a + [...d].map(c => SUBS[+c]).join(''));
+for (const id in CHEM) if (CHEM[id].formula && id !== 'moe' && id !== 'peg') CHEM[id].formula = subF(CHEM[id].formula);
+
 // Owner overrides, e.g.  fe: { solid:'#e0d0ea', sol:'#b8700f' }
 const OWNER_COLORS = {};
 
@@ -250,7 +276,7 @@ const REACTIONS = [
   { id:'fe_acac', note:'Fe(III) + acetylacetone → Fe(acac)3, deep red', color:'#8e1414', strength:c=>c.fe*120*(c.acac>0.005?1:0) },
   { id:'fe_naoh', note:'Fe(III) + NaOH → Fe(OH)3, brown precipitate', color:'#7a3d14', cloudy:true, strength:c=>(c.fe>0&&c.naoh>0)?6:0 },
   { id:'ni_naoh', note:'Ni(II) + NaOH → Ni(OH)2, green precipitate', color:'#76a865', cloudy:true, strength:c=>(c.ni>0&&c.naoh>0)?5:0 },
-  { id:'bi_water', note:'Bi(NO3)3 hydrolyses in plain water → white BiONO3 (cloudy). Acid keeps it clear.', color:'#f4f4f0', cloudy:true,
+  { id:'bi_water', note:'Bi(NO₃)₃ hydrolyses in plain water → white BiONO₃ (cloudy). Acid keeps it clear.', color:'#f4f4f0', cloudy:true,
     strength:c=>(c.bi>0 && c.water>0.5 && (c.hno3+c.acetic)<0.03 && c.citric<0.02)?4:0 },
   { id:'cr_heat', note:'Cr(III) nitrate solution turns green when heated', color:'#4f7f3a', strength:(c,v)=>(c.cr>0 && v.maxTemp>60)?c.cr*50:0 },
 ];
@@ -322,8 +348,9 @@ scene.add(sun);
 const fill = new THREE.DirectionalLight(0xdfe8ff, 0.45); fill.position.set(-3, 4, -2.5); scene.add(fill);
 
 const M = {
-  glass: new THREE.MeshStandardMaterial({ color:0xe4f1ee, roughness:0.3, metalness:0, transparent:true, opacity:0.14,
-    envMapIntensity:0.2, depthWrite:false, side:THREE.FrontSide }),
+  // owner: glass was barely visible -> opacity 0.14 -> 0.22, more reflection, stronger edges (shader below)
+  glass: new THREE.MeshStandardMaterial({ color:0xdcecea, roughness:0.22, metalness:0, transparent:true, opacity:0.22,
+    envMapIntensity:0.45, depthWrite:false, side:THREE.FrontSide }),
   // metal: reflective but soft, so highlights don't jump around while the view moves
   steel: new THREE.MeshStandardMaterial({ color:0xd4d9df, metalness:0.45, roughness:0.4, envMapIntensity:0.6 }),
   steelDark: new THREE.MeshStandardMaterial({ color:0x9ca3aa, metalness:0.4, roughness:0.45, envMapIntensity:0.6 }),
@@ -348,10 +375,16 @@ const M = {
 // reflections, so it stays calm while rotating.
 M.glass.onBeforeCompile = sh => {
   sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', `#include <opaque_fragment>
-    { float fr = pow(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), 2.2);
-      gl_FragColor.a = clamp(gl_FragColor.a + fr * 0.55, 0.0, 0.9);
-      gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.80, 0.90, 0.88), fr * 0.4); }`);
+    { float fr = pow(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), 1.8);
+      gl_FragColor.a = clamp(gl_FragColor.a + fr * 0.7, 0.0, 0.93);
+      // edge tone a little darker + bluish than before, so the outline also shows against the white walls
+      gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.62, 0.74, 0.76), fr * 0.5); }`);
 };
+// watch glass (owner: nearly invisible on the white balance): shallow, seen from above, so the edge effect
+// hardly shows -> its own slightly tinted, less clear glass + a thin darker rim line (equipment/watchglass.js)
+M.watchGlass = M.glass.clone(); M.watchGlass.color.set(0x9fbcc2); M.watchGlass.opacity = 0.4;
+M.watchGlass.onBeforeCompile = M.glass.onBeforeCompile;
+M.glassRim = new THREE.MeshStandardMaterial({ color:0x6a8a91, roughness:0.2, transparent:true, opacity:0.85, depthWrite:false });
 const HITMAT = new THREE.MeshBasicMaterial({ transparent:true, opacity:0, depthWrite:false });
 const matCache = {};
 const colMat = (hex, rough = 0.45, extra = {}) => {
@@ -451,8 +484,24 @@ function makeItem(def) {
   items.push(it);
   return it;
 }
+// owner: white bodies (balance, hotplates, oven, spin coater, bottles ...) glared under the lab lights.
+// Every opaque near-white surface is capped to a soft off-white (linear brightness <= WHITE_CAP). Glass,
+// liquids (transparent), printed labels / displays (texture maps), basic + glowing materials are left alone.
+const WHITE_CAP = 0.5;
+function tameWhite(m) {
+  if (!m || m.userData.tamed || !m.color || !m.isMeshStandardMaterial || m.transparent || m.map) return;
+  if (m.emissive && m.emissiveIntensity > 0 && m.emissive.getHex() !== 0) return;
+  m.userData.tamed = true;
+  const mx = Math.max(m.color.r, m.color.g, m.color.b);
+  if (mx > WHITE_CAP) {
+    m.color.multiplyScalar(WHITE_CAP / mx);
+    // the glare is mostly the ceiling light panels mirrored on glossy white tops: make whites matte
+    m.roughness = Math.max(m.roughness, 0.78); m.envMapIntensity = Math.min(m.envMapIntensity, 0.45); m.metalness = Math.min(m.metalness, 0.1);
+  }
+}
 function finishItem(it) {
-  it.obj.traverse(o => { if (o.isMesh && !o.userData.surface && !o.userData.item) { o.userData.item = it; it.meshes.push(o); } });
+  it.obj.traverse(o => { if (o.isMesh) (Array.isArray(o.material) ? o.material : [o.material]).forEach(tameWhite);
+    if (o.isMesh && !o.userData.surface && !o.userData.item) { o.userData.item = it; it.meshes.push(o); } });
   const b = new THREE.Box3().setFromObject(it.obj);
   if (!it.hSet) it.h = Math.max(0.005, b.max.y - b.min.y);
   return it;
@@ -934,7 +983,7 @@ F.mainBottle = id => {
     const hd = tube([[-0.045, 0.235, -0.02], [-0.045, 0.285, -0.02], [0.045, 0.285, -0.02], [0.045, 0.235, -0.02]], 0.007, M.plasticT); it.obj.add(hd);
     const sp = cyl(0.009, 0.009, 0.03, colMat('#3a7bd5', 0.45), 16); sp.rotation.x = Math.PI / 2; sp.position.set(0, 0.03, 0.098); it.obj.add(sp);
     const tap = rbox(0.012, 0.022, 0.012, 0.003, colMat('#3a7bd5', 0.45)); tap.position.set(0, 0.04, 0.11); it.obj.add(tap);
-    addLabel(it, 0.09, 0.13, 0.08, labelTex(['DI water', 'H2O'], '#ffffff', '#1b2027', '#3a7bd5'));
+    addLabel(it, 0.09, 0.13, 0.08, labelTex(['DI water', 'H₂O'], '#ffffff', '#1b2027', '#3a7bd5'));
     it.r = 0.093; it.mass = 5200; it.stockFit = 'carboy'; it.stockCapY = 0.262; it.mouthY = 0.276;
   } else if (c.bottle === 'opaque') {
     it.contents.liq[id] = 1000;
@@ -1008,8 +1057,18 @@ F.tipbox = range => {
 F.filterjar = () => {
   const it = makeItem({ type:'filterjar', dispenser:true, name:'Jar of syringe filters (0.22 µm, PTFE)', mass: 200 });
   const p = cupProfile(0.04, 0.1); makeVessel(it, p.outer, p.inner); it.vessel = null;
-  for (let i = 0; i < 14; i++) { const f = cyl(0.012, 0.012, 0.008, colMat('#f4f4f0', 0.4), 16);
-    f.position.set((Math.random() - 0.5) * 0.045, 0.006 + i * 0.006, (Math.random() - 0.5) * 0.045); f.rotation.x = Math.random(); it.obj.add(f); }
+  // a loose pile of the REAL filter model (owner: the plain discs did not look natural): mostly lying flat,
+  // tilted, overlapping, some turned over; fixed seed so every jar looks the same; baked into one mesh
+  const rnd = (n => () => (n = (n * 16807) % 2147483647) / 2147483647)(7);
+  it.obj.add(bake('filterpile', g => {
+    const layers = [[3, 0.0], [3, 0.6], [3, 1.2], [2, 0.3], [1, 0.9]];
+    layers.forEach(([n, rot], L) => { for (let i = 0; i < n; i++) {
+      const f = eq('filterModel')(K), a = rot + i / n * Math.PI * 2 + (rnd() - 0.5) * 0.5, rr = n > 1 ? 0.0145 + rnd() * 0.004 : rnd() * 0.006;
+      f.position.set(Math.cos(a) * rr, 0.0175 + L * 0.0125 + rnd() * 0.003, Math.sin(a) * rr);
+      f.rotation.set((rnd() < 0.3 ? Math.PI : 0) + (rnd() - 0.5) * 0.7, rnd() * Math.PI * 2, (rnd() - 0.5) * 0.7);
+      g.add(f);
+    } });
+  }));
   const cap = cyl(0.041, 0.041, 0.012, M.black); cap.position.y = 0.106; it.obj.add(cap);
   return finishItem(it);
 };
@@ -1045,7 +1104,7 @@ function refreshSubstrate(it) {
     const look = fresh ? contentsLook(it) : null; if (fresh) { it._lookT = simTime; it._lookVol = vol; }
     const r = Math.min(0.0125, Math.sqrt(vol * 1e-6 / (Math.PI * 0.0006)));   // ~0.6 mm high puddle, limited by the slide width
     it.puddle.visible = true; it.puddle.scale.set(r, r, 1);
-    if (look) { it.puddle.material.color.copy(look.col); it.puddle.material.opacity = Math.max(0.45, look.opacity); }
+    if (look) { it.puddle.material.color.copy(look.col); it.puddle.material.opacity = Math.max(0.55, look.opacity); }
   } else it.puddle.visible = false;
   if (it.film) { it.filmMesh.visible = true; it.filmMesh.material.color.copy(it.film.col); it.filmMesh.material.opacity = Math.min(0.85, 0.22 + 0.12 * it.film.layers + 0.15 * it.film.strength); }
   else it.filmMesh.visible = false;
@@ -1100,6 +1159,8 @@ F.stand = kind => {
   });
   return it;
 };
+// black permanent marker (equipment/marker.js; writing labels: actions/marker.js)
+F.marker = () => { const it = makeItem({ type:'marker', name:'Permanent marker (black, fine) — writes labels', mass: 12 }); eq('marker')(K, it); return finishItem(it); };
 F.misc = (name, build, r) => {
   const it = makeItem({ type:'misc', name, mass: 50 }); build(it.obj); it.r = r; return finishItem(it);
 };
@@ -1124,8 +1185,10 @@ F.hotplate = spec => {
   const it = makeItem({ type:'hotplate', machine:{ ...spec, setT: spec.heat ? 25 : 0, actT: 25, setRpm: 0, actRpm: 0 }, name: spec.name, mass: 2500 });
   const v = eq('hotplate')(K, it, spec, W, D, H, mini);        // equipment/hotplate.js
   if (!mini) {   // printed label on the top front edge
-    const lt = canvasTex(512, 64, (g, w, h) => { g.fillStyle = '#6c747b'; g.fillRect(0, 0, w, h); g.fillStyle = '#f2f4f5'; g.font = 'bold 34px system-ui'; g.textAlign = 'center';
-      g.fillText(`HOTPLATE STIRRER  ·  MAX ${spec.maxT} °C`, w / 2, 44); });
+    const lt = canvasTex(1024, 128, (g, w, h) => { g.fillStyle = '#6c747b'; g.fillRect(0, 0, w, h); g.fillStyle = '#f2f4f5'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      const txt = `HOTPLATE STIRRER  ·  MAX ${spec.maxT} °C`; let fs = 64;           // shrink to fit (owner: it was cut to "IOTPLATE")
+      do { g.font = `bold ${fs}px system-ui`; fs -= 2; } while (g.measureText(txt).width > w - 48 && fs > 20);
+      g.fillText(txt, w / 2, h / 2 + 2); });
     const lab = new THREE.Mesh(new THREE.PlaneGeometry(W * 0.7, W * 0.0875), new THREE.MeshStandardMaterial({ map:lt, roughness:0.6 }));
     lab.rotation.x = -Math.PI / 2 + 0.1; lab.position.set(0, 0.0722, D / 2 - 0.042); it.obj.add(lab);   // on the console top (equipment/hotplate.js)
   }
@@ -1134,7 +1197,7 @@ F.hotplate = spec => {
   it.machine.knobT = v.knobT; it.machine.knobR = v.knobR;
   it.r = Math.hypot(W, D) / 2 * 0.86;
   finishItem(it);
-  it.plateSurface = addSurface(it.obj, { name: spec.name, kind:'plate', w:0.16, d:0.16, y: H + 0.0105, z: -D / 2 + 0.1, owner:it, snap:true });
+  it.plateSurface = addSurface(it.obj, { name: spec.name, kind:'plate', w:0.16, d:0.16, y: it.plateTop ?? H + 0.0105, z: it.plateZ ?? -D / 2 + 0.1, owner:it, snap:true });   // equipment/hotplate.js
   machines.push(it); return it;
 };
 F.oven = () => {
@@ -1191,21 +1254,9 @@ F.balance = () => {
 F.spincoater = () => {
   const it = makeItem({ type:'spincoater', name:'Spin coater', mass: 8000,
     machine:{ lidOpen:false, vacuum:false, steps:[{ rpm:0, time:0 }, { rpm:0, time:0 }], running:false, phase:0, t:0, actRpm:0, maxRpm:0 } });
-  const o = it.obj;
-  const b = rbox(0.25, 0.12, 0.25, 0.014, colMat('#dfe4e8', 0.35), 4); b.position.y = 0.06; o.add(b);
-  feet(o, 0.25, 0.25, 0.03, 0.009, 0.006);
-  o.add(lathe([[0.07, 0.12], [0.09, 0.16], [0.094, 0.16], [0.074, 0.12]], M.steelDark, 48));
-  const floor = cyl(0.072, 0.072, 0.002, colMat('#5a636d', 0.5), 40); floor.position.y = 0.121; o.add(floor);
-  const spinner = new THREE.Group(); spinner.position.y = 0.122; o.add(spinner);
-  const chuck = cyl(0.012, 0.014, 0.012, M.black, 24); chuck.position.y = 0.006; spinner.add(chuck);
-  const mark = box(0.002, 0.0005, 0.01, colMat('#ffffff')); mark.position.set(0, 0.0123, 0.006); spinner.add(mark);
-  const hinge = new THREE.Group(); hinge.position.set(0, 0.16, -0.095); o.add(hinge);
-  const lid = mesh(new THREE.SphereGeometry(0.095, 40, 12, 0, Math.PI * 2, 0, Math.PI * 0.32), M.glass); lid.scale.y = 0.55; lid.position.set(0, -0.025, 0.095); lid.renderOrder = 3; hinge.add(lid);
-  const knob = cyl(0.008, 0.008, 0.012, M.black, 16); knob.position.set(0, 0.012, 0.18); hinge.add(knob);
-  const pn = rbox(0.2, 0.05, 0.006, 0.003, M.bodyDark); pn.position.set(0, 0.06, 0.126); o.add(pn);
-  for (let i = 0; i < 3; i++) { const bt = cyl(0.007, 0.007, 0.004, colMat(['#7d8894', '#d9a21b', '#3c9a5f'][i], 0.4), 20); bt.rotation.x = Math.PI / 2; bt.position.set(0.02 + i * 0.024, 0.06, 0.13); o.add(bt); }
-  const dt = displayTex(); const disp = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.024), new THREE.MeshBasicMaterial({ map:dt.t }));
-  disp.position.set(-0.05, 0.06, 0.1295); o.add(disp);
+  const v = eq('spincoater')(K, it);                       // equipment/spincoater.js
+  const dt = displayTex(); v.dispMesh.material.map = dt.t; v.dispMesh.material.needsUpdate = true;
+  const hinge = v.lidHinge, spinner = v.spinner;
   it.machine.disp = dt; it.lidHinge = hinge; it.spinner = spinner; it.lidAngle = 0;
   it.r = 0.18; finishItem(it);
   it.chuckSurface = addSurface(spinner, { name:'Spin coater chuck', kind:'chuck', w:0.03, d:0.03, y:0.0122, owner:it, snap:true, clear:0.03 });
@@ -1316,15 +1367,15 @@ const hood = makeItem({ type:'fumehood', fixed:true, name:'Fume hood', machine:{
     for (const x of [-0.3, 0.3]) { const d = rbox(0.58, 0.74, 0.016, 0.004, colMat('#e3e7ea', 0.45)); d.position.set(x, 0.43, 0.405); g.add(d);
       const hd = rbox(0.1, 0.012, 0.016, 0.005, M.steel); hd.position.set(x + (x < 0 ? 0.2 : -0.2), 0.74, 0.42); g.add(hd); }
     const ws = rbox(1.22, 0.03, 0.82, 0.006, M.bench); ws.position.y = 0.875; g.add(ws);
-    for (const x of [-0.585, 0.585]) { const sd = rbox(0.05, 1.3, 0.8, 0.01, body); sd.position.set(x, 1.54, 0); g.add(sd); }
+    for (const x of [-0.585, 0.585]) { const sd = rbox(0.05, 1.278, 0.8, 0.01, body); sd.position.set(x, 1.529, 0); g.add(sd); }   // 0.89..2.168: ends inside the fascia's ROUNDED lower edge, below its flat faces (shared flat faces flickered)
     const top = rbox(1.22, 0.36, 0.8, 0.01, body); top.position.set(0, 2.34, 0); g.add(top);
     hood.backMat = new THREE.MeshStandardMaterial({ color:0xd9dde0, roughness:0.6, emissive:0xfff4e0, emissiveIntensity:0 });
-    const back = new THREE.Mesh(new THREE.BoxGeometry(1.12, 1.3, 0.02), hood.backMat); back.position.set(0, 1.54, -0.39); g.add(back);
+    const back = new THREE.Mesh(new THREE.BoxGeometry(1.12, 1.278, 0.02), hood.backMat); back.position.set(0, 1.529, -0.39); g.add(back);
     for (const y of [1.25, 1.75]) { const bf = box(1.1, 0.03, 0.01, colMat('#c3c9ce', 0.6)); bf.position.set(0, y, -0.375); g.add(bf); }   // baffle slots
     // sash: framed glass that slides up behind the top fascia
     hood.sashG = new THREE.Group(); hood.sashG.position.set(0, 0, 0.36); g.add(hood.sashG);
     const glass = rbox(1.1, 0.7, 0.008, 0.004, colMat('#cfe2ec', 0.1, { transparent:true, opacity:0.26, depthWrite:false })); glass.renderOrder = 3; hood.sashG.add(glass);
-    for (const [w, h, x, y] of [[1.12, 0.035, 0, -0.35], [1.12, 0.025, 0, 0.35], [0.025, 0.7, -0.55, 0], [0.025, 0.7, 0.55, 0]]) { const f = rbox(w, h, 0.02, 0.004, colMat('#9aa3aa', 0.45)); f.position.set(x, y, 0); hood.sashG.add(f); }
+    for (const [w, h, x, y, d] of [[1.12, 0.035, 0, -0.35, 0.02], [1.12, 0.025, 0, 0.35, 0.02], [0.025, 0.67, -0.55, 0.0025, 0.018], [0.025, 0.67, 0.55, 0.0025, 0.018]]) { const f = rbox(w, h, d, 0.004, colMat('#9aa3aa', 0.45)); f.position.set(x, y, 0); hood.sashG.add(f); }   // side bars fit between top + bottom bars (no overlapping faces)
     const sh = rbox(0.9, 0.022, 0.03, 0.008, M.steel); sh.position.set(0, -0.355, 0.025); hood.sashG.add(sh);
     // paper tell-tale strip at the sash bottom: hangs still, flutters inward when the fan pulls air
     hood.tell = new THREE.Mesh(new THREE.PlaneGeometry(0.018, 0.06), colMat('#fff7d6', 0.8, { side:THREE.DoubleSide }));
@@ -1361,10 +1412,7 @@ const hood = makeItem({ type:'fumehood', fixed:true, name:'Fume hood', machine:{
     const sp = new THREE.Mesh(new RoundedBoxGeometry(0.16, 0.08, 0.012, 2, 0.004), sockM); sp.position.set(x, y, z); sp.rotation.y = ry; scene.add(sp); }
   // fire extinguisher on a wall bracket
   { const g = new THREE.Group(); g.position.set(ROOM.x - 0.12, 0, 2.55); g.rotation.y = -Math.PI / 2; scene.add(g);   // right wall, near the door
-    g.add(lathe([[0.0001, 0.3], [0.075, 0.3], [0.08, 0.32], [0.08, 0.78], [0.06, 0.83], [0.022, 0.86], [0.0001, 0.86]], colMat('#c62828', 0.35), 40));
-    const vh = rbox(0.06, 0.04, 0.03, 0.008, M.black); vh.position.set(0, 0.88, 0); g.add(vh);
-    g.add(tube([[0.02, 0.87, 0], [0.09, 0.84, 0.0], [0.1, 0.6, 0.02], [0.085, 0.45, 0.05]], 0.008, M.black));
-    const br = rbox(0.14, 0.04, 0.08, 0.006, M.steelDark); br.position.set(0, 0.62, 0.06); g.add(br);
+    eq('fireExtCO2')(K, g);                              // CO2 extinguisher on its bracket (equipment/roomdecor.js; owner: realistic, CO2)
     const sgn = canvasTex(128, 128, (c, w, h) => { c.fillStyle = '#c62828'; c.fillRect(0, 0, w, h); c.fillStyle = '#fff'; c.font = 'bold 20px system-ui'; c.textAlign = 'center'; c.fillText('FIRE', w / 2, 56); c.fillText('EXTINGUISHER', w / 2, 84); });
     const sp = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.2), new THREE.MeshStandardMaterial({ map:sgn })); sp.position.set(0, 1.15, -0.105); g.add(sp); }
   // wall clock showing the real time (back wall, above the basin)
@@ -1402,6 +1450,17 @@ const sMach = addSurface(machTable, { name:'Machine table', kind:'table', w:2.38
 // Balance table (front-right)
 const balTable = makeTable(1.2, 0.7, 0.85); balTable.position.set(2.3, 0, ROOM.z - 0.4); balTable.rotation.y = Math.PI;
 const sBal = addSurface(balTable, { name:'Balance table', kind:'table', w:1.18, d:0.68, y:0.85 });
+
+// UV-Vis desk (left wall, front half; owner): computer desk with the UV-Vis spectrophotometer, PC, monitor,
+// keyboard, mouse, cuvette rack; office chair in front (furniture). Models: equipment/uvvis.js
+// office computer desk (owner: "make the desktop realistic"): laminate top, steel frame, drawer pedestal, cable tray
+const deskTable = new THREE.Group(); eq('officeDesk')(K, deskTable, 1.6, 0.75, 0.75); scene.add(deskTable);
+deskTable.position.set(-ROOM.x + 0.42, 0, 1.55); deskTable.rotation.y = Math.PI / 2;
+const sDesk = addSurface(deskTable, { name:'UV-Vis desk', kind:'table', w:1.58, d:0.73, y:0.75 });
+const sDeskFloor = addSurface(deskTable, { name:'Under the UV-Vis desk (floor)', kind:'shelf', w:0.5, d:0.5, x:-0.45, y:0, z:0.08, clear:0.6 });
+const chair = makeItem({ type:'chair', fixed:true, name:'Office chair (click: turn / move)', mass: 12000 });
+chair.parts = eq('officeChair')(K, chair.obj); finishItem(chair); chair.r = 0.33;
+chair.obj.position.set(-ROOM.x + 1.15, 0, 1.85); chair.parts.top.rotation.y = -Math.PI / 2 + 0.25; scene.add(chair.obj);
 
 // Basin (back wall, near rack) — fixed
 const basin = makeItem({ type:'basin', fixed:true, name:'Basin (sink)' });
@@ -1585,7 +1644,7 @@ const decor = [
   F.misc('Aluminium foil (box, 30 cm roll)', o => eq('foil')(K, o), 0.16),        // equipment/consumables.js
   F.misc('Nitrile gloves (box of 100)', o => eq('gloves')(K, o), 0.135),
   F.misc('Lint-free wipes (box)', o => eq('wipes')(K, o), 0.12),
-  F.misc('Marker + labels', o => { const b = cyl(0.007, 0.007, 0.13, M.black, 10); b.rotation.x = Math.PI / 2; b.position.y = 0.007; o.add(b); }, 0.066),
+  F.marker(),
 ];
 decor.forEach(i => autoPlace(i, [R[0], R[1]]));
 
@@ -1618,6 +1677,88 @@ autoPlace(F.simpleMachine('sonicator', 'Ultrasonic sonicator (works in a later v
   feet(o, 0.3, 0.18, 0.03, 0.009, 0.006);
 }, 0.18), [sMach]);
 const balance = F.balance(); autoPlace(balance, [sBal]);
+// Box furnace (dummy; also used by the Recipe book film) + alumina setter, on the machine table (owner)
+const furnace = makeItem({ type:'furnace', machine:{ doorOpen:false }, name:'Box furnace (1200 °C) — not working yet', mass: 30000 });
+eq('furnace')(K, furnace); furnace.r = 0.28; finishItem(furnace); machines.push(furnace);
+{ const lp = sMach.root.worldToLocal(new THREE.Vector3(3.55, 0, 0.08)); placeOn(furnace, sMach, lp.x, lp.z); }
+{ const st = makeItem({ type:'misc', name:'Alumina setter plate 50 × 50 mm', mass: 20 }); eq('aluminaSetter')(K, st); st.setter = true; finishItem(st);
+  const lp = sMach.root.worldToLocal(new THREE.Vector3(3.22, 0, 0.3)); placeOn(st, sMach, lp.x, lp.z); }
+// UV-Vis station on the desk (decor; the sample-compartment lid opens)
+{ const uv = makeItem({ type:'uvvis', machine:{ lidOpen:false }, name:'UV-Vis spectrophotometer — not working yet', mass: 25000 });
+  uv.lidHinge = eq('uvvis')(K, uv).lidHinge; finishItem(uv); machines.push(uv); placeOn(uv, sDesk, -0.45, -0.08);
+  const misc = (name, b, x, z, mass = 500) => { const it = makeItem({ type:'misc', name, mass }); const r = eq(b)(K, it); finishItem(it); placeOn(it, sDesk, x, z); return [it, r]; };
+  const [, mon] = misc('Monitor (UV-Vis software)', 'monitor', 0.3, -0.18, 5000);
+  mon.screen.material.map = canvasTex(1280, 720, (g, w, h) => {          // generic OS desktop + spectrometer software window
+    const bg = g.createLinearGradient(0, 0, w, h); bg.addColorStop(0, '#1d4f86'); bg.addColorStop(1, '#3f8dbf'); g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    g.fillStyle = 'rgba(255,255,255,0.06)'; for (let i = 0; i < 6; i++) { g.beginPath(); g.arc(w * 0.8, h * 1.1, 300 + i * 90, 0, 7); g.fill(); }
+    const icons = ['This PC', 'Documents', 'UV-Vis Scan', 'Spectra data', 'Recycle bin'];
+    icons.forEach((t, i) => { const y = 24 + i * 108; g.fillStyle = ['#e9edf2', '#f2c14e', '#5ab0e6', '#f2c14e', '#d8dde3'][i]; g.fillRect(34, y, 54, 46);
+      g.fillStyle = 'rgba(0,0,0,0.25)'; g.fillRect(34, y + 38, 54, 8); g.fillStyle = '#fff'; g.font = '17px system-ui'; g.textAlign = 'center'; g.fillText(t, 61, y + 70); });
+    g.textAlign = 'left';
+    g.fillStyle = 'rgba(18,22,28,0.92)'; g.fillRect(0, h - 48, w, 48);                                   // taskbar
+    g.fillStyle = '#4fa3ff'; g.beginPath(); g.arc(30, h - 24, 13, 0, 7); g.fill();
+    ['#5ab0e6', '#f2c14e', '#9be27a'].forEach((c, i) => { g.fillStyle = c; g.fillRect(64 + i * 50, h - 38, 30, 28); });
+    g.fillStyle = '#2d6fb5'; g.fillRect(64 + 3 * 50 - 4, h - 42, 38, 36); g.fillStyle = '#5ab0e6'; g.fillRect(64 + 3 * 50, h - 38, 30, 28);
+    g.fillStyle = '#e8eef4'; g.font = '18px system-ui'; g.textAlign = 'right'; g.fillText('10:24', w - 18, h - 27); g.font = '14px system-ui'; g.fillText('21-11-2026', w - 18, h - 10); g.textAlign = 'left';
+    // software window
+    const WX = 150, WY = 40, WW = w - 190, WH = h - 110;
+    g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(WX + 6, WY + 8, WW, WH);
+    g.fillStyle = '#f3f5f7'; g.fillRect(WX, WY, WW, WH); g.fillStyle = '#2d5d8c'; g.fillRect(WX, WY, WW, 40);
+    g.fillStyle = '#fff'; g.font = 'bold 21px system-ui'; g.fillText('UV-Vis Scan — Spectrum', WX + 14, WY + 27);
+    ['—', '☐', '✕'].forEach((t, i) => g.fillText(t, WX + WW - 100 + i * 34, WY + 27));
+    g.fillStyle = '#dfe4e9'; g.fillRect(WX, WY + 40, WW, 38); g.fillStyle = '#2b3238'; g.font = '18px system-ui';
+    ['Baseline', 'Measure', 'Scan settings', 'Save'].forEach((t, i) => { g.strokeStyle = '#9aa5ae'; g.strokeRect(WX + 12 + i * 140, WY + 46, 128, 26); g.fillText(t, WX + 22 + i * 140, WY + 65); });
+    const X0 = WX + 80, Y0 = WY + WH - 60, X1 = WX + WW - 30, Y1 = WY + 100;
+    g.strokeStyle = '#d5dbe0'; g.lineWidth = 1;
+    for (let i = 0; i <= 6; i++) { const x = X0 + (X1 - X0) * i / 6; g.beginPath(); g.moveTo(x, Y1); g.lineTo(x, Y0); g.stroke(); }
+    for (let i = 0; i <= 5; i++) { const y = Y0 - (Y0 - Y1) * i / 5; g.beginPath(); g.moveTo(X0, y); g.lineTo(X1, y); g.stroke(); }
+    g.strokeStyle = '#2b3238'; g.lineWidth = 2; g.strokeRect(X0, Y1, X1 - X0, Y0 - Y1);
+    g.fillStyle = '#2b3238'; g.font = '16px system-ui'; g.textAlign = 'center';
+    for (let i = 0; i <= 6; i++) g.fillText(200 + i * 100, X0 + (X1 - X0) * i / 6, Y0 + 20);
+    g.fillText('Wavelength (nm)', (X0 + X1) / 2, Y0 + 44);
+    g.textAlign = 'right'; for (let i = 0; i <= 5; i++) g.fillText((i * 0.5).toFixed(1), X0 - 8, Y0 - (Y0 - Y1) * i / 5 + 5);
+    g.save(); g.translate(WX + 26, (Y0 + Y1) / 2); g.rotate(-Math.PI / 2); g.textAlign = 'center'; g.fillText('Absorbance', 0, 0); g.restore();
+    g.textAlign = 'left'; g.fillStyle = '#6b7680'; g.font = 'italic 18px system-ui'; g.fillText('Ready — no sample measured', X0 + 14, Y1 + 28);
+  });
+  mon.screen.material.needsUpdate = true;
+  misc('Keyboard', 'keyboard', 0.28, 0.16, 700);
+  misc('Mouse (on a mouse pad)', 'mouse', 0.6, 0.16, 100);
+  misc('Desk lamp', 'deskLamp', 0.7, -0.22, 1500);
+  misc('Lab notebook + pen', 'notebook', -0.07, 0.17, 300);
+  misc('Cuvette rack (2 quartz cuvettes)', 'cuvetteRack', -0.08, -0.2, 150);
+  { const it = makeItem({ type:'misc', name:'Desktop PC', mass: 8000 }); eq('pcTower')(K, it); finishItem(it); placeOn(it, sDeskFloor, 0, 0); }   // on the floor under the desk
+  // cables (desk-local, fixed: they stay where they are if an item is moved): monitor, keyboard, mouse, UV-Vis USB -> PC
+  { const cm = colMat('#15181b', 0.6), T = 0.75;
+    const cable = pts => deskTable.add(tube(pts, 0.0028, cm, 48));
+    cable([[0.3, T + 0.24, -0.26], [0.3, T + 0.01, -0.33], [0.22, T - 0.12, -0.27], [-0.1, T - 0.14, -0.26], [-0.38, T - 0.2, -0.24], [-0.44, 0.45, -0.12]]);
+    cable([[0.28, T + 0.018, 0.09], [0.28, T + 0.004, -0.3], [0.27, T - 0.01, -0.37], [0.2, T - 0.13, -0.27], [-0.2, T - 0.15, -0.25], [-0.42, 0.44, -0.12]]);
+    cable([[0.6, T + 0.02, 0.11], [0.6, T + 0.004, -0.3], [0.58, T - 0.01, -0.37], [0.35, T - 0.13, -0.27], [-0.25, T - 0.16, -0.25], [-0.46, 0.43, -0.12]]);
+    cable([[-0.45, T + 0.1, -0.29], [-0.45, T + 0.01, -0.35], [-0.45, T - 0.15, -0.3], [-0.47, 0.44, -0.12]]);
+    cable([[-0.45, 0.3, -0.12], [-0.45, 0.08, -0.3], [-0.5, 0.02, -0.36], [-0.6, 0.02, -0.37]]);   // PC power, along the floor to the wall
+  }
+}
+// Central air conditioning (owner: central AC type): 2 square 4-way supply diffusers + 1 return-air grille in the
+// ceiling (between the light panels), controlled from a wall thermostat by the door (click it: on/off + set
+// temperature). Decor: streaks of air fan out of the diffusers while it runs; the room stays at 25 °C.
+const aircon = makeItem({ type:'aircon', fixed:true, machine:{ on:false, setT:24 }, name:'Air conditioning — wall thermostat', mass: 300 });
+{ const th = eq('thermostat')(K, aircon.obj); aircon.disp = th.disp; finishItem(aircon); machines.push(aircon);
+  aircon.obj.position.set(ROOM.x - 0.005, 1.45, 3.05); aircon.obj.rotation.y = -Math.PI / 2; scene.add(aircon.obj);
+  aircon.airs = [];
+  for (const [x, z] of [[-1.6, -0.6], [1.5, 0.9]]) { const g = new THREE.Group(); g.position.set(x, ROOM.h, z); scene.add(g); aircon.airs.push(eq('ceilingDiffuser')(K, g).air); }
+  { const g = new THREE.Group(); g.position.set(-0.2, ROOM.h, 1.6); scene.add(g); eq('returnGrille')(K, g); } }
+aircon.setDisp = () => { const m = aircon.machine; aircon.disp.material.map = canvasTex(200, 140, (g, w, h) => {
+  g.fillStyle = m.on ? '#cfe4d4' : '#9aa49c'; g.fillRect(0, 0, w, h); g.fillStyle = '#1d2a22'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  if (m.on) { g.font = 'bold 64px ui-monospace,Consolas,monospace'; g.fillText(m.setT + '°', w / 2, h / 2 - 8); g.font = 'bold 22px system-ui'; g.fillText('COOL · AUTO', w / 2, h - 22); }
+  else { g.font = 'bold 34px system-ui'; g.fillText('OFF', w / 2, h / 2); } });
+  aircon.disp.material.needsUpdate = true; }; aircon.setDisp();
+// Lab coats + apron on a wall rail, and a small PPE shelf with safety goggles (right wall, near the door; owner)
+{ const g = new THREE.Group(); eq('coatRail')(K, g); g.position.set(ROOM.x - 0.005, 1.78, 1.45); g.rotation.y = -Math.PI / 2; scene.add(g); }
+const sPPE = (() => { const g = new THREE.Group(); eq('wallShelf')(K, g, 0.4); g.position.set(ROOM.x - 0.005, 1.25, 2.15); g.rotation.y = -Math.PI / 2; scene.add(g);
+  return addSurface(g, { name:'PPE shelf (wall)', kind:'shelf', w:0.38, d:0.15, y:0, z:0.08, clear:0.35 }); })();
+const goggles = () => { const it = makeItem({ type:'misc', name:'Safety goggles', mass: 80 }); eq('goggles')(K, it); return finishItem(it); };
+placeOn(goggles(), sPPE, -0.08, 0); placeOn(goggles(), sPPE, 0.1, 0);
+autoPlace(goggles(), [sMain]);
+
 {
   const sc = F.spincoater();
   sc.baseY = 0; placeOn(sc, sMain, 2.38 / 2 - 0.2, -0.88 / 2 + 0.2);
@@ -1668,9 +1809,11 @@ const fmtVol = ml => ml < 1 ? `${Math.round(ml * 1000)} µl` : `${ml.toFixed(ml 
 /* ---------- colour ---------- */
 // Absorbance-style mixing: each coloured species filters the light (like Beer–Lambert),
 // so colours stay saturated and deepen with concentration.
+const CLEAR_TINT = new THREE.Color('#3d7fc0');            // sRGB light water-blue (clear liquids, owner)
 function contentsLook(it) {
   const c = it.contents, vol = totLiq(c);
   if (vol <= 0) return null;
+  if (it.lookOverride) return it.lookOverride;     // fixed colour set by a synthesis step (actions/synthesis/)
   const conc = {}; for (const id in CHEM) conc[id] = 0;
   for (const id in c.dis) conc[id] = c.dis[id] / vol;
   for (const id in c.liq) conc[id] = c.liq[id] / vol;
@@ -1680,7 +1823,11 @@ function contentsLook(it) {
   for (const rx of REACTIONS) { const w = rx.strength(conc, it); if (w > 0) { hasRx.add(rx.id); if (rx.cloudy) cloudy = rx.color; else absorb(rx.color, w); } }
   for (const id in c.dis) { const ch = CHEM[id]; if (!ch.sol) continue; if (id === 'cr' && hasRx.has('cr_heat')) continue; if (id === 'fe' && hasRx.has('fe_acac')) continue; absorb(ch.sol, ch.k * conc[id]); }
   for (const id in c.liq) { const ch = CHEM[id]; if (ch.liq) absorb(ch.liq, (ch.k || 0.5) * conc[id]); }
-  let opacity = 0.22 + 0.68 * (1 - Math.exp(-A));
+  // owner: clear liquids were barely visible -> a light water-blue tint + more body for CLEAR liquids only;
+  // the tint fades out as the liquid gets coloured, so real colours stay as they were
+  const clear = Math.exp(-A * 2);
+  col.lerp(CLEAR_TINT, 0.8 * clear);
+  let opacity = 0.6 + 0.34 * (1 - Math.exp(-A));
   if (cloudy) { col.lerp(new THREE.Color(cloudy), 0.75); opacity = Math.max(opacity, 0.9); }
   return { col, opacity };
 }
@@ -1748,7 +1895,7 @@ function showTip(it, x, y) {
   tipEl.style.left = Math.min(x + 16, innerWidth - w - 8) + 'px'; tipEl.style.top = Math.min(y + 16, innerHeight - h - 8) + 'px';
 }
 // Settings (remembered in this browser): bottom bar tips / "Holding …" line
-const SET_ROT = { pivot: 'depth', pull: 0.45, speed: 1, smooth: 14, thr: 8, grab: 0, invX: false, invY: false, dot: true };   // rotation defaults
+const SET_ROT = { pivot: 'volume', pull: 0.45, speed: 1, smooth: 14, thr: 8, grab: 0, invX: false, invY: false, dot: true };   // rotation defaults
 const SET = { tips: !COARSE, holding: true, ...SET_ROT };       // touch: tips bar off by default (joystick lives at the bottom)
 try { Object.assign(SET, JSON.parse(localStorage.getItem('vl_settings') || '{}')); } catch (e) {}
 const saveSet = () => { try { localStorage.setItem('vl_settings', JSON.stringify(SET)); } catch (e) {} };
@@ -2500,10 +2647,25 @@ function openPanel(it) {
     const run = add(`<div class="row"><button class="go">Start</button><button class="st">Stop</button></div>`);
     run.querySelector('.go').onclick = () => { if (!m.running) spinStart(it); };
     run.querySelector('.st').onclick = () => { if (m.running) spinStop(it, false); };
+  } else if (it.type === 'aircon') {
+    sub.textContent = 'Central air conditioning (ceiling diffusers). Decor: the room stays at 25 °C (nothing in the lab depends on it).';
+    const row = add(`<div class="row"><button class="pw"></button></div>`), pw = row.querySelector('.pw');
+    const d = add(`<label>Set temperature: <b class="v"></b></label><input type="range" min="16" max="30" step="1">`);
+    const r = d.querySelector('input'), v = d.querySelector('.v'); r.value = m.setT;
+    const sync = () => { pw.textContent = m.on ? 'Turn OFF' : 'Turn ON'; v.textContent = m.setT + ' °C'; it.setDisp(); }; sync();
+    pw.onclick = () => { m.on = !m.on; sync(); };
+    r.oninput = () => { m.setT = +r.value; sync(); };
+  } else if (it.type === 'furnace' || it.type === 'uvvis') {
+    const isF = it.type === 'furnace', key = isF ? 'doorOpen' : 'lidOpen';
+    sub.textContent = isF ? 'Box furnace for the final anneal (the Recipe book film uses it). Not working yet — the door opens.'
+      : 'Not working yet — the sample-compartment lid opens.';
+    const row = add(`<div class="row"><button class="dl"></button></div>`), bt = row.querySelector('.dl');
+    const sd = () => bt.textContent = (m[key] ? 'Close the ' : 'Open the ') + (isF ? 'door' : 'lid'); sd();
+    bt.onclick = () => { m[key] = !m[key]; sd(); };
   } else if (it.machine && it.machine.placeholder) {
     sub.textContent = 'Placed and movable. It will work in a later version.';
   }
-  if (it.machine) {
+  if (it.machine && !it.fixed) {
     const row = add(`<div class="row"><button class="mv">Move it</button></div>`);
     row.querySelector('.mv').onclick = () => { closePanel(); pickUp(it); };
   }
@@ -2611,6 +2773,23 @@ function refreshVessel(it) {
     v.crystals.instanceMatrix.needsUpdate = true; if (v.crystals.instanceColor) v.crystals.instanceColor.needsUpdate = true;
   }
 }
+// Liquid in a narrow tube (pipette, syringe, dropper) looks silvery-bright: light is totally reflected
+// inside the column (owner). Own material: a bit metallic + glossy, reflects the room, brighter at the
+// edges, tinted by the liquid's colour (clear liquid = silvery-blue). Cached per colour.
+const toolLiqCache = {};
+function toolLiqMat(look) {
+  const key = look.col.getHexString() + (look.opacity > 0.9 ? 'o' : '');
+  if (toolLiqCache[key]) return toolLiqCache[key];
+  const col = look.col.clone().lerp(new THREE.Color('#ffffff'), 0.25);
+  const m = new THREE.MeshStandardMaterial({ color: col, metalness: 0.7, roughness: 0.12, envMapIntensity: 1.8,
+    transparent: true, opacity: Math.max(0.9, look.opacity), depthWrite: false });
+  m.onBeforeCompile = sh => {
+    sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', `#include <opaque_fragment>
+      { float fr = pow(1.0 - abs(dot(normalize(normal), normalize(vViewPosition))), 1.5);
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.95, 0.98, 1.0), fr * 0.55); }`);
+  };
+  return (toolLiqCache[key] = m);
+}
 function refreshTool(it) {
   if (it.toolLiq) {
     const vol = totLiq(it.contents); const m = it.toolLiq.mesh;
@@ -2618,7 +2797,7 @@ function refreshTool(it) {
       const f = Math.min(1, vol / it.cap); const len = it.toolLiq.len * 0.9 * Math.max(0.05, f);
       m.visible = true; m.scale.set(1, len, 1); m.position.y = len / 2 + 0.002;
       if (it.onLevel) it.onLevel(f);
-      const look = contentsLook(it); if (look) { m.material = colMat('#' + look.col.getHexString(), 0.2, { transparent:true, opacity:Math.max(0.5, look.opacity) }); }
+      const look = contentsLook(it); if (look) m.material = toolLiqMat(look);   // thin tube: silvery shine (owner)
     } else { m.visible = false; if (it.onLevel) it.onLevel(0); }
   }
   if (it.type === 'micropipette') {
@@ -2742,6 +2921,15 @@ function tick(dt) {
       m.actRpm = approach(m.actRpm, m.setRpm, 500, 700, dt);
     } else if (it.type === 'oven') m.actT = approach(m.actT, Math.max(25, m.setT), 3, 1, dt);
     else if (it.type === 'spincoater') spinTick(it, dt);
+    else if (it.type === 'furnace' || it.type === 'uvvis') {          // door / lid swings (only written while moving,
+      const want = (it.type === 'furnace' ? m.doorOpen : m.lidOpen) ? 1 : 0, f0 = it.openF || 0;   // so a clip may move it too)
+      it.openMoving = Math.abs(want - f0) > 1e-4;
+      if (it.openMoving) { it.openF = approach(f0, want, 1.4, 1.4, dt);
+        if (it.type === 'furnace') it.furnace.door.rotation.y = -1.9 * it.openF; else it.lidHinge.rotation.x = -1.75 * it.openF; }
+    } else if (it.type === 'aircon') {                                // central AC: air streaks fan out of the ceiling diffusers
+      for (const air of it.airs) { air.visible = m.on;
+        if (m.on) for (const q of air.children) { const c = q.children[0], u = (simTime * 0.3 + c.userData.phase) % 1; c.position.y = -u * 0.05; c.scale.setScalar(0.8 + u * 0.35); } }
+    }
   }
   for (const it of items) {
     // drying
@@ -2945,7 +3133,9 @@ addEventListener('keyup', e => { if (e.code === 'Space' && pour) pour.on = false
 addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); });
 // Soft contact shadows where things touch (ambient occlusion). Glass, liquids and invisible
 // click-planes are hidden from the AO pass so they don't leave dark halos.
-const composer = new EffectComposer(renderer);
+// MSAA render target: without it the still (AO) frames had jagged edges and the moving frames smooth ones,
+// so thin edges (glass sash, balance draft shield) "blinked" every time the camera stopped or started.
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerWidth * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio(), { type: THREE.HalfFloatType, samples: 4 }));
 composer.addPass(new RenderPass(scene, camera));
 const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
 gtao.updateGtaoMaterial({ radius: 0.12, distanceExponent: 1.5, thickness: 1.0, scale: 1.1, samples: 16 });
@@ -3223,6 +3413,7 @@ const VIEWS = {
   machines: [[2.15, 1.6, -0.8], [3.5, 0.95, -0.8]],
   balance:  [[2.3, 1.55, 2.0], [2.3, 0.9, 3.1]],
   chem:     [[-1.5, 1.55, 1.6], [-1.5, 1.0, 3.25]],
+  uvvis:    [[-2.75, 1.45, 1.55], [-3.65, 0.85, 1.55]],   // UV-Vis desk (left wall, front half)
 };
 let camAnim = null, lastFocus = null;
 const keys = {};
@@ -3266,12 +3457,18 @@ function focusAtCursor() {
   else if (dir.y < 0.35) { dir.y = 0.35; dir.normalize(); }
   camAnim = { p0: camera.position.clone(), t0: controls.target.clone(), p1: tgt.clone().addScaledVector(dir, dist), t1: tgt, u: 0 };
 }
+// views at a base table follow the table when it is moved (stored in the table's own frame)
+const VIEW_ON = { main: mainTable, under: mainTable, machines: machTable, balance: balTable }, VIEW_LOCAL = {};
+for (const k in VIEW_ON) { const g = VIEW_ON[k]; g.updateMatrixWorld(true); VIEW_LOCAL[k] = VIEWS[k].map(v => g.worldToLocal(new THREE.Vector3(...v))); }
 function goView(k) {
   lastFocus = null;
-  const [p, t] = VIEWS[k];
-  camAnim = { p0: camera.position.clone(), t0: controls.target.clone(), p1: new THREE.Vector3(...p), t1: new THREE.Vector3(...t), u: 0 };
+  let [p, t] = VIEWS[k].map(v => new THREE.Vector3(...v));
+  if (VIEW_ON[k]) { const g = VIEW_ON[k]; g.updateMatrixWorld(true); p = g.localToWorld(VIEW_LOCAL[k][0].clone()); t = g.localToWorld(VIEW_LOCAL[k][1].clone()); }
+  camAnim = { p0: camera.position.clone(), t0: controls.target.clone(), p1: p, t1: t, u: 0 };
 }
 document.querySelectorAll('#views button[data-v]').forEach(b => b.onclick = () => { goView(b.dataset.v); $('#views').classList.remove('open'); });
+// the area buttons never run under the top-right buttons (their width changes: Recipe book, narrow screens)
+{ const tr = $('#topright'), fit = () => document.documentElement.style.setProperty('--trw', tr.offsetWidth + 'px'); fit(); new ResizeObserver(fit).observe(tr); }
 $('#bGo').onclick = () => $('#views').classList.toggle('open');
 
 /* =====================================================================
@@ -3287,8 +3484,8 @@ let shadowHotUntil = 0, shadowStale = false, stillFor = 0;
 const shadowPoke = () => { shadowHotUntil = performance.now() + 600; };
 for (const ev of ['pointerdown', 'pointerup', 'keydown', 'keyup']) addEventListener(ev, shadowPoke, true);
 function shadowTick(dt) {
-  let hot = held || pour || (HK.busy && HK.busy()) || hood.sashMoving || drops.length || bin.falling.length || (bin.open > 0.005 && bin.open < 0.995) || performance.now() < shadowHotUntil;
-  if (!hot) for (const it of machines) { const m = it.machine; if (it.type === 'spincoater' && (m.actRpm > 0.5 || Math.abs((m.lidOpen ? 1 : 0) - it.lidAngle) > 0.002)) { hot = true; break; } }
+  let hot = held || pour || (HK.busy && HK.busy()) || (HK.filmMoving && HK.filmMoving()) || hood.sashMoving || drops.length || bin.falling.length || (bin.open > 0.005 && bin.open < 0.995) || performance.now() < shadowHotUntil;
+  if (!hot) for (const it of machines) { const m = it.machine; if ((it.type === 'spincoater' && (m.actRpm > 0.5 || Math.abs((m.lidOpen ? 1 : 0) - it.lidAngle) > 0.002)) || it.openMoving) { hot = true; break; } }
   if (hot) { shadowStale = true; stillFor = 0; return; }
   if (shadowStale && (stillFor += dt) > 0.15) { shadowStale = false; renderer.shadowMap.needsUpdate = true; }
 }
@@ -3299,14 +3496,14 @@ function cameraMoving(dt) {
   const moved = camPrev.distanceToSquared(camera.position) > 1e-10 || tgtPrev.distanceToSquared(controls.target) > 1e-10;
   camPrev.copy(camera.position); tgtPrev.copy(controls.target);
   camStill = moved ? 0 : camStill + dt;
-  return camStill < 0.12;
+  return camStill < 0.12 || !!(HK.filmActive && HK.filmActive());   // protocol film: no AO on/off popping
 }
 // Resolution: drop the pixel ratio a step when frames get slow, raise it again when there is room.
 const PR_MAX = Math.min(devicePixelRatio, COARSE ? 1.5 : 2), PR_MIN = Math.min(PR_MAX, 0.75);
 let prNow = PR_MAX, frameEma = 1 / 60, prT = 0, lastDrop = -1e9;
 function setPR(pr) { prNow = pr; renderer.setPixelRatio(pr); composer.setPixelRatio(pr); }
 function resTick(rawDt) {
-  if (rawDt > 0.25 || document.hidden) return;              // tab switch / hitch: ignore
+  if (rawDt > 0.25 || document.hidden || (HK.filmActive && HK.filmActive())) return;   // protocol film: steady resolution              // tab switch / hitch: ignore
   frameEma += (rawDt - frameEma) * 0.08; prT += rawDt;
   const now = performance.now();
   if (frameEma > 1 / 48 && prT > 0.6 && prNow > PR_MIN) { setPR(Math.max(PR_MIN, prNow - 0.25)); prT = 0; lastDrop = now; frameEma = 1 / 60; }
@@ -3349,6 +3546,10 @@ window.LAB = { THREE, renderer, scene, camera, controls, K, M, F, CHEM, items, s
   makeItem, makeVessel, finishItem, addSurface, autoPlace, placeOn, findFree, removeFrom, disposeItem, updateHand,
   receive, takeLiquidFraction, takeSolid, addC, chemsIn, totLiq, totSol, totAll, emptyC, contentsLook, refreshTool, heightFor,
   mistake, toast, touch, checkClean, checkResidue, amountDialog, fmtVol, roomFor,
+  tick, machines, attachCap, ROOM, shadowPoke: () => shadowPoke(), chair,
+  baseTables: [{ name:'Main table', g: mainTable, w: 2.4, d: 0.9, surfaces: [sMain, sUnder] }, { name:'Machine table', g: machTable, w: 2.4, d: 0.9, surfaces: [sMach] },
+    { name:'Balance table', g: balTable, w: 1.2, d: 0.7, surfaces: [sBal] }],
+  fixedFurniture: [rackG, chemG, deskTable, basin.obj, bin.obj, hood.obj],
   getHeld: () => held, releaseHeld: () => { held = null; ring.visible = false; updateHand(); },
   basin, bin, sCounter, binDrop, setPose, fpClash, fpOf, openMenu, closeMenu, openDlg, closeDlg, makeStream, setStream, secsLeft, now: () => simTime,
   holdItem: (it, prev) => { if (it.surface) removeFrom(it); scene.add(it.obj); it.obj.rotation.set(0, 0, 0); setPose(it, true);

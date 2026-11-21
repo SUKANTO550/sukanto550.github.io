@@ -47,6 +47,7 @@
     rebuildSlideCutter();
     addWatchGlasses();
     settingsHook();
+    if (window.SYNTH) window.SYNTH.init(L, H);   // actions/synthesis/ (Recipe book: whole-synthesis films)
     // keys during a clip: Space = hold, Esc = skip, everything else (walk, F, ...) is ignored
     addEventListener('keydown', e => {
       if (!H.busy()) return;
@@ -375,7 +376,7 @@
       { title: 'Cutting the slide into 3 pieces', onEnd: () => { if (fake) fake.parent.remove(fake); L.disposeItem(S); } });
   }
   function makePieces(meshes, dish, T, S) {
-    const { THREE } = L, lens = [25.35, 24.3, 25.35];
+    const { THREE } = L, lens = [25, 25, 25];
     let surf = null;
     if (dish) {
       if (!dish.pieceSurface) dish.pieceSurface = L.addSurface(dish.obj, { name: 'Petri dish', kind: 'dish', w: 0.072, d: 0.072, y: dish.vessel.inner[0][0], clear: 0.009 });
@@ -390,7 +391,7 @@
       else { const s = T.surface || L.sMain; const p = L.findFree(s, it); if (p) L.placeOn(it, s, p.x, p.z); else L.autoPlace(it, [L.sMain]); }
       m.parent && m.parent.remove(m); m.geometry.dispose();
     });
-    L.toast('Slide cut into 3 pieces (25.35 / 24.3 / 25.35 mm). They are dirty — wash and dry before use.', 'ok');
+    L.toast('Slide cut into 3 pieces of 25 × 25 mm. They are dirty — wash and dry before use.', 'ok');
   }
 
   /* ---------------- watch glasses (new item: 75 mm, for weighing salts) ---------------- */
@@ -403,7 +404,8 @@
       const outer = []; for (let i = 0; i <= 20; i++) { const r = RR * i / 20; outer.push([Math.max(1e-4, r), sag(r)]); }
       outer.push([RR + 0.0004, sag(RR) + TT * 0.5]); for (let i = 20; i >= 0; i--) { const r = RR * i / 20; outer.push([Math.max(1e-4, r), sag(r) + TT]); }
       const inner = []; for (let i = 1; i <= 12; i++) { const r = RR * 0.95 * i / 12; inner.push([Y(r), r]); }
-      L.makeVessel(it, outer, inner, L.M.glass, 56);
+      L.makeVessel(it, outer, inner, L.M.watchGlass || L.M.glass, 56);
+      if (E.watchglassRim) E.watchglassRim(L.K, it.obj);
       it.lipR = RR; it.lipY = Y(RR);
       L.finishItem(it);
       L.autoPlace(it, [L.R[3], L.R[4], L.R[2]]);

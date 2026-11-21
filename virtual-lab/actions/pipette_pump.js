@@ -8,6 +8,7 @@
      intro  pipette comes to the target, tip touching the inner wall below the rim (top leaning in a little)
      loop   wheel rolls DOWN: liquid runs out along the wall, level drops on the scale
      outro  tip held on the wall a moment, then withdrawn, pipette goes home
+     c.drops = true: dropwise instead — tip held over the mouth centre, drops fall (~0.05 ml, ~3 per second)
    Camera follows the meniscus so the scale stays in view.
    Context c:
      tool = { obj (pipette item; the model's local frame: upright, tip end at y = tipY), tipY (-0.03),
@@ -82,13 +83,17 @@
     },
   });
 
+  // c.drops = true (protocol run, e.g. acetic acid "dropwise"): pipette held upright over the mouth centre,
+  // the wheel turned slowly, one drop per DROP ml falls from the tip (no wall contact)
+  const DROP = 0.05;
   C.register('pipetteDispense', {
     label: 'Graduated pipette (pump): dispense', unit: 'ml',
-    intro: 1.3, outro: 1.3, minLoop: 2, maxLoop: 7,
-    rate: c => Math.max(0.2, c.tool.cap * 0.08),          // 10 ml pipette drains ~0.8 ml/s
+    intro: 1.3, outro: 1.3, minLoop: 2, maxLoop: 9,
+    rate: c => c.drops ? DROP * 3 : Math.max(0.2, c.tool.cap * 0.08),   // 10 ml pipette drains ~0.8 ml/s; drops ~3 per second
     moves: c => [c.tool.obj],
     setup(k, c) {
       const { THREE } = k, s = {}; setupCommon(k, c, s, c.dst);
+      if (c.drops) { s.tipP = s.mouthW.clone().add(new THREE.Vector3(0, 0.008, 0)); s.acc = 0; return s; }
       s.axisW = s.mouthW.clone();
       // tip on the inner wall (screen-left side), 12 mm below the rim, above the liquid
       const sy = surfW(k, c.dst).y;
@@ -97,9 +102,17 @@
       s.film = k.fx.stream();
       return s;
     },
-    shot(k, c, s) { return camFollow(k, c, s, s.tipWall); },
-    camAt(k, c, s) { return camFollow(k, c, s, s.tipWall); },
+    shot(k, c, s) { return camFollow(k, c, s, c.drops ? s.tipP : s.tipWall); },
+    camAt(k, c, s) { return camFollow(k, c, s, c.drops ? s.tipP : s.tipWall); },
     pose(k, c, s, phase, u, on) {
+      if (c.drops) {
+        const up = () => tipPose(k, c, s, s.tipP.clone().add(new k.THREE.Vector3(0, 0.03, 0)));
+        if (phase === 'intro') { k.blendPose(s.p, s.home, tipPose(k, c, s, s.tipP), u, 0.04); return 0; }
+        if (phase === 'loop') { setP(s.p, tipPose(k, c, s, s.tipP)); pumpTick(c, s, 1 / 60 * on, -0.4); return 1; }
+        if (u < 0.3) k.blendPose(s.p, tipPose(k, c, s, s.tipP), up(), k.smooth(0, 0.3, u));
+        else k.blendPose(s.p, up(), s.home, k.ease(k.smooth(0.3, 1, u)), 0.04);
+        return 0;
+      }
       const { THREE } = k, wall = () => tipPose(k, c, s, s.tipWall, 0.22, s.d);
       if (phase === 'intro') {
         if (u < 0.6) k.blendPose(s.p, s.home, tipPose(k, c, s, s.hover, 0.22, s.d), k.smooth(0, 0.6, u), 0.04);
@@ -119,6 +132,12 @@
       else k.blendPose(s.p, wall(), s.home, k.ease(k.smooth(0.3, 1, u)), 0.05);
       return 0;
     },
-    cleanup(k, c, s) { s.film.dispose(); },
+    emit(k, c, s, amt) {                                  // drop mode: one visible drop per DROP ml
+      if (!c.drops) return;
+      s.acc += amt;
+      while (s.acc >= DROP * 0.999) { s.acc -= DROP;
+        k.fx.fall(k.world(s.p, new k.THREE.Vector3(0, c.tool.tipY, 0)), surfW(k, c.dst), c.color, 1, { grain: false, spread: 0 }); }
+    },
+    cleanup(k, c, s) { if (s.film) s.film.dispose(); },
   });
 })();

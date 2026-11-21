@@ -21,8 +21,16 @@
     pts.push([R + 0.0004, sag(R) + T * 0.5]);
     for (let i = N; i >= 0; i--) { const r = R * i / N; pts.push([Math.max(1e-4, r), sag(r) + T]); }
     const g = new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), 56);
-    const m = new THREE.Mesh(g, M.glass); m.renderOrder = 3; m.castShadow = false;
+    const m = new THREE.Mesh(g, M.watchGlass || M.glass); m.renderOrder = 3; m.castShadow = false;
     it.obj.add(m);
+    E.watchglassRim(k, it.obj);
     it.r = R + 0.002; it.h = sag(R) + T;
+  };
+  // thin darker line round the rim, so the dish shows on the white balance (owner); also used by the lab copies
+  E.watchglassRim = (k, parent) => {
+    const { THREE, M } = k;
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(R + 0.0002, 0.0012, 8, 64), M.glassRim || M.glass);
+    rim.rotation.x = Math.PI / 2; rim.position.y = sag(R) + T * 0.5; rim.renderOrder = 4; rim.castShadow = false; rim.receiveShadow = false;
+    parent.add(rim); return rim;
   };
 })();

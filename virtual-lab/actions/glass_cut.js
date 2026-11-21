@@ -3,9 +3,9 @@
      1. slide goes into the base pocket (76.2 x 25), pushed against end wall 1
      2. guide block (upper cover) is placed in the middle of the base, then slid to wall 1 until it mates
      3. glass cutter goes into the block's slot and makes ONE stroke, top (far) to bottom (near)
-        -> mark 1 at 25.35 mm (slot 5.5 mm wide, 22.6 mm from the block's mating edge)
+        -> mark 1 at 25.0 mm (slot 5.5 mm wide, 22.25 mm from the block's mating edge)
      4. block lifts, turns 180 degrees, is placed in the middle again and slid to wall 2; the slide sits against wall 2
-     5. one stroke again -> mark 2 at 25.35 mm from the other end (middle piece = the rest, 24.3 mm)
+     5. one stroke again -> mark 2 at 25.0 mm from the other end -> 3 EQUAL pieces 25 x 25 mm (owner)
      6. cutter and block lifted away; the base is held in TWO HANDS (outline sketch, this step only),
         both thumbs press the middle of the underside, the base bows a little, the glass breaks on both marks
      7. base is turned over a petri dish, the 3 pieces drop in (no hands)
@@ -25,8 +25,8 @@
   const POCKET = 0.0381, FLOOR = 0.0017, L = 0.075, W = 0.025, TH = 0.001, TOP = FLOOR + TH;
   const DX = 0.00692;                     // block shift from its assembled pose to a mated end wall
   const MID = 0.01118;                    // block shift that centres it in the pocket (where it is first placed)
-  const SLOT = 0.02535 - POCKET;          // slot centre (base x) with the block mated to wall 1: -0.01275
-  const MARK = -L / 2 + 0.02535;          // mark 1 on the slide (slide x); mark 2 = -MARK
+  const SLOT = 0.025 - POCKET;            // slot centre (base x) with the block mated to wall 1: -0.0131
+  const MARK = -L / 2 + 0.025;            // mark 1 on the slide (slide x); mark 2 = -MARK
   const STROKE = 0.0126, TILT = 0.639, HALF = 0.0481, BOW = 0.0015;
   const WHEEL = [0.00098, -0.02786, 0], WHEEL_R = 0, TIP_GAP = 0.0003;   // cutting tip of the head (equipment/tools.js)
   // timeline (s)
